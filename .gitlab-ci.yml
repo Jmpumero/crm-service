@@ -1,0 +1,38 @@
+stages:
+  - docker-build
+  - deploy
+  
+variables:
+   DIR_CONF: '.env'
+
+
+docker:
+  stage: docker-build
+  only:
+    - uat-demo
+    - master
+  tags:
+    - docker
+  before_script:
+    - if [ "$CI_COMMIT_BRANCH" = "uat-demo" ]; then cp -v $env_uat  $DIR_CONF
+    - else cp -v $env_uat  $DIR_CONF; fi
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_BRANCH .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_BRANCH
+
+deploy:
+  stage: deploy
+  image: curlimages/curl
+  resource_group: deploy-prod
+  tags:
+    - docker
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: manual
+    - if: '$CI_COMMIT_BRANCH == "uat-demo"'
+      when: on_success
+  script:
+    - if [ "$CI_COMMIT_BRANCH" = "master" ] ; then curl -X POST $prod_server ;
+    - elif [ "$CI_COMMIT_BRANCH" = "uat-demo" ]; then curl -X POST $uat_server ;
+    - else curl -X POST $qa_server ; fi

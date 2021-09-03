@@ -54,9 +54,12 @@ async def get_open_api_endpoint(
 
     return response
 
+
 remove_422s(app)
 
 
 @app.get("/")
 async def read_root() -> dict[str, str]:
-    return {"Hello": "World"} # cuenta la leyenda que si borras el hola mundo te ira mal el resto del proyecto
+    return {
+        "Hello": "World"
+    }  # cuenta la leyenda que si borras el hola mundo te ira mal el resto del proyecto

@@ -15,11 +15,13 @@ from error_handlers import validation_error, bad_gateway, bad_request, unauthori
 
 from utils.remove_422 import remove_422s
 
+from src import customers_router
 
 global_settings = Settings()
 
 app = FastAPI()
 
+app.include_router(customers_router)
 # app.include_router(sensor_router)  #para incluir rutas
 
 app.add_exception_handler(RequestValidationError, validation_error.handler)

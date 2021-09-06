@@ -6,7 +6,7 @@ class RedisRepository:
         self._redis = redis
 
     async def set(self, key: str, value: str, expire: int = 0):
-        return await self._redis.set(key, value, expire=expire)
+        return await self._redis.set(key, value, ex=expire)
 
     async def get(self, key: str):
         return await self._redis.get(key)

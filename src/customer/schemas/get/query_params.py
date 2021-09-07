@@ -4,6 +4,6 @@ from pydantic import BaseModel
 
 
 class SearchCustomersQueryParams(BaseModel):
-    query: Optional[str] = None
+    query: Optional[str] = ""
     column_name: str = ""
-    contain: str = ""
+    contrain: str = ""

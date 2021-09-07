@@ -1,27 +1,27 @@
+from .repository import MongoQueries
+
 from src.customer.schemas.get import responses
 from .schemas import SearchCustomersQueryParams, SearchCustomersResponse
 
 
-class Service:
-    def get(
-        self, query_params: SearchCustomersQueryParams
+class Service(MongoQueries):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def get_customers(
+        self, skip, limit, query_params: SearchCustomersQueryParams
     ) -> list[SearchCustomersResponse]:
-        data = [
-            {
-                "name": "elber",
-                "last_name": "nava",
-                "age": 15,
-                "email": "dafd",
-                "phone": "1234",
-                "nationality": "us",
-                "address": "aaa" "",
-                "document_identification": "1234679800",
-                "civl_status": "married",
-            }
-        ]
+
+        print(query_params.column_name)
+
+        if query_params.query is "":
+
+            print("gege")
+        else:
+            pass
         response = []
 
-        for elem in data:
-            response.append(SearchCustomersResponse(**elem))
+        # for elem in data:
+        #      response.append(SearchCustomersResponse(**elem))
 
         return response

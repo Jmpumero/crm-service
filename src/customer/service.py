@@ -12,7 +12,7 @@ class Service(MongoQueries):
         self, skip, limit, query_params: SearchCustomersQueryParams
     ) -> list[SearchCustomersResponse]:
 
-        response = []
+        customers = []
 
         total_customer = await self.total_customer()
         print(total_customer)
@@ -22,7 +22,7 @@ class Service(MongoQueries):
 
             for customer in await cursor.to_list(length=None):
 
-                response.append(SearchCustomersResponse(**customer))
+                customers.append(SearchCustomersResponse(**customer))
 
         else:
             pass
@@ -30,7 +30,10 @@ class Service(MongoQueries):
         # for elem in data:
         #     response.append(SearchCustomersResponse(**elem))
 
+        response = self.build_response(customers, total_customer)
+
         return response
 
     def build_response(self, list_customer, total_customer):
+
         pass

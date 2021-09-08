@@ -72,3 +72,12 @@ class SearchCustomersResponse(BaseModel):
     blacklist_enable_motive: List[str]
     blacklist_disable_motive: List[str]
     sensors: List[str]
+
+
+class Metadata(BaseModel):
+    TotalCustomer: int
+
+
+class SearchCustomersResponseFinal(BaseModel):
+    customer_container: List[SearchCustomersResponse]
+    metadata: Metadata

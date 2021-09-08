@@ -7,3 +7,5 @@ class SearchCustomersQueryParams(BaseModel):
     query: Optional[str] = ""
     column_name: str = ""
     contrain: str = ""
+    skip: int = 0
+    limit: int = 10

@@ -1,7 +1,7 @@
 from __future__ import annotations
 from config.config import Settings
 
-from fastapi import APIRouter,status, Depends
+from fastapi import APIRouter, status, Depends
 
 from .service import Service
 
@@ -24,9 +24,10 @@ customers_router = APIRouter(
 @customers_router.get("/customers/")
 @remove_422
 async def get_customers(
-    skip: int =0,limit: int = global_settings.pagination_limit,
-    query_params: SearchCustomersQueryParams = Depends(SearchCustomersQueryParams),    
+    skip: int = 0,
+    limit: int = global_settings.pagination_limit,
+    query_params: SearchCustomersQueryParams = Depends(SearchCustomersQueryParams),
 ):
     service = Service()
 
-    return service.get_customers(skip,limit,query_params)
+    return await service.get_customers(skip, limit, query_params)

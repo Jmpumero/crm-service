@@ -15,12 +15,16 @@ global_settings = Settings()
 class MongoQueries(DwConnection):
     # Metodos de Queries para el servicio de Clientes
 
+    def total_customer(self):
+        customers = self.clients_collection.estimated_document_count()
+        return customers
+
     def find_one_customer(self, client_id):
         customer = self.clients_collection.find_one({"id": client_id}, {"_id": 0})
         return customer
 
-    def find_all_customers(self):
-        customers = self.clients_collection.find({}, {"_id": 0})
+    def find_all_customers(self, skip, limit):
+        customers = self.clients_collection.find({}, {"_id": 0}).skip(skip).limit(limit)
         return customers
 
     def insert_one_customer(self, data):

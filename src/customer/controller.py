@@ -19,3 +19,19 @@ async def get_customers(
     service = Service()
 
     return service.get(query_params)
+
+
+@customers_router.get("/customers/{customer_id}/profile-header")
+@remove_422
+async def get_customer_profile_header(customer_id: int):
+    service = Service()
+
+    return service.get_profile_header(customer_id)
+
+
+@customers_router.get("/customers/{customer_id}/details")
+@remove_422
+async def get_customer_profile_detail(customer_id: int):
+    service = Service()
+
+    return service.get_profile_details(customer_id)

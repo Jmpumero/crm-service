@@ -37,7 +37,21 @@ class Service(MongoQueries):
             if query_params.column_name.replace(" ", ""):
                 # print("resp:" + query_params.column_name.replace(" ", ""))
                 if query_params.column_name.replace(" ", "").lower() == "email":
-                    pass
+
+                    a = query_params.column_name + ".email"
+                    print(a)
+                    cursor = self.filter_search_customers(
+                        query_params.contain,
+                        query_params.query,
+                        query_params.column_name + ".email",
+                        query_params.skip,
+                        query_params.limit,
+                    )
+
+                    for customer in await cursor.to_list(length=None):
+
+                        customers.append(SearchCustomers(**customer))
+
                 elif query_params.column_name.replace(" ", "").lower() == "phone":
                     pass
                 elif query_params.column_name.replace(" ", "").lower() == "booking_id":

@@ -75,8 +75,7 @@ class MongoQueries(DwConnection):
     #     inserted_customer = self.clients_collection.insert_one(data.dict())
     #     return inserted_customer
 
-    def filter_search_customers(self, constrain, item_search, column, skip, limit):
-
+    def search_customer_email(self, constrain, item_search, column, skip, limit):
         response = ""
         if constrain == "contain":
 
@@ -128,5 +127,13 @@ class MongoQueries(DwConnection):
                 .skip(skip)
                 .limit(limit)
             )
+
+        return response
+
+    def filter_search_customers(self, constrain, item_search, column, skip, limit):
+
+        response = self.search_customer_email(
+            constrain, item_search, column, skip, limit
+        )
 
         return response

@@ -51,33 +51,42 @@ class Languages(BaseModel):
     is_main: bool
 
 
-class SearchCustomersResponse(BaseModel):
-    id: int
+class SearchCustomers(BaseModel):
     name: str
     last_name: str
-    full_name: str
     age: int
-    birthdate: str
-    documentId: List[DocumentID]
-    phone: List[Phones]
     email: List[Emails]
+    phone: List[Phones]
     address: List[str]
-    country: str
-    city: str
-    state: str
-    postalCode: str
-    language: List[Languages]
-    marketCluster: List[str]
-    status_blacklist: bool
-    blacklist_enable_motive: List[str]
-    blacklist_disable_motive: List[str]
-    sensors: List[str]
+    documentId: List[DocumentID]
+    nationality: str
+    civilStatus: str
+    # id: int
+    # full_name: str
+    # birthdate: str
+    # country: str
+    # city: str
+    # state: str
+    # postalCode: str
+    # language: List[Languages]
+    # marketCluster: List[str]
+    # status_blacklist: bool
+    # blacklist_enable_motive: List[str]
+    # blacklist_disable_motive: List[str]
+    # sensors: List[str]
 
 
-class Metadata(BaseModel):
-    TotalCustomer: int
+class ResponseMetaData(BaseModel):
+    code: int
+    message: str
 
 
-class SearchCustomersResponseFinal(BaseModel):
-    customer_container: List[SearchCustomersResponse]
-    metadata: Metadata
+# class Metadata(BaseModel):
+#     response: ResponseMetaData
+#     total_customers_in_collection: int
+
+
+class SearchCustomersResponse(BaseModel):
+    customer_container: List[SearchCustomers]
+    total_items: int
+    total_shown: int

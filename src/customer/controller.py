@@ -24,10 +24,10 @@ customers_router = APIRouter(
 @customers_router.get("/customers/")
 @remove_422
 async def get_customers(
-    skip: int = 0,
-    limit: int = global_settings.pagination_limit,
+    # skip: int = 0,
+    # limit: int = global_settings.pagination_limit,
     query_params: SearchCustomersQueryParams = Depends(SearchCustomersQueryParams),
 ):
     service = Service()
 
-    return await service.get_customers(skip, limit, query_params)
+    return await service.get_customers(query_params)

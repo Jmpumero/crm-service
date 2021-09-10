@@ -17,7 +17,7 @@ class Service(MongoQueries):
     ) -> list[SearchCustomers]:
 
         customers = []
-
+        cursor = None
         total_customer = await self.total_customer()
 
         if query_params.query == "":
@@ -35,47 +35,21 @@ class Service(MongoQueries):
 
         else:
             if query_params.column_name.replace(" ", ""):
-                # print("resp:" + query_params.column_name.replace(" ", ""))
-                if query_params.column_name.replace(" ", "").lower() == "email":
 
-                    a = query_params.column_name + ".email"
-                    print(a)
-                    cursor = self.filter_search_customers(
-                        query_params.contain,
-                        query_params.query,
-                        query_params.column_name + ".email",
-                        query_params.skip,
-                        query_params.limit,
-                    )
-
+                cursor = self.filter_search_customers(
+                    query_params.contain,
+                    query_params.query,
+                    query_params.column_name.replace(" ", "").lower(),
+                    query_params.skip,
+                    query_params.limit,
+                )
+                if cursor:
                     for customer in await cursor.to_list(length=None):
 
                         customers.append(SearchCustomers(**customer))
-
-                elif query_params.column_name.replace(" ", "").lower() == "phone":
-                    pass
-                elif query_params.column_name.replace(" ", "").lower() == "booking_id":
-                    pass
-                else:
-
-                    cursor = self.filter_search_customers(
-                        query_params.contain,
-                        query_params.query,
-                        query_params.column_name,
-                        query_params.skip,
-                        query_params.limit,
-                    )
-
-                    for customer in await cursor.to_list(length=None):
-
-                        customers.append(SearchCustomers(**customer))
-                    # query_params.column_name.replace(" ", "")
 
             else:
                 print("F")
-
-        # for elem in data:
-        #     response.append(SearchCustomersResponse(**elem))
 
         response = self.build_response(customers, total_customer)
 

@@ -3,6 +3,7 @@ from .schemas import (
     SearchCustomersResponse,
     CustomerProfileHeaderResponse,
     CustomerProfileDetailResponse,
+    CustomerLogBook,
 )
 
 
@@ -83,3 +84,30 @@ class Service:
         }
 
         return CustomerProfileDetailResponse(**data)
+
+    def get_customer_logbook(self, customer_id) -> CustomerLogBook:
+        data = {
+            "first_contact_info": {
+                "property_name": "random name",
+                "insert_date": "21/08/2021",
+                "updated": "21/08/2021",
+            },
+            "another_contacts": [
+                {
+                    "date": "22/02/2021",
+                    "souce": "PMS",
+                    "data": "random data",
+                    "property_name": "HPA",
+                },
+                {
+                    "date": "15/01/2021",
+                    "souce": "CAST",
+                    "data": "super random data",
+                    "property_name": "",
+                },
+            ],
+            "total_items": 56,
+            "items_shown": 2,
+        }
+
+        return CustomerLogBook(**data)

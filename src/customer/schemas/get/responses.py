@@ -60,3 +60,7 @@ class SearchCustomersResponse(BaseModel):
     customer_container: List[SearchCustomers]
     total_items: int
     total_shown: int
+
+
+class testagg(BaseModel):
+    nombre: str

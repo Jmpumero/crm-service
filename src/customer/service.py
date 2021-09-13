@@ -47,6 +47,8 @@ class Service(MongoQueries):
                     for customer in await cursor.to_list(length=None):
 
                         customers.append(SearchCustomers(**customer))
+                        # customers.append(customer)
+                    print(customers)
 
             else:
                 print("F")

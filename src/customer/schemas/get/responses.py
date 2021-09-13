@@ -22,7 +22,8 @@ class DocumentID(BaseModel):
 
 
 class Phones(BaseModel):
-    phone: str
+    local_format: str
+    intl_format: str
     areaCode: str
     countryCode: str
     isMain: bool

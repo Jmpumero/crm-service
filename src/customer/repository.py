@@ -132,7 +132,6 @@ class MongoQueries(DwConnection):
 
     def search_customer_email(self, constrain, item_search, column, skip, limit):
         response = ""
-        # column = column + ".0.email"
         if constrain == "contain":
             return (
                 self.clients_collection.find(
@@ -207,6 +206,97 @@ class MongoQueries(DwConnection):
 
         return response
 
+    def search_phone_local(self, constrain, item_search, column, skip, limit):
+        response = ""
+
+        if constrain == "contain":
+            return (
+                self.clients_collection.find(
+                    {
+                        "phone": {
+                            "$elemMatch": {
+                                f"{column}": {
+                                    "$regex": f".*{item_search.lower()}.*",
+                                    "$options": "i",
+                                },
+                                "isMain": True,
+                            }
+                        }
+                    },
+                    search_projections,
+                )
+                .skip(skip)
+                .limit(limit)
+            )
+        if constrain == "equal_to":
+
+            return (
+                self.clients_collection.find(
+                    {
+                        "phone": {
+                            "$elemMatch": {
+                                f"{column}": f"{item_search}",
+                                "isMain": True,
+                            }
+                        }
+                    },
+                    search_projections,
+                )
+                .skip(skip)
+                .limit(limit)
+            )
+        if constrain == "starts_by":
+            return (
+                self.clients_collection.find(
+                    {
+                        "phone": {
+                            "$elemMatch": {
+                                f"{column}": {
+                                    "$regex": f"\A{item_search}",
+                                    "$options": "i",
+                                },
+                                "isMain": True,
+                            }
+                        }
+                    },
+                    search_projections,
+                )
+                .skip(skip)
+                .limit(limit)
+            )
+        if constrain == "ends_by":
+            return (
+                self.clients_collection.find(
+                    {
+                        "phone": {
+                            "$elemMatch": {
+                                f"{column}": {
+                                    "$regex": f"\Z{item_search}",
+                                    "$options": "i",
+                                },
+                                "isMain": True,
+                            }
+                        }
+                    },
+                    search_projections,
+                )
+                .skip(skip)
+                .limit(limit)
+            )
+
+        return response
+
+    def filter_search_phone(self, constrain, item_search, column, skip, limit):
+
+        if item_search.find("*") > -1:
+
+            print("+" + item_search)
+        else:
+
+            item = item_search.replace(" ", "")
+            item = item_search.replace("-", "")
+            return self.search_phone_local(constrain, item, "local_format", skip, limit)
+
     def filter_search_customers(self, constrain, item_search, column, skip, limit):
 
         response = None
@@ -215,6 +305,10 @@ class MongoQueries(DwConnection):
                 constrain, item_search, column, skip, limit
             )
         elif column == "phone":
+
+            return self.filter_search_phone(constrain, item_search, column, skip, limit)
+
+        elif column == "booking_id":
             pass
         else:
             response = self.search_customer_name(

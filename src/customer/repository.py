@@ -26,6 +26,51 @@ search_projections = {
     "address": 1,
 }
 
+# db.getCollection('customer').aggregate( [
+#                 {
+#                     $match: {
+#                         email: {
+#                             $elemMatch: {
+#                                 email: "ablanca@jacidi.com",
+#                                 isMain: true,
+#                             }
+#                         }
+#                     }
+#                 },
+#                 {
+#                     $project:{
+#                         _id:0,
+#                         id:1,
+#                        full_name: 1,
+#                         age: 1,
+#                         nationality: 1,
+#                         civilStatus: 1,
+#                         documentId: 1,
+
+#                          phone:{
+#                                 $arrayElemAt: [ "$phone", {$indexOfArray:["$phone.isMain",true]}]
+#                              },
+
+#                          email:{
+#                                 $arrayElemAt: [ "$email", {$indexOfArray:["$email.isMain",true]}]
+#                              },
+
+#                         }
+#                     },
+#                     {
+#                         $sort : { email : 1 }
+#                         },
+#                     {
+#                         $project:{
+#                             "email.isMain":0,
+#                             "phone.isMain":0,
+#                             "phone.areaCode":0,
+#                             "phone.countryCode":0
+#                         }
+#                     }
+
+#             ])
+
 
 class MongoQueries(DwConnection):
 

@@ -24,14 +24,14 @@ class DocumentID(BaseModel):
 class Phones(BaseModel):
     local_format: str
     intl_format: str
-    areaCode: str
-    countryCode: str
-    isMain: bool
+    # areaCode: str
+    # countryCode: str
+    # isMain: bool
 
 
 class Emails(BaseModel):
     email: str
-    isMain: bool
+    # isMain: bool
 
 
 class Languages(BaseModel):
@@ -43,8 +43,8 @@ class SearchCustomers(BaseModel):
     name: str
     last_name: str
     age: int
-    email: List[Emails]
-    phone: List[Phones]
+    email: Emails
+    phone: Phones
     address: List[str]
     documentId: List[DocumentID]
     nationality: str
@@ -59,7 +59,7 @@ class ResponseMetaData(BaseModel):
 class SearchCustomersResponse(BaseModel):
     customer_container: List[SearchCustomers]
     total_items: int
-    total_shown: int
+    total_show: int
 
 
 class testagg(BaseModel):

@@ -62,6 +62,6 @@ class Service(MongoQueries):
         finalresponse = {
             "customer_container": list_customer,
             "total_items": total_customer,
-            "total_shown": len(list_customer),
+            "total_show": len(list_customer),
         }
         return SearchCustomersResponse(**finalresponse)

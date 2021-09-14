@@ -53,3 +53,10 @@ class CustomerProfileDetailResponse(BaseModel):
     accepted_terms: List[CustomerTermAccepted]
     interests: List[str]
     communication_methods: Any
+
+
+class CustomerLogBook(BaseModel):
+    first_contact_info: Any
+    another_contacts: Any
+    total_items: Any
+    items_shown: Any

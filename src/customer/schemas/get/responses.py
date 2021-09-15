@@ -24,14 +24,14 @@ class DocumentID(BaseModel):
 class Phones(BaseModel):
     local_format: str
     intl_format: str
-    # areaCode: str
-    # countryCode: str
-    # isMain: bool
+    areaCode: str
+    countryCode: str
+    isMain: bool
 
 
 class Emails(BaseModel):
     email: str
-    # isMain: bool
+    isMain: bool
 
 
 class Languages(BaseModel):
@@ -49,6 +49,7 @@ class SearchCustomers(BaseModel):
     documentId: List[DocumentID]
     nationality: str
     civilStatus: str
+    booking_id: str
 
 
 class ResponseMetaData(BaseModel):

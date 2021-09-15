@@ -21,55 +21,21 @@ search_projections = {
     "nationality": 1,
     "civilStatus": 1,
     "documentId": 1,
-    "phone": 1,
-    "email": 1,
+    "booking_id": 1,
+    "phone": {
+        "$arrayElemAt": [
+            "$phone",
+            {"$indexOfArray": ["$phone.isMain", True]},
+        ]
+    },
+    "email": {
+        "$arrayElemAt": [
+            "$email",
+            {"$indexOfArray": ["$email.isMain", True]},
+        ]
+    },
     "address": 1,
 }
-
-# db.getCollection('customer').aggregate( [
-#                 {
-#                     $match: {
-#                         email: {
-#                             $elemMatch: {
-#                                 email: "ablanca@jacidi.com",
-#                                 isMain: true,
-#                             }
-#                         }
-#                     }
-#                 },
-#                 {
-#                     $project:{
-#                         _id:0,
-#                         id:1,
-#                        full_name: 1,
-#                         age: 1,
-#                         nationality: 1,
-#                         civilStatus: 1,
-#                         documentId: 1,
-
-#                          phone:{
-#                                 $arrayElemAt: [ "$phone", {$indexOfArray:["$phone.isMain",true]}]
-#                              },
-
-#                          email:{
-#                                 $arrayElemAt: [ "$email", {$indexOfArray:["$email.isMain",true]}]
-#                              },
-
-#                         }
-#                     },
-#                     {
-#                         $sort : { email : 1 }
-#                         },
-#                     {
-#                         $project:{
-#                             "email.isMain":0,
-#                             "phone.isMain":0,
-#                             "phone.areaCode":0,
-#                             "phone.countryCode":0
-#                         }
-#                     }
-
-#             ])
 
 
 class MongoQueries(DwConnection):
@@ -84,15 +50,15 @@ class MongoQueries(DwConnection):
         customer = self.clients_customer.find_one({"id": client_id}, search_projections)
         return customer
 
-    def find_all_customers(self, skip, limit, column, order):
-        if column:
+    def find_all_customers(self, skip, limit, column, order, column_order):
+        if column_order:
             if order.lower() == "desc":
 
                 customers = (
                     self.clients_customer.find({}, search_projections)
                     .skip(skip)
                     .limit(limit)
-                    .sort(column, pymongo.DESCENDING)
+                    .sort(column_order, pymongo.DESCENDING)
                 )
             else:
 
@@ -118,16 +84,20 @@ class MongoQueries(DwConnection):
     #     inserted_customer = self.clients_customer.insert_one(data.dict())
     #     return inserted_customer
 
-    def search_customer_name(self, constrain, item_search, column, skip, limit):
+    def search_customer_name(
+        self, constrain, item_search, column, skip, limit, order, column_order
+    ):
+
         response = ""
         if constrain == "contain":
 
             # busca en el campo nombre, aquellos que contenga  'variable' en minscula y mayuscula
-            response = (
+            return (
                 self.clients_customer.find(
                     {
                         f"{column}": {
-                            "$regex": f".*{item_search}.*|.*{item_search.capitalize()}.*"
+                            "$regex": f".*{item_search}.*",
+                            "$options": "i",
                         }
                     },
                     search_projections,
@@ -171,12 +141,12 @@ class MongoQueries(DwConnection):
                 .limit(limit)
             )
 
-        return response
-
-    def search_customer_email(self, constrain, item_search, column, skip, limit):
-        response = ""
+    def search_customer_email(
+        self, constrain, item_search, column, skip, limit, order, column_order
+    ):
+        response = None
         if constrain == "contain":
-            return (
+            response = (
                 self.clients_customer.find(
                     {
                         "email": {
@@ -188,10 +158,6 @@ class MongoQueries(DwConnection):
                                 "isMain": True,
                             }
                         }
-                        # "$and": [
-                        #     {"email.0.email": {"$regex": f".*{item_search.lower()}.*"}},
-                        #     {"email.0.isMain": True},
-                        # ]
                     },
                     search_projections,
                 )
@@ -200,7 +166,7 @@ class MongoQueries(DwConnection):
             )
         if constrain == "equal_to":
 
-            return (
+            response = (
                 self.clients_customer.find(
                     {"email": {"email": f"{item_search}", "isMain": True}},
                     search_projections,
@@ -209,7 +175,7 @@ class MongoQueries(DwConnection):
                 .limit(limit)
             )
         if constrain == "starts_by":
-            return (
+            response = (
                 self.clients_customer.find(
                     {
                         "email": {
@@ -228,7 +194,7 @@ class MongoQueries(DwConnection):
                 .limit(limit)
             )
         if constrain == "ends_by":
-            return (
+            response = (
                 self.clients_customer.find(
                     {
                         "email": {
@@ -247,12 +213,21 @@ class MongoQueries(DwConnection):
                 .limit(limit)
             )
 
-        return response
+        if column_order:
+
+            if order.lower() == "desc":
+
+                return response.sort(column_order, pymongo.DESCENDING)
+            else:
+                return response.sort(column_order, pymongo.ASCENDING)
+
+        else:
+            return response
+
+        # return response
 
     def search_phone_local(self, constrain, item_search, column, skip, limit):
         response = ""
-        print(item_search)
-        print(column)
 
         if constrain == "contain":
             return (
@@ -333,10 +308,7 @@ class MongoQueries(DwConnection):
 
     def search_phone_intl(self, constrain, item_search, column, skip, limit):
         response = ""
-        print(item_search)
-        print(column)
-        a = f".*\+{item_search.lower()}.*"
-        b = f".*{item_search.lower()}.*"
+
         if constrain == "contain":
             return (
                 self.clients_customer.find(
@@ -415,7 +387,7 @@ class MongoQueries(DwConnection):
         return response
 
     def filter_search_phone(self, constrain, item_search, column, skip, limit):
-
+        print(item_search)
         if item_search.find("+") > -1:
 
             item = item_search.replace(" ", "")
@@ -427,41 +399,97 @@ class MongoQueries(DwConnection):
             item = item_search.replace("-", "")
             return self.search_phone_local(constrain, item, "local_format", skip, limit)
 
-    def test_agr(self, constrain, item_search, column, skip, limit):
+    def test_agr(
+        self, constrain, item_search, column, skip, limit
+    ):  # en desarrollo... pruebas con agregaciones
         return self.clients_customer.aggregate(
             [
                 {
                     "$match": {
                         "email": {
                             "$elemMatch": {
-                                "email": "Pruebadev@gmail.com",
+                                "email": "ablanca@jacidi.com",
                                 "isMain": True,
                             }
                         }
                     }
-                }
+                },
+                {
+                    "$project": {
+                        "_id": 0,
+                        "id": 1,
+                        "full_name": 1,
+                        "age": 1,
+                        "nationality": 1,
+                        "civilStatus": 1,
+                        "documentId": 1,
+                        "phone": {
+                            "$arrayElemAt": [
+                                "$phone",
+                                {"$indexOfArray": ["$phone.isMain", True]},
+                            ]
+                        },
+                        "email": {
+                            "$arrayElemAt": [
+                                "$email",
+                                {"$indexOfArray": ["$email.isMain", True]},
+                            ]
+                        },
+                        "address": 1,
+                    }
+                },
+                {"$sort": {"email": 1}},
+                {
+                    "$project": {
+                        "email.isMain": 0,
+                        "phone.isMain": 0,
+                        "phone.areaCode": 0,
+                        "phone.countryCode": 0,
+                    }
+                },
             ]
         )
 
-    def filter_search_customers(self, constrain, item_search, column, skip, limit):
+    def filter_search_customers(
+        self, constrain, item_search, column, skip, limit, order, column_order
+    ):
 
         response = None
         if column == "email":
-            return self.search_customer_email(
-                constrain, item_search, column, skip, limit
+            response = self.search_customer_email(
+                constrain, item_search, column, skip, limit, order, column_order
             )
         elif column == "phone":
 
-            return self.filter_search_phone(constrain, item_search, column, skip, limit)
+            response = self.filter_search_phone(
+                constrain, item_search, column, skip, limit
+            )
 
         elif column == "booking_id":
+            # no esta definido su estructura(no se sabe como esta representada si es unica o un usuario puede tener n)
             pass
 
         elif column == "prueba":
-            return self.test_agr(constrain, item_search, column, skip, limit)
+            response = self.test_agr(constrain, item_search, column, skip, limit)
 
         else:
             response = self.search_customer_name(
-                constrain, item_search, column, skip, limit
+                constrain, item_search, column, skip, limit, order, column_order
             )
-        return response
+
+        if column_order:
+
+            if column_order == "email":
+                column_order = column_order + ".email"
+
+            if column_order == "phone":
+                column_order = column_order + ".intl_format"
+
+            if order.lower() == "desc":
+
+                return response.sort(column_order, pymongo.DESCENDING)
+            else:
+                return response.sort(column_order, pymongo.ASCENDING)
+
+        else:
+            return response

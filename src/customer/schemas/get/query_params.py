@@ -9,5 +9,6 @@ class SearchCustomersQueryParams(BaseModel):
     contain: str = ""
     skip: int = 0
     limit: int = 10
-    column_sort: Optional[str] = ""
+
     order: Optional[str] = ""
+    column_order: Optional[str] = ""

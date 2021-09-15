@@ -25,8 +25,9 @@ class Service(MongoQueries):
             cursor = self.find_all_customers(
                 query_params.skip,
                 query_params.limit,
-                query_params.column_sort.replace(" ", ""),
+                query_params.column_name.replace(" ", ""),
                 query_params.order,
+                query_params.column_order.replace(" ", ""),
             )
 
             for customer in await cursor.to_list(length=None):
@@ -42,13 +43,14 @@ class Service(MongoQueries):
                     query_params.column_name.replace(" ", "").lower(),
                     query_params.skip,
                     query_params.limit,
+                    query_params.order,
+                    query_params.column_order,
                 )
                 if cursor:
                     for customer in await cursor.to_list(length=None):
 
+                        # print(customer)
                         customers.append(SearchCustomers(**customer))
-                        # customers.append(customer)
-                    print(customers)
 
             else:
                 print("F")

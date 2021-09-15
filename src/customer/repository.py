@@ -80,10 +80,6 @@ class MongoQueries(DwConnection):
 
         return customers
 
-    # def insert_one_customer(self, data):
-    #     inserted_customer = self.clients_customer.insert_one(data.dict())
-    #     return inserted_customer
-
     def search_customer_name(
         self, constrain, item_search, column, skip, limit, order, column_order
     ):

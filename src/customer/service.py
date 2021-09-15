@@ -62,7 +62,7 @@ class Service(MongoQueries):
     def build_response(self, list_customer, total_customer):
 
         finalresponse = {
-            "customer_container": list_customer,
+            "customers": list_customer,
             "total_items": total_customer,
             "total_show": len(list_customer),
         }

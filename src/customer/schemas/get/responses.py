@@ -58,7 +58,7 @@ class ResponseMetaData(BaseModel):
 
 
 class SearchCustomersResponse(BaseModel):
-    customer_container: List[SearchCustomers]
+    customers: List[SearchCustomers]
     total_items: int
     total_show: int
 

@@ -5,4 +5,5 @@ from .get import (
     CustomerProfileDetailResponse,
     CustomerLogBook,
     CustomerMarketingSubscriptions,
+    SearchCustomers,
 )

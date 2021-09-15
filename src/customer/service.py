@@ -1,3 +1,6 @@
+from .repository import MongoQueries
+
+
 from .schemas import (
     SearchCustomersQueryParams,
     SearchCustomersResponse,
@@ -5,32 +8,69 @@ from .schemas import (
     CustomerProfileDetailResponse,
     CustomerLogBook,
     CustomerMarketingSubscriptions,
+    SearchCustomers,
 )
 
 
-class Service:
-    def get(
+class Service(MongoQueries):
+    def __init__(self) -> None:
+        super().__init__()
+
+    async def get_customers(
         self, query_params: SearchCustomersQueryParams
-    ) -> list[SearchCustomersResponse]:
-        data = [
-            {
-                "name": "elber",
-                "last_name": "nava",
-                "age": 15,
-                "email": "dafd",
-                "phone": "1234",
-                "nationality": "us",
-                "address": "aaa" "",
-                "document_identification": "1234679800",
-                "civl_status": "married",
-            }
-        ]
-        response = []
+    ) -> list[SearchCustomers]:
 
-        for elem in data:
-            response.append(SearchCustomersResponse(**elem))
+        customers = []
+        cursor = None
+        total_customer = await self.total_customer()
 
-        return response
+        if query_params.query == "":
+
+            cursor = self.find_all_customers(
+                query_params.skip,
+                query_params.limit,
+                query_params.column_name.replace(" ", ""),
+                query_params.order,
+                query_params.column_order.replace(" ", ""),
+            )
+
+            for customer in await cursor.to_list(length=None):
+
+                customers.append(SearchCustomers(**customer))
+
+        else:
+            if query_params.column_name.replace(" ", ""):
+
+                cursor = self.filter_search_customers(
+                    query_params.contain,
+                    query_params.query,
+                    query_params.column_name.replace(" ", "").lower(),
+                    query_params.skip,
+                    query_params.limit,
+                    query_params.order,
+                    query_params.column_order,
+                )
+                if cursor:
+                    for customer in await cursor.to_list(length=None):
+
+                        # print(customer)
+                        customers.append(SearchCustomers(**customer))
+
+            else:
+                print("F")
+
+        response = self.build_response(customers, total_customer)
+
+        return self.build_response(customers, total_customer)
+
+    def build_response(self, list_customer, total_customer):
+
+        finalresponse = {
+            "customers": list_customer,
+            "total_items": total_customer,
+            "total_show": len(list_customer),
+        }
+        return SearchCustomersResponse(**finalresponse)
 
     def get_profile_header(self, customer_id: int) -> CustomerProfileHeaderResponse:
         data = {

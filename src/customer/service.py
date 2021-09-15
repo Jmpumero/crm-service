@@ -4,6 +4,7 @@ from .schemas import (
     CustomerProfileHeaderResponse,
     CustomerProfileDetailResponse,
     CustomerLogBook,
+    CustomerMarketingSubscriptions,
 )
 
 
@@ -111,3 +112,32 @@ class Service:
         }
 
         return CustomerLogBook(**data)
+
+    def get_customer_marketing_subscriptions(self, customer_id):
+        data = {
+            "emails": [
+                {"email": "test@email.com", "subscribed": False, "is_primary": True},
+                {"email": "anotherTest@email.com", "subscribed": True},
+            ],
+            "devices": [
+                {
+                    "mac_address": "00:00:00:00:00:01",
+                    "subscribed": False,
+                },
+                {
+                    "mac_address": "00:00:00:00:00:02",
+                    "subscribed": True,
+                },
+            ],
+            "phones": [
+                {
+                    "phone_iso_code": "+58",
+                    "phone": "4144964508",
+                    "is_primary": True,
+                    "subscribed": False,
+                },
+                {"phone_iso_code": "+1", "phone": "4457988", "subscribed": False},
+            ],
+        }
+
+        return CustomerMarketingSubscriptions(**data)

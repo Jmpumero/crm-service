@@ -4,4 +4,5 @@ from .responses import (
     CustomerProfileHeaderResponse,
     CustomerProfileDetailResponse,
     CustomerLogBook,
+    CustomerMarketingSubscriptions,
 )

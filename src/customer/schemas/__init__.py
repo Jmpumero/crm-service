@@ -4,4 +4,5 @@ from .get import (
     CustomerProfileHeaderResponse,
     CustomerProfileDetailResponse,
     CustomerLogBook,
+    CustomerMarketingSubscriptions,
 )

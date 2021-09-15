@@ -463,7 +463,7 @@ class MongoQueries(DwConnection):
 
         elif column == "booking_id":
             # no esta definido su estructura(no se sabe como esta representada si es unica o un usuario puede tener n)
-            pass
+            response = self.find_all_customers(skip, limit, column, order, column_order)
 
         elif column == "prueba":
             response = self.test_agr(constrain, item_search, column, skip, limit)

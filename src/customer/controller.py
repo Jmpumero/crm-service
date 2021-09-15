@@ -43,3 +43,11 @@ async def get_customer_logbook(customer_id: int):
     service = Service()
 
     return service.get_customer_logbook(customer_id)
+
+
+@customers_router.get("/customers/{customer_id}/marketing-subscriptions")
+@remove_422
+async def get_customer_marketing_subscriptions(customer_id: int):
+    service = Service()
+
+    return service.get_customer_marketing_subscriptions(customer_id)

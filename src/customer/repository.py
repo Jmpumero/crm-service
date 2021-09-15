@@ -473,19 +473,19 @@ class MongoQueries(DwConnection):
                 constrain, item_search, column, skip, limit, order, column_order
             )
 
-        if column_order:
+        if response:
+            if column_order:
 
-            if column_order == "email":
-                column_order = column_order + ".email"
+                if column_order == "email":
+                    column_order = column_order + ".email"
 
-            if column_order == "phone":
-                column_order = column_order + ".intl_format"
+                if column_order == "phone":
+                    column_order = column_order + ".intl_format"
 
-            if order.lower() == "desc":
+                if order.lower() == "desc":
+                    print(column_order)
+                    return response.sort(column_order, pymongo.DESCENDING)
+                else:
+                    return response.sort(column_order, pymongo.ASCENDING)
 
-                return response.sort(column_order, pymongo.DESCENDING)
-            else:
-                return response.sort(column_order, pymongo.ASCENDING)
-
-        else:
-            return response
+        return response

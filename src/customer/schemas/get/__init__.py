@@ -1,2 +1,9 @@
 from .query_params import SearchCustomersQueryParams
-from .responses import SearchCustomersResponse, SearchCustomers
+from .responses import (
+    SearchCustomersResponse,
+    CustomerProfileHeaderResponse,
+    CustomerProfileDetailResponse,
+    CustomerLogBook,
+    CustomerMarketingSubscriptions,
+    SearchCustomers,
+)

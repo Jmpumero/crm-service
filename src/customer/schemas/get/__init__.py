@@ -6,4 +6,6 @@ from .responses import (
     CustomerLogBook,
     CustomerMarketingSubscriptions,
     SearchCustomers,
+    CustomerNotesAndcomments,
+    NotesAndCommentsResponse,
 )

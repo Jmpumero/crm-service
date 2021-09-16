@@ -9,6 +9,8 @@ from .schemas import (
     CustomerLogBook,
     CustomerMarketingSubscriptions,
     SearchCustomers,
+    CustomerNotesAndcomments,
+    NotesAndCommentsResponse,
 )
 
 
@@ -57,20 +59,45 @@ class Service(MongoQueries):
                         customers.append(SearchCustomers(**customer))
 
             else:
-                print("F")
+                print("F :(")
 
-        response = self.build_response(customers, total_customer)
+        # response = self.build_response(customers, total_customer)
 
-        return self.build_response(customers, total_customer)
+        return self.build_response_search(customers, total_customer)
 
-    def build_response(self, list_customer, total_customer):
+    def build_response_search(self, list_items, total_customer):
 
         finalresponse = {
-            "customers": list_customer,
+            "customers": list_items,
             "total_items": total_customer,
-            "total_show": len(list_customer),
+            "total_show": len(list_items),
         }
         return SearchCustomersResponse(**finalresponse)
+
+    def get_customer_notes_comments(self, customer_id: int) -> CustomerNotesAndcomments:
+
+        comments = []
+        data = {
+            "date": "18-12-2020",
+            "comment": "Deseo la habitacion con una esfera del dragon",
+            "created_by": "Huesped",
+            "belong": "HPA",
+        }
+        data2 = {
+            "date": "18-12-2020",
+            "comment": "Deseo la habitacion con una temperatura ambiente",
+            "created_by": "Huesped",
+            "belong": "HPA",
+        }
+        comments.append(data)
+        comments.append(data2)
+
+        finalresponse = {
+            "customer_comments": comments,
+            "total_show": len(comments),
+        }
+
+        return NotesAndCommentsResponse(**finalresponse)
 
     def get_profile_header(self, customer_id: int) -> CustomerProfileHeaderResponse:
         data = {
@@ -80,7 +107,7 @@ class Service(MongoQueries):
             "languages": ["ENG", "SPANISH"],
             "country": "VEN",
             "membership": "?",
-            "gender": "NO BINARY",
+            "gender": "NO BINARY KEK",
             "age": 36,
             "next_hotel_stay": "random hotel",
             "next_stay_date": "25/10/2021",

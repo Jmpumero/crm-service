@@ -6,4 +6,6 @@ from .get import (
     CustomerLogBook,
     CustomerMarketingSubscriptions,
     SearchCustomers,
+    CustomerNotesAndcomments,
+    NotesAndCommentsResponse,
 )

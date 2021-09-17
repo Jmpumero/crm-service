@@ -33,6 +33,14 @@ async def get_customers(
     return await service.get_customers(query_params)
 
 
+@customers_router.get("/customers/{customer_id}/notes-comments")
+@remove_422
+async def get_customer_notes_comments(customer_id: int):
+    service = Service()
+
+    return service.get_customer_notes_comments(customer_id)
+
+
 @customers_router.get("/customers/{customer_id}/profile-header")
 @remove_422
 async def get_customer_profile_header(customer_id: int):

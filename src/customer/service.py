@@ -181,3 +181,8 @@ class Service(MongoQueries):
         }
 
         return CustomerMarketingSubscriptions(**data)
+
+    def get_customer_sales_summary(self, customer_id):
+        data = {"message": "work"}
+
+        return data

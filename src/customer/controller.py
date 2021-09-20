@@ -70,4 +70,4 @@ async def get_customer_marketing_subscriptions(customer_id: int):
 async def get_customer_sales_summary(customer_id: int):
     service = Service()
 
-    return service.get_customer_sales_summary(customer_id)
+    return await service.get_customer_sales_summary(customer_id)

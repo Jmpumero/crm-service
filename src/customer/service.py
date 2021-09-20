@@ -1,5 +1,6 @@
-from .repository import MongoQueries
+import json
 
+from .repository import MongoQueries
 
 from .schemas import (
     SearchCustomersQueryParams,
@@ -12,6 +13,9 @@ from .schemas import (
     CustomerNotesAndcomments,
     NotesAndCommentsResponse,
 )
+
+
+import main
 
 
 class Service(MongoQueries):
@@ -208,3 +212,32 @@ class Service(MongoQueries):
         }
 
         return CustomerMarketingSubscriptions(**data)
+
+    async def get_customer_sales_summary(self, customer_id):
+        customer_in_redis = await main.app.state.redis_repo.get(str(customer_id))
+
+        if not customer_in_redis:
+            data = {
+                "total_revenue": [
+                    {"name": "upgrade_and_upselling", "amount": 110},
+                    {"name": "food_and_beverage", "amount": 150},
+                    {"name": "lodging", "amount": 130},
+                ],
+                "frequent_visits": [
+                    {"name": "superior king"},
+                    {"name": "king"},
+                    {"name": "double"},
+                ],
+                "most_contracted_services": [
+                    {"name": "extra key", "amount": 118},
+                    {"name": "tablet rental", "amount": 112},
+                    {"name": "spa access", "amount": 220},
+                    {"name": "bottle of wine", "amount": 80},
+                ],
+            }
+
+            await main.app.state.redis_repo.set(str(customer_id), json.dumps(data))
+
+            return data
+
+        return json.loads(customer_in_redis)

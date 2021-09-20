@@ -38,7 +38,7 @@ async def startup_event() -> None:
 
 @app.on_event("shutdown")
 async def shutdown_event() -> None:
-    app.state.redis.close()
+    await app.state.redis.close()
     await app.state.redis.wait_closed()
 
 

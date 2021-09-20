@@ -71,3 +71,11 @@ async def get_customer_marketing_subscriptions(customer_id: int):
     service = Service()
 
     return service.get_customer_marketing_subscriptions(customer_id)
+
+
+@customers_router.get("/customers/{customer_id}/sales-summary")
+@remove_422
+async def get_customer_sales_summary(customer_id: int):
+    service = Service()
+
+    return await service.get_customer_sales_summary(customer_id)

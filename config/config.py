@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     jwt_exp: int = int(os.environ.get("JWT_EXP", "30"))
 
     output_json: str = os.environ.get("OUTPUT_JSON", "./clients.json")
-    pagination_limit: int = os.environ.get("PAGINATION_LIMIT", 25)
+    pagination_limit: int = int(os.environ.get("PAGINATION_LIMIT", 25))
 
 
 # @lru_cache()

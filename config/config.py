@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     api_base_url: str = os.getenv("BASE_URL", "http://localhost:8000")
 
-    mongodb_url: str = os.getenv("MONGODB_URL", "mongodb://localhost:27017/")
+    mongodb_url: str = os.getenv("MONGODB_URL", "mongodb://127.0.0.1:27017/")
 
     redis_url: str = os.environ.get("REDIS_URL", "redis://localhost:6379")
     redis_password: str = os.getenv("REDIS_PASSWORD", "")

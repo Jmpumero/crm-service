@@ -219,21 +219,37 @@ class Service(MongoQueries):
         if not customer_in_redis:
             data = {
                 "total_revenue": [
-                    {"name": "upgrade_and_upselling", "amount": 110},
-                    {"name": "food_and_beverage", "amount": 150},
-                    {"name": "lodging", "amount": 130},
+                    {"name": "upgrade_and_upselling", "quantity": 110},
+                    {"name": "food_and_beverage", "quantity": 150},
+                    {"name": "lodging", "quantity": 130},
                 ],
                 "frequent_visits": [
-                    {"name": "superior king"},
-                    {"name": "king"},
-                    {"name": "double"},
+                    {"name": "superior king", "quantity": 4},
+                    {"name": "king", "quantity": 2},
+                    {"name": "double", "quantity": 2},
                 ],
                 "most_contracted_services": [
-                    {"name": "extra key", "amount": 118},
-                    {"name": "tablet rental", "amount": 112},
-                    {"name": "spa access", "amount": 220},
-                    {"name": "bottle of wine", "amount": 80},
+                    {"name": "extra key", "quantity": 118},
+                    {"name": "tablet rental", "quantity": 112},
+                    {"name": "spa access", "quantity": 220},
+                    {"name": "bottle of wine", "quantity": 80},
                 ],
+                "check_ins": [
+                    {"name": "complete", "quantity": 8},
+                    {"name": "no complete", "quantity": 2},
+                ],
+                "most_visited_pages": [
+                    {"name": "youtube", "quantity": 15},
+                    {"name": "twitter", "quantity": 7},
+                    {"name": "instagram", "quantity": 18},
+                    {"name": "google", "quantity": 44},
+                ],
+                "use_of_suite_applications": [],
+                "frequency_of_use_of_suite_applications": [
+                    {"name": "cast", "quantity": 7},
+                    {"name": "hostpod", "quantity": 11},
+                ],
+                "segment_where_it_is_located": [],
             }
 
             await main.app.state.redis_repo.set(str(customer_id), json.dumps(data))

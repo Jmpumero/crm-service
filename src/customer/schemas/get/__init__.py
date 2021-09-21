@@ -1,4 +1,4 @@
-from .query_params import SearchCustomersQueryParams
+from .query_params import SearchCustomersQueryParams, BlacklistQueryParams
 from .responses import (
     SearchCustomersResponse,
     CustomerProfileHeaderResponse,

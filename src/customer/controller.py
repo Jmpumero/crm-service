@@ -5,7 +5,7 @@ from fastapi import APIRouter, status, Depends
 
 from .service import Service
 
-from .schemas import SearchCustomersQueryParams
+from .schemas import SearchCustomersQueryParams, BlacklistQueryParams
 
 from utils.remove_422 import remove_422
 
@@ -31,6 +31,16 @@ async def get_customers(
     service = Service()
 
     return await service.get_customers(query_params)
+
+
+@customers_router.get("/blacklist/")
+@remove_422
+async def get_customers(
+    query_params: BlacklistQueryParams = Depends(BlacklistQueryParams),
+):
+    service = Service()
+
+    return await service.get_customers_blacklist(query_params)
 
 
 @customers_router.get("/customers/{customer_id}/notes-comments")

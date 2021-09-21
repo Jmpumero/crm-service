@@ -1,5 +1,6 @@
 from .get import (
     SearchCustomersQueryParams,
+    BlacklistQueryParams,
     SearchCustomersResponse,
     CustomerProfileHeaderResponse,
     CustomerProfileDetailResponse,

@@ -1,3 +1,5 @@
+from src.customer.schemas.get.responses.blacklist import BlacklistCustomer
+from src.customer.schemas.get.query_params import BlacklistQueryParams
 from .repository import MongoQueries
 
 
@@ -208,3 +210,15 @@ class Service(MongoQueries):
         }
 
         return CustomerMarketingSubscriptions(**data)
+
+    def get_customers_blacklist(
+        self, query_params: BlacklistQueryParams
+    ) -> list[BlacklistCustomer]:
+
+        if query_params.query.replace(" ", "") != "":
+            if query_params.query.lower() == "disable":
+                print("gege")
+            elif query_params.query.lower() == "enable":
+                print("enableichon")
+            else:
+                print("valor de query errado")

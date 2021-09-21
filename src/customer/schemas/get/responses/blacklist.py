@@ -28,7 +28,7 @@ class Languages(BaseModel):
     is_main: bool
 
 
-class SearchCustomers(BaseModel):
+class BlacklistCustomer(BaseModel):
     id: str = Field(..., alias="_id")
     # id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     name: str
@@ -40,11 +40,12 @@ class SearchCustomers(BaseModel):
     documentId: List[DocumentID]
     nationality: str
     civilStatus: str
-    languages: List[str]
-    marital_status: str
+    languages: List[Languages]
     birthday: str
-    customer_sensors: List[str]
+    sensors_log: List[str]
     blacklist_status: bool
+    blacklist_enable_motive: List[str]
+    blacklist_disable_motive: List[str]
 
     class Config:
         allow_population_by_field_name = True
@@ -52,16 +53,7 @@ class SearchCustomers(BaseModel):
         json_encoders = {ObjectId: str}
 
 
-class ResponseMetaData(BaseModel):
-    code: int
-    message: str
-
-
 class SearchCustomersResponse(BaseModel):
-    customers: List[SearchCustomers]
+    customers: List[BlacklistCustomer]
     total_items: int
     total_show: int
-
-
-class testagg(BaseModel):
-    nombre: str

@@ -27,18 +27,18 @@ class Service(MongoQueries):
         total_customer = await self.total_customer()
 
         if query_params.query == "":
+            if query_params.column_name:  # ultima validacion especial
+                cursor = self.find_all_customers(
+                    query_params.skip,
+                    query_params.limit,
+                    query_params.column_name.replace(" ", ""),
+                    query_params.order,
+                    query_params.column_order.replace(" ", ""),
+                )
 
-            cursor = self.find_all_customers(
-                query_params.skip,
-                query_params.limit,
-                query_params.column_name.replace(" ", ""),
-                query_params.order,
-                query_params.column_order.replace(" ", ""),
-            )
+                for customer in await cursor.to_list(length=None):
 
-            for customer in await cursor.to_list(length=None):
-
-                customers.append(SearchCustomers(**customer))
+                    customers.append(SearchCustomers(**customer))
 
         else:
             if query_params.column_name.replace(" ", ""):
@@ -59,7 +59,7 @@ class Service(MongoQueries):
                         customers.append(SearchCustomers(**customer))
 
             else:
-                print("F :(")
+                print("Caso no valido error ")
 
         # response = self.build_response(customers, total_customer)
 

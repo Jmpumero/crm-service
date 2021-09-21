@@ -27,8 +27,9 @@ class ConnectionMongo:
         self.db = self.client.crm
 
         self.clients_customer = self.db.customer
-        self.clients_customer.create_index(
-            [("id", pymongo.ASCENDING)], unique=True
-        )  # evita inserciones duplicadas
+        # self.clients_customer.create_index(
+        #     [("id", pymongo.ASCENDING)], unique=True
+        # )
+        # evita inserciones duplicadas
 
         self.sensors_collection = self.db.sensors

@@ -13,7 +13,6 @@ from error_handlers.bad_gateway import BadGatewayException
 global_settings = Settings()
 
 search_projections = {
-    "_id": 0,
     "name": 1,
     "last_name": 1,
     "full_name": 1,

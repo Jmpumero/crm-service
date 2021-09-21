@@ -1,35 +1,8 @@
 from typing import List, Optional
 from pydantic import BaseModel
 
-from pydantic import BaseModel, Field, validator
-from fastapi.encoders import jsonable_encoder
-
+from pydantic import BaseModel, Field
 from bson import ObjectId
-
-
-# class PyObjectId(ObjectId):
-#     @classmethod
-#     def __get_validators__(cls):
-#         yield cls.validate
-
-#     @classmethod
-#     def validate(cls, v):
-#         if not ObjectId.is_valid(v):
-#             raise ValueError("Invalid objectid")
-#         return ObjectId(v)
-
-#     @classmethod
-#     def __modify_schema__(cls, field_schema):
-#         field_schema.update(type="string")
-
-
-# class Link(BaseModel):
-#     href: str
-
-
-# class Links(BaseModel):
-#     self: Link
-#     clients: Link
 
 
 class DocumentID(BaseModel):
@@ -61,13 +34,17 @@ class SearchCustomers(BaseModel):
     name: str
     last_name: str
     age: int
-    email: Emails
-    phone: Phones
+    email: List[Emails]
+    phone: List[Phones]
     address: List[str]
     documentId: List[DocumentID]
     nationality: str
     civilStatus: str
-    booking_id: str
+    languages: List[str]
+    marital_status: str
+    birthday: str
+    customer_sensors: List[str]
+    blacklist_status: bool
 
     class Config:
         allow_population_by_field_name = True

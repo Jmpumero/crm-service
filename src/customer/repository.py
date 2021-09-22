@@ -1,3 +1,5 @@
+from src.customer.schemas.get.responses import blacklist, customers
+from src.customer.schemas.get import responses
 import pymongo
 from core.connection.connection import ConnectionMongo as DwConnection
 
@@ -34,6 +36,24 @@ search_projections = {
         ]
     },
     "address": 1,
+}
+
+blacklist_customer_projections = {
+    "name": 1,
+    "last_name": 1,
+    "age": 1,
+    "email": 1,
+    "phone": 1,
+    "address": 1,
+    "documentId": 1,
+    "nationality": 1,
+    "civilStatus": 1,
+    "languages": 1,
+    "birthdate": 1,
+    "associated_sensors": 1,
+    "blacklist_status": 1,
+    "blacklist_enable_motive": 1,
+    "blacklist_disable_motive": 1,
 }
 
 
@@ -488,3 +508,25 @@ class MongoQueries(DwConnection):
                     return response.sort(column_order, pymongo.ASCENDING)
 
         return response
+
+    def blacklist_search(self, type, skip, limit):
+
+        cursor = None
+        if type == "enable":
+            cursor = (
+                self.clients_customer.find(
+                    {"blacklist_status": False}, blacklist_customer_projections
+                )
+                .skip(skip)
+                .limit(limit)
+            )
+        else:
+            cursor = (
+                self.clients_customer.find(
+                    {"blacklist_status": True}, blacklist_customer_projections
+                )
+                .skip(skip)
+                .limit(limit)
+            )
+
+        return cursor

@@ -41,8 +41,8 @@ class BlacklistCustomer(BaseModel):
     nationality: str
     civilStatus: str
     languages: List[Languages]
-    birthday: str
-    sensors_log: List[str]
+    birthdate: str
+    associated_sensors: List[str]
     blacklist_status: bool
     blacklist_enable_motive: List[str]
     blacklist_disable_motive: List[str]

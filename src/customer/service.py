@@ -1,3 +1,5 @@
+from src.customer.schemas.get.responses import customers
+from src.customer.schemas.get.responses import blacklist
 from src.customer.schemas.get.responses.blacklist import BlacklistCustomer
 from src.customer.schemas.get.query_params import BlacklistQueryParams
 from .repository import MongoQueries
@@ -211,14 +213,30 @@ class Service(MongoQueries):
 
         return CustomerMarketingSubscriptions(**data)
 
-    def get_customers_blacklist(
+    async def get_customers_blacklist(
         self, query_params: BlacklistQueryParams
     ) -> list[BlacklistCustomer]:
-
+        response = None
+        customers = []
         if query_params.query.replace(" ", "") != "":
             if query_params.query.lower() == "disable":
-                print("gege")
+
+                total_customer_enable = await self.total_customer()
+                cursor = self.blacklist_search(
+                    query_params.query, query_params.skip, query_params.limit
+                )
+
+                for customer in await cursor.to_list(length=None):
+
+                    customers.append(BlacklistCustomer(**customer))
+
             elif query_params.query.lower() == "enable":
-                print("enableichon")
+
+                pass
             else:
                 print("valor de query errado")
+
+        else:
+            print("el query no puede ser vacio")
+
+        print(customers)

@@ -1,3 +1,4 @@
+from typing import Any
 from src.customer.schemas.get.responses import customers
 from src.customer.schemas.get.responses import blacklist
 
@@ -15,8 +16,10 @@ from .schemas import (
     CustomerNotesAndcomments,
     NotesAndCommentsResponse,
     BlacklistCustomersResponse,
+    BlacklistSensorResponse,
     BlacklistCustomer,
     BlacklistQueryParams,
+    BlacklistQueryParamsSensor,
 )
 
 
@@ -253,3 +256,31 @@ class Service(MongoQueries):
             print("el query no puede ser vacio")
 
         return self.build_blacklist_response(customers, total)
+
+    def get_blacklist_sensor(
+        self, customer_id, query_params: BlacklistQueryParamsSensor
+    ):
+
+        data_s = []
+        total = 2
+        if query_params.sensor == "sensor_1":
+            pass
+        elif query_params.sensor == "sensor_2":
+            pass
+        elif query_params.sensor == "sensor_3":
+            pass
+        elif query_params.sensor == "sensor_4":
+            pass
+
+        data_s = [
+            {"fecha": "25-10-2020 15:00", "propiedad": "HPA", "duracion": "30min"},
+            {"fecha": "15-06-2020 16:50", "propiedad": "H Barcelona", "duracion": "1h"},
+        ]
+
+        response = {
+            "sensor_data": data_s,
+            "total_items": total,
+            "total_show": len(data_s),
+        }
+
+        return BlacklistSensorResponse(**response)

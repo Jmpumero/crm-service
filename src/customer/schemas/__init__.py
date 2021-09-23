@@ -1,6 +1,7 @@
 from .get import (
     SearchCustomersQueryParams,
     BlacklistQueryParams,
+    BlacklistQueryParamsSensor,
     SearchCustomersResponse,
     CustomerProfileHeaderResponse,
     CustomerProfileDetailResponse,
@@ -11,4 +12,5 @@ from .get import (
     NotesAndCommentsResponse,
     BlacklistCustomersResponse,
     BlacklistCustomer,
+    BlacklistSensorResponse,
 )

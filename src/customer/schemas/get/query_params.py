@@ -15,6 +15,12 @@ class SearchCustomersQueryParams(BaseModel):
 
 
 class BlacklistQueryParams(BaseModel):
-    query: str = "disable"
     skip: int = 0
     limit: int = 10
+    query: str = "disable"
+
+
+class BlacklistQueryParamsSensor(BaseModel):
+    skip: int = 0
+    limit: int = 10
+    sensor: str

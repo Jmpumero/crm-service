@@ -1,7 +1,6 @@
 from src.customer.schemas.get.responses import customers
 from src.customer.schemas.get.responses import blacklist
-from src.customer.schemas.get.responses.blacklist import BlacklistCustomer
-from src.customer.schemas.get.query_params import BlacklistQueryParams
+
 from .repository import MongoQueries
 
 
@@ -15,6 +14,9 @@ from .schemas import (
     SearchCustomers,
     CustomerNotesAndcomments,
     NotesAndCommentsResponse,
+    BlacklistCustomersResponse,
+    BlacklistCustomer,
+    BlacklistQueryParams,
 )
 
 
@@ -213,30 +215,41 @@ class Service(MongoQueries):
 
         return CustomerMarketingSubscriptions(**data)
 
+    def build_blacklist_response(self, list_items, total):
+
+        response = {
+            "customers": list_items,
+            "total_items": total,
+            "total_show": len(list_items),
+        }
+        return BlacklistCustomersResponse(**response)
+
     async def get_customers_blacklist(
         self, query_params: BlacklistQueryParams
     ) -> list[BlacklistCustomer]:
         response = None
         customers = []
+        cursor = None
+        total = 0
         if query_params.query.replace(" ", "") != "":
+
             if query_params.query.lower() == "disable":
-
-                total_customer_enable = await self.total_customer()
-                cursor = self.blacklist_search(
-                    query_params.query, query_params.skip, query_params.limit
-                )
-
-                for customer in await cursor.to_list(length=None):
-
-                    customers.append(BlacklistCustomer(**customer))
+                total = await self.total_customer_in_blacklist(True)
 
             elif query_params.query.lower() == "enable":
+                total = await self.total_customer_in_blacklist(False)
 
-                pass
             else:
                 print("valor de query errado")
 
+            cursor = self.blacklist_search(
+                query_params.query, query_params.skip, query_params.limit
+            )
+
+            if cursor != None:
+                for customer in await cursor.to_list(length=None):
+                    customers.append(BlacklistCustomer(**customer))
         else:
             print("el query no puede ser vacio")
 
-        print(customers)
+        return self.build_blacklist_response(customers, total)

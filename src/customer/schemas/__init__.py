@@ -9,4 +9,6 @@ from .get import (
     SearchCustomers,
     CustomerNotesAndcomments,
     NotesAndCommentsResponse,
+    BlacklistCustomersResponse,
+    BlacklistCustomer,
 )

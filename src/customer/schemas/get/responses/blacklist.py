@@ -24,13 +24,12 @@ class Emails(BaseModel):
 
 
 class Languages(BaseModel):
-    language: str
-    is_main: bool
+    lang: str
+    isMain: bool
 
 
 class BlacklistCustomer(BaseModel):
     id: str = Field(..., alias="_id")
-    # id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     name: str
     last_name: str
     age: int
@@ -53,7 +52,7 @@ class BlacklistCustomer(BaseModel):
         json_encoders = {ObjectId: str}
 
 
-class SearchCustomersResponse(BaseModel):
+class BlacklistCustomersResponse(BaseModel):
     customers: List[BlacklistCustomer]
     total_items: int
     total_show: int

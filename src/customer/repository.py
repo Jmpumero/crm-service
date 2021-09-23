@@ -520,7 +520,7 @@ class MongoQueries(DwConnection):
                 .skip(skip)
                 .limit(limit)
             )
-        else:
+        elif type == "disable":
             cursor = (
                 self.clients_customer.find(
                     {"blacklist_status": True}, blacklist_customer_projections
@@ -530,3 +530,7 @@ class MongoQueries(DwConnection):
             )
 
         return cursor
+
+    def total_customer_in_blacklist(self, type):
+        total = self.clients_customer.count_documents({"blacklist_status": type})
+        return total

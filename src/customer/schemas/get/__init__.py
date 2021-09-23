@@ -8,4 +8,6 @@ from .responses import (
     SearchCustomers,
     CustomerNotesAndcomments,
     NotesAndCommentsResponse,
+    BlacklistCustomersResponse,
+    BlacklistCustomer,
 )

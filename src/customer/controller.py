@@ -1,4 +1,5 @@
 from __future__ import annotations
+from src.customer.schemas.get.query_params import BlacklistQueryParamsSensor
 from config.config import Settings
 
 from fastapi import APIRouter, status, Depends
@@ -43,9 +44,32 @@ async def get_customers(
     return await service.get_customers_blacklist(query_params)
 
 
+@customers_router.get("/blacklist/{customer_id}/sensor")
+@remove_422
+async def get_customers(
+    customer_id: str,
+    query_params: BlacklistQueryParamsSensor = Depends(BlacklistQueryParamsSensor),
+):
+    service = Service()
+    # la comentada se usara a futuro cuando se tenga data real...
+    # return await service.get_blacklist_sensor(customer_id, query_params)
+    return service.get_blacklist_sensor(customer_id, query_params)
+
+
+@customers_router.get("/blacklist/update/customer")
+@remove_422
+async def get_customers(
+    body: BlacklistQueryParamsSensor = Depends(BlacklistQueryParamsSensor),
+):
+    service = Service()
+    # la comentada se usara a futuro cuando se tenga data real...
+    # return await service.get_blacklist_sensor(customer_id, query_params)
+    return service.get_blacklist_sensor(body)
+
+
 @customers_router.get("/customers/{customer_id}/notes-comments")
 @remove_422
-async def get_customer_notes_comments(customer_id: int):
+async def get_customer_notes_comments(customer_id: str):
     service = Service()
 
     return service.get_customer_notes_comments(customer_id)
@@ -53,7 +77,7 @@ async def get_customer_notes_comments(customer_id: int):
 
 @customers_router.get("/customers/{customer_id}/profile-header")
 @remove_422
-async def get_customer_profile_header(customer_id: int):
+async def get_customer_profile_header(customer_id: str):
     service = Service()
 
     return service.get_profile_header(customer_id)
@@ -61,7 +85,7 @@ async def get_customer_profile_header(customer_id: int):
 
 @customers_router.get("/customers/{customer_id}/details")
 @remove_422
-async def get_customer_profile_detail(customer_id: int):
+async def get_customer_profile_detail(customer_id: str):
     service = Service()
 
     return service.get_profile_details(customer_id)
@@ -69,7 +93,7 @@ async def get_customer_profile_detail(customer_id: int):
 
 @customers_router.get("/customers/{customer_id}/logbook")
 @remove_422
-async def get_customer_logbook(customer_id: int):
+async def get_customer_logbook(customer_id: str):
     service = Service()
 
     return service.get_customer_logbook(customer_id)
@@ -77,7 +101,7 @@ async def get_customer_logbook(customer_id: int):
 
 @customers_router.get("/customers/{customer_id}/marketing-subscriptions")
 @remove_422
-async def get_customer_marketing_subscriptions(customer_id: int):
+async def get_customer_marketing_subscriptions(customer_id: str):
     service = Service()
 
     return service.get_customer_marketing_subscriptions(customer_id)

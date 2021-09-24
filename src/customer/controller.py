@@ -26,8 +26,6 @@ customers_router = APIRouter(
 @customers_router.get("/customers/")
 @remove_422
 async def get_customers(
-    # skip: int = 0,
-    # limit: int = global_settings.pagination_limit,
     query_params: SearchCustomersQueryParams = Depends(SearchCustomersQueryParams),
 ):
     service = Service()
@@ -104,5 +102,4 @@ async def get_customer_marketing_subscriptions(customer_id: str):
 async def update_customer_in_blacklist(body: BlackListBody):
 
     service = Service()
-    # falta el  await
     return await service.post_blacklist_update_customer(body)

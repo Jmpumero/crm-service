@@ -3,8 +3,9 @@ from src.customer.schemas.post.bodys.blacklist import BlackListBody
 from src.customer.schemas.get.query_params import BlacklistQueryParamsSensor
 from config.config import Settings
 
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, Depends
 
+from core import keycloack_guard
 from .service import Service
 
 from .schemas import SearchCustomersQueryParams, BlacklistQueryParams
@@ -19,7 +20,7 @@ from fastapi import HTTPException
 global_settings = Settings()
 
 customers_router = APIRouter(
-    tags=["Customers"],
+    tags=["Customers"], dependencies=[Depends(keycloack_guard)]
 )
 
 
@@ -103,3 +104,11 @@ async def update_customer_in_blacklist(body: BlackListBody):
 
     service = Service()
     return await service.post_blacklist_update_customer(body)
+
+
+@customers_router.get("/customers/{customer_id}/sales-summary")
+@remove_422
+async def get_customer_sales_summary(customer_id: int):
+    service = Service()
+
+    return await service.get_customer_sales_summary(customer_id)

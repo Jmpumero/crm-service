@@ -1,11 +1,11 @@
 import logging
 import os
-from functools import lru_cache
-from typing import Any
+from dotenv import load_dotenv
 
 from pydantic import BaseSettings
 
 log = logging.getLogger("uvicorn")
+load_dotenv()
 
 
 class Settings(BaseSettings):
@@ -13,22 +13,21 @@ class Settings(BaseSettings):
 
     api_base_url: str = os.getenv("BASE_URL", "http://localhost:8000")
 
-    mongodb_url: str = os.getenv("MONGODB_URL", "mongodb://localhost:27017/")
+    mongodb_url: str = os.getenv("MONGODB_URL", "mongodb://127.0.0.1:27017/")
 
     redis_url: str = os.environ.get("REDIS_URL", "redis://localhost:6379")
     redis_password: str = os.getenv("REDIS_PASSWORD", "")
     redis_db: int = int(os.getenv("REDIS_DB", "0"))
 
-    sqlite_url: str = os.environ.get("SQLITE_URL", "sqlite:///./users.db")
+    sqlite_url: str = os.getenv("SQLITE_URL", "sqlite:///./users.db")
 
-    jwt_secret: str = os.environ.get(
-        "JWT_SECRET_KEY", "zCaud3gzRN9NoheRQv2J6SpBdbrkihmskwl5vfhOeK3LF"
-    )
-    jwt_algorithm: str = os.environ.get("JWT_ALGORITHM", "HS256")
-    jwt_exp: int = int(os.environ.get("JWT_EXP", "30"))
+    output_json: str = os.getenv("OUTPUT_JSON", "./clients.json")
+    pagination_limit: int = int(os.getenv("PAGINATION_LIMIT", 25))
 
-    output_json: str = os.environ.get("OUTPUT_JSON", "./clients.json")
-    pagination_limit: int = os.environ.get("PAGINATION_LIMIT", 25)
+    keycloack_server_url: str = os.getenv("KEYCLOACK_SERVER_URL", "")
+    keycloack_client_id: str = os.getenv("KEYCLOACK_CLIENT_ID", "")
+    keycloack_client_secrect_key: str = os.getenv("KEYCLOACK_CLIENT_SECRECT_KEY", "")
+    keycloack_realm_name: str = os.getenv("KEYCLOACK_REALM_NAME", "")
 
 
 # @lru_cache()

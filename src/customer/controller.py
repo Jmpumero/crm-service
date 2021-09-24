@@ -1,12 +1,11 @@
 from __future__ import annotations
 from config.config import Settings
 
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, Depends
 
+from core import keycloack_guard
 from .service import Service
-
 from .schemas import SearchCustomersQueryParams
-
 from utils.remove_422 import remove_422
 
 from error_handlers.schemas.validation_error import CustomValidationError
@@ -17,7 +16,7 @@ from error_handlers.schemas.unauthorized import UnauthorizedError
 global_settings = Settings()
 
 customers_router = APIRouter(
-    tags=["Customers"],
+    tags=["Customers"], dependencies=[Depends(keycloack_guard)]
 )
 
 

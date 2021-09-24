@@ -1,3 +1,6 @@
+from starlette.responses import Response
+from src.customer.schemas.post.responses.blacklist import BlackListBodyResponse
+from fastapi.encoders import jsonable_encoder
 from src.customer.schemas.get.responses import blacklist, customers
 from src.customer.schemas.get import responses
 import pymongo
@@ -534,3 +537,35 @@ class MongoQueries(DwConnection):
     def total_customer_in_blacklist(self, type):
         total = self.clients_customer.count_documents({"blacklist_status": type})
         return total
+
+    async def update_customer_in_blacklist(self, data) -> BlackListBodyResponse:
+        resp = None
+        if data.blacklist_status:
+            resp = await self.clients_customer.find_one_and_update(
+                {"_id": data.id},
+                {
+                    "$set": {
+                        "blacklist_status": data.blacklist_status,
+                        "blacklist_enable_motive": data.motives,
+                    }
+                },
+            )
+        else:
+            resp = await self.clients_customer.find_one_and_update(
+                {"_id": data.id},
+                {
+                    "$set": {
+                        "blacklist_status": data.blacklist_status,
+                        "blacklist_disable_motive": data.motives,
+                    }
+                },
+            )
+
+        if resp != None:
+            response = {"msg": " Success Customer Update ", "code": 200}
+        else:
+            response = {
+                "msg": " Failed Customer Update, Customer not found ",
+                "code": 400,
+            }
+        return BlackListBodyResponse(**response)

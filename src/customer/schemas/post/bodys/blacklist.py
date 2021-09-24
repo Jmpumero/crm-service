@@ -6,5 +6,5 @@ from bson import ObjectId
 
 class BlackListBody(BaseModel):
     id: str
-    status_change: bool = False
+    blacklist_status: bool = False
     motives: List[str]

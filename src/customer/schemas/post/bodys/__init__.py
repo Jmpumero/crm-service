@@ -1,1 +1,1 @@
-from blacklist import BlackListBody
+from .blacklist import BlackListBody

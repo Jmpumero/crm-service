@@ -20,6 +20,7 @@ from .schemas import (
     BlacklistCustomer,
     BlacklistQueryParams,
     BlacklistQueryParamsSensor,
+    BlackListBody,
 )
 
 
@@ -284,3 +285,7 @@ class Service(MongoQueries):
         }
 
         return BlacklistSensorResponse(**response)
+
+    async def post_blacklist_update_customer(self, body: BlackListBody):
+
+        return await self.update_customer_in_blacklist(body)

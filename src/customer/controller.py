@@ -1,4 +1,5 @@
 from __future__ import annotations
+from src.customer.schemas.post.bodys.blacklist import BlackListBody
 from src.customer.schemas.get.query_params import BlacklistQueryParamsSensor
 from config.config import Settings
 
@@ -7,13 +8,13 @@ from fastapi import APIRouter, status, Depends
 from .service import Service
 
 from .schemas import SearchCustomersQueryParams, BlacklistQueryParams
-
+from .schemas import BlackListBodyResponse
 from utils.remove_422 import remove_422
 
 from error_handlers.schemas.validation_error import CustomValidationError
 from error_handlers.schemas.bad_gateway import BadGatewayError
 from error_handlers.schemas.unauthorized import UnauthorizedError
-
+from fastapi import HTTPException
 
 global_settings = Settings()
 
@@ -46,7 +47,7 @@ async def get_customers(
 
 @customers_router.get("/blacklist/{customer_id}/sensor")
 @remove_422
-async def get_customers(
+async def get_customer_sensor(
     customer_id: str,
     query_params: BlacklistQueryParamsSensor = Depends(BlacklistQueryParamsSensor),
 ):
@@ -54,17 +55,6 @@ async def get_customers(
     # la comentada se usara a futuro cuando se tenga data real...
     # return await service.get_blacklist_sensor(customer_id, query_params)
     return service.get_blacklist_sensor(customer_id, query_params)
-
-
-@customers_router.get("/blacklist/update/customer")
-@remove_422
-async def get_customers(
-    body: BlacklistQueryParamsSensor = Depends(BlacklistQueryParamsSensor),
-):
-    service = Service()
-    # la comentada se usara a futuro cuando se tenga data real...
-    # return await service.get_blacklist_sensor(customer_id, query_params)
-    return service.get_blacklist_sensor(body)
 
 
 @customers_router.get("/customers/{customer_id}/notes-comments")
@@ -105,3 +95,14 @@ async def get_customer_marketing_subscriptions(customer_id: str):
     service = Service()
 
     return service.get_customer_marketing_subscriptions(customer_id)
+
+
+@customers_router.post(
+    "/blacklist/update/customer", response_model=BlackListBodyResponse
+)
+@remove_422
+async def update_customer_in_blacklist(body: BlackListBody):
+
+    service = Service()
+    # falta el  await
+    return await service.post_blacklist_update_customer(body)

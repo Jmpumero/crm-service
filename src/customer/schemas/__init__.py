@@ -15,4 +15,9 @@ from .get import (
     BlacklistSensorResponse,
 )
 
-from .post import BlackListBody, BlackListBodyResponse
+from .post import (
+    BlackListBody,
+    BlackListBodyResponse,
+    CreateCustomerBody,
+    CustomerCRUDResponse,
+)

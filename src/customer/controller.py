@@ -1,4 +1,5 @@
 from __future__ import annotations
+from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
 from src.customer.schemas.post.bodys.blacklist import BlackListBody
 from src.customer.schemas.get.query_params import BlacklistQueryParamsSensor
 from config.config import Settings
@@ -8,8 +9,14 @@ from fastapi import APIRouter, Depends
 from core import keycloack_guard
 from .service import Service
 
-from .schemas import SearchCustomersQueryParams, BlacklistQueryParams
-from .schemas import BlackListBodyResponse
+from .schemas import (
+    BlackListBodyResponse,
+    SearchCustomersQueryParams,
+    BlacklistQueryParams,
+    CreateCustomerBody,
+    CustomerCRUDResponse,
+)
+
 from utils.remove_422 import remove_422
 
 from error_handlers.schemas.validation_error import CustomValidationError
@@ -112,3 +119,11 @@ async def get_customer_sales_summary(customer_id: int):
     service = Service()
 
     return await service.get_customer_sales_summary(customer_id)
+
+
+@customers_router.post("/customer/created", response_model=CustomerCRUDResponse)
+@remove_422
+async def created_customer_crud(body: CreateCustomerBody):
+
+    service = Service()
+    return await service.post_create_customer(body)

@@ -1,3 +1,4 @@
+from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
 from starlette.responses import Response
 from src.customer.schemas.post.responses.blacklist import BlackListBodyResponse
 from fastapi.encoders import jsonable_encoder
@@ -569,3 +570,31 @@ class MongoQueries(DwConnection):
                 "code": 400,
             }
         return BlackListBodyResponse(**response)
+
+    async def insert_one_customer(self, data):
+
+        inserted_customer = None
+        response = None
+        customer = jsonable_encoder(data)
+        try:
+            inserted_customer = await self.clients_customer.insert_one(customer)
+        except:
+            response = {
+                "msg": " Failed inseting Customer ",
+                "code": 400,
+            }
+
+        if inserted_customer != None:
+
+            if inserted_customer.acknowledged:
+                response = {
+                    "msg": " Success Customer created ",
+                    "code": 200,
+                }
+            else:
+                response = {
+                    "msg": " Failed inseting Customer ",
+                    "code": 400,
+                }
+
+        return CustomerCRUDResponse(**response)

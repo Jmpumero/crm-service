@@ -23,6 +23,8 @@ from .schemas import (
     BlacklistQueryParams,
     BlacklistQueryParamsSensor,
     BlackListBody,
+    CreateCustomerBody,
+    CustomerCRUDResponse,
 )
 
 
@@ -339,3 +341,7 @@ class Service(MongoQueries):
             return data
 
         return json.loads(customer_in_redis)
+
+    async def post_create_customer(self, body: CreateCustomerBody):
+
+        return await self.insert_one_customer(body)

@@ -9,3 +9,4 @@ from .blacklist import (
     BlacklistCustomersResponse,
     BlacklistSensorResponse,
 )
+from .update_customer import SearchUpdate, SearchUpdateResponse

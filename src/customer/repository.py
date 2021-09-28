@@ -60,13 +60,16 @@ blacklist_customer_projections = {
     "blacklist_disable_motive": 1,
 }
 
+search_update_projections = {"blacklist_status": 0}
+
 
 class MongoQueries(DwConnection):
 
     # Metodos de Queries para el servicio de Clientes
 
     def total_customer(self):
-        customers = self.clients_customer.estimated_document_count()
+        # customers = self.clients_customer.estimated_document_count()
+        customers = self.clients_customer.count_documents({"customer_status": True})
         return customers
 
     def find_one_customer(self, client_id):
@@ -598,3 +601,172 @@ class MongoQueries(DwConnection):
                 }
 
         return CustomerCRUDResponse(**response)
+
+    def find_all_customers_in_update_view(self, skip, limit, column_sort, order):
+        if column_sort:
+            if order.lower() == "desc":
+
+                customers = (
+                    self.clients_customer.find(
+                        {"customer_status": True}, search_update_projections
+                    )
+                    .skip(skip)
+                    .limit(limit)
+                    .sort(column_sort, pymongo.DESCENDING)
+                )
+            else:
+
+                customers = (
+                    self.clients_customer.find(
+                        {"customer_status": True}, search_update_projections
+                    )
+                    .skip(skip)
+                    .limit(limit)
+                    .sort(column_sort, pymongo.ASCENDING)
+                )
+        else:
+            customers = (
+                self.clients_customer.find(
+                    {"customer_status": True},
+                    search_projections,
+                )
+                .skip(skip)
+                .limit(limit)
+            )
+
+        return customers
+
+    def find_filter_customers_in_update_view(
+        self, query, skip, limit, column_sort, order
+    ):
+
+        customers = (
+            self.clients_customer.find(
+                {
+                    "$and": [
+                        {"customer_status": True},
+                        {
+                            "$or": [
+                                {
+                                    "full_name": {
+                                        "$regex": f".*{query}.*",
+                                        "$options": "i",
+                                    }
+                                },
+                                {
+                                    "email": {
+                                        "$elemMatch": {
+                                            "email": {
+                                                "$regex": f".*{query}.*",
+                                                "$options": "i",
+                                            },
+                                            "isMain": True,
+                                        }
+                                    }
+                                },
+                                {
+                                    "phone": {
+                                        "$elemMatch": {
+                                            "intl_format": {
+                                                "$regex": f".*\+{query}.*",
+                                                "$options": "i",
+                                            },
+                                            "isMain": True,
+                                        }
+                                    }
+                                },
+                                {
+                                    "phone": {
+                                        "$elemMatch": {
+                                            "local_format": {
+                                                "$regex": f".*{query}.*",
+                                                "$options": "i",
+                                            },
+                                            "isMain": True,
+                                        }
+                                    }
+                                },
+                            ]
+                        },
+                    ]
+                },
+                search_update_projections,
+            )
+            .skip(skip)
+            .limit(limit)
+        )
+        if order.lower() == "desc":
+            customers.sort(column_sort, pymongo.DESCENDING)
+        else:
+            customers.sort(column_sort, pymongo.ASCENDING)
+
+        return customers
+
+    def build_query_update(self, data):
+        query = {}
+        if data.name != "" and data.name != None:
+            query["name"] = data.name
+        if data.last_name != "" and data.last_name != None:
+            query["last_name"] = data.last_name
+        if data.full_name != "" and data.full_name != None:
+            query["full_name"] = data.full_name
+        if data.nationality != "" and data.nationality != None:
+            query["nationality"] = data.nationality
+        if data.phone != "" and data.phone != None:
+
+            for i in data.phone:
+                query["phone"] = [i.dict() for i in data.phone]
+
+        if data.address != "" and data.address != None:
+            query["address"] = data.address
+        if data.postal_address != "" and data.postal_address != None:
+            query["postal_address"] = data.postal_address
+        if data.email != "" and data.email != None:
+
+            for i in data.email:
+                query["email"] = [i.dict() for i in data.email]
+
+        if data.documentId != "" and data.documentId != None:
+            for i in data.documentId:
+                query["documentId"] = [i.dict() for i in data.documentId]
+
+        if data.civil_status != "" and data.civil_status != None:
+            query["civil_status"] = data.civil_status
+        if data.age != "" and data.age != None:
+            query["age"] = data.age
+        if data.birthdate != "" and data.birthdate != None:
+            query["birthdate"] = data.birthdate
+
+        if data.language != "" and data.language != None:
+            for i in data.language:
+                query["language"] = [i.dict() for i in data.language]
+
+        if data.social_media != "" and data.social_media != None:
+            for i in data.social_media:
+                query["social_media"] = [i.dict() for i in data.social_media]
+
+        if data.customer_avatar != "" and data.customer_avatar != None:
+            query["customer_avatar"] = data.customer_avatar
+        if data.signature != "" and data.signature != None:
+            query["name"] = data.signature
+
+        return query
+
+    async def update_customer_(self, data):
+
+        query = self.build_query_update(data)
+        resp = None
+        if data.id != "" and data.id != None:
+            resp = await self.clients_customer.find_one_and_update(
+                {"_id": data.id},
+                {"$set": query},
+            )
+
+        if resp != None:
+            resp = {"msg": " Success Customer Update ", "code": 200}
+        else:
+            resp = {
+                "msg": " Failed Customer Update, Customer not found ",
+                "code": 400,
+            }
+        return resp

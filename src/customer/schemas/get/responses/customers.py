@@ -52,7 +52,7 @@ class Emails(BaseModel):
 
 class Languages(BaseModel):
     language: str
-    is_main: bool
+    isMain: bool
 
 
 class SearchCustomers(BaseModel):
@@ -62,12 +62,12 @@ class SearchCustomers(BaseModel):
     last_name: str
     age: int
     email: Emails
-    phone: Phones
+    phone: Optional[Phones]
     address: List[str]
     documentId: List[DocumentID]
-    nationality: str
-    civilStatus: str
-    booking_id: str
+    nationality: Optional[List[str]]
+    civilStatus: Optional[str]
+    booking_id: Optional[str] = "1234"
 
     class Config:
         allow_population_by_field_name = True

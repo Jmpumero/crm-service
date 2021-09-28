@@ -15,6 +15,8 @@ from .schemas import (
     BlacklistQueryParams,
     CreateCustomerBody,
     CustomerCRUDResponse,
+    SearchUpdateQueryParams,
+    UpdateCustomerBody,
 )
 
 from utils.remove_422 import remove_422
@@ -103,7 +105,7 @@ async def get_customer_marketing_subscriptions(customer_id: str):
     return service.get_customer_marketing_subscriptions(customer_id)
 
 
-@customers_router.post(
+@customers_router.put(
     "/blacklist/update/customer", response_model=BlackListBodyResponse
 )
 @remove_422
@@ -121,9 +123,29 @@ async def get_customer_sales_summary(customer_id: int):
     return await service.get_customer_sales_summary(customer_id)
 
 
-@customers_router.post("/customer/created", response_model=CustomerCRUDResponse)
+@customers_router.post("/customer/", response_model=CustomerCRUDResponse)
 @remove_422
 async def created_customer_crud(body: CreateCustomerBody):
 
     service = Service()
     return await service.post_create_customer(body)
+
+
+@customers_router.get("/customers/update")
+@remove_422
+async def get_all_customer_in_crud(
+    query_params: SearchUpdateQueryParams = Depends(SearchUpdateQueryParams),
+):
+
+    service = Service()
+    return await service.get_all_customer_in_update_view(query_params)
+
+
+@customers_router.put("/customer/")
+@remove_422
+async def update_customer(
+    body: UpdateCustomerBody,
+):
+
+    service = Service()
+    return await service.update_customer(body)

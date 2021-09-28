@@ -2,6 +2,7 @@ from .query_params import (
     SearchCustomersQueryParams,
     BlacklistQueryParams,
     BlacklistQueryParamsSensor,
+    SearchUpdateQueryParams,
 )
 from .responses import (
     SearchCustomersResponse,
@@ -15,4 +16,6 @@ from .responses import (
     BlacklistCustomersResponse,
     BlacklistCustomer,
     BlacklistSensorResponse,
+    SearchUpdateResponse,
+    SearchUpdate,
 )

@@ -13,6 +13,9 @@ from .get import (
     BlacklistCustomersResponse,
     BlacklistCustomer,
     BlacklistSensorResponse,
+    SearchUpdateQueryParams,
+    SearchUpdate,
+    SearchUpdateResponse,
 )
 
 from .post import (
@@ -20,4 +23,5 @@ from .post import (
     BlackListBodyResponse,
     CreateCustomerBody,
     CustomerCRUDResponse,
+    UpdateCustomerBody,
 )

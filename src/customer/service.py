@@ -1,4 +1,5 @@
 from typing import Any
+from src.customer.schemas.get import responses
 from src.customer.schemas.get.responses import customers
 from src.customer.schemas.get.responses import blacklist
 
@@ -24,6 +25,11 @@ from .schemas import (
     BlacklistQueryParamsSensor,
     BlackListBody,
     CreateCustomerBody,
+    SearchUpdateResponse,
+    SearchUpdate,
+    SearchUpdateQueryParams,
+    UpdateCustomerBody,
+    BlackListBodyResponse,
     CustomerCRUDResponse,
 )
 
@@ -44,6 +50,7 @@ class Service(MongoQueries):
         total_customer = await self.total_customer()
 
         if query_params.query == "":
+
             if query_params.column_name:  # ultima validacion especial
                 cursor = self.find_all_customers(
                     query_params.skip,
@@ -54,7 +61,7 @@ class Service(MongoQueries):
                 )
 
                 for customer in await cursor.to_list(length=None):
-
+                    # print(customer)
                     customers.append(SearchCustomers(**customer))
 
         else:
@@ -345,3 +352,46 @@ class Service(MongoQueries):
     async def post_create_customer(self, body: CreateCustomerBody):
 
         return await self.insert_one_customer(body)
+
+    async def get_all_customer_in_update_view(
+        self, query_params: SearchUpdateQueryParams
+    ) -> SearchUpdateResponse:
+        customers = []
+        cursor = None
+        total_customer = await self.total_customer()
+
+        if query_params.query == "":
+
+            cursor = self.find_all_customers_in_update_view(
+                query_params.skip,
+                query_params.limit,
+                query_params.column_sort.replace(" ", ""),
+                query_params.order,
+            )
+
+        else:
+
+            cursor = self.find_filter_customers_in_update_view(
+                query_params.query,
+                query_params.skip,
+                query_params.limit,
+                query_params.column_sort.replace(" ", ""),
+                query_params.order,
+            )
+
+        for customer in await cursor.to_list(length=None):
+            # print(customer)
+            customers.append(SearchUpdate(**customer))
+
+        response = {
+            "customers": customers,
+            "total_items": total_customer,
+            "total_show": len(customers),
+        }
+        return SearchUpdateResponse(**response)
+
+    async def update_customer(self, body) -> CustomerCRUDResponse:
+        response = None
+        response = await self.update_customer_(body)
+
+        return CustomerCRUDResponse(**response)

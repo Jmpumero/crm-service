@@ -1,11 +1,14 @@
 from __future__ import annotations
+from typing import Any
 from config.config import Settings
 
 from fastapi import APIRouter, Depends
 
 from core import keycloack_guard
 from .service import Service
+from .score_card_service import ScoreCardService
 from .schemas import SearchCustomersQueryParams
+from .schemas import PutScoreCard
 from utils.remove_422 import remove_422
 
 from error_handlers.schemas.validation_error import CustomValidationError
@@ -78,3 +81,20 @@ async def get_customer_sales_summary(customer_id: int):
     service = Service()
 
     return await service.get_customer_sales_summary(customer_id)
+
+
+#### Score Card ####
+
+
+@customers_router.get("/customers/{customer_id}/score-card")
+async def get_customer_score_card(customer_id: str):
+    service = ScoreCardService()
+
+    return await service.get_customer_score_card(customer_id)
+
+
+@customers_router.put("/customers/{customer_id}/score-card")
+async def post_customer_score_card(customer_id: str, scoreCard: PutScoreCard):
+    service = ScoreCardService()
+
+    return await service.put_score_card(customer_id, scoreCard)

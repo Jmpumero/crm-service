@@ -9,3 +9,5 @@ from .get import (
     CustomerNotesAndcomments,
     NotesAndCommentsResponse,
 )
+
+from .put import PutScoreCard

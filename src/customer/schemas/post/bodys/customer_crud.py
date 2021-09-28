@@ -69,11 +69,11 @@ class CreateCustomerBody(BaseModel):
     customer_avatar: Optional[str]
     customer_status: bool = True
     blacklist_status: bool = False
+    associated_sensors: Optional[List[str]] = []
 
     country: Optional[str] = None
     city: Optional[str]
     postalCode: Optional[str]
-    associated_sensors: Optional[List[str]]
     blacklist_enable_motive: Optional[List[str]]
     blacklist_disable_motive: Optional[List[str]]
 
@@ -104,6 +104,36 @@ class UpdateCustomerBody(BaseModel):
     # postalCode: Optional[str]
     # country: Optional[str]
     # city: Optional[str]
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+
+class MergeCustomerBody(BaseModel):
+    id_parent_a: str
+    id_parent_b: str
+    name: Optional[str]
+    last_name: Optional[str]
+    full_name: Optional[str]
+    nationality: Optional[List[str]]
+    phone: Optional[List[Phones]]
+    address: Optional[List[str]]
+    postal_address: Optional[str]
+    email: Optional[List[Emails]]
+    documentId: Optional[List[DocumentID]]
+    civil_status: Optional[str]
+    age: Optional[int]
+    birthdate: Optional[str]
+    language: Optional[List[Languages]]
+    social_media: Optional[List[SocialMedia]]
+    customer_avatar: Optional[str]
+    signature: Optional[str]
+    postalCode: Optional[str]
+    country: Optional[str]
+    city: Optional[str]
+    associated_sensors: Optional[List[str]]
 
     class Config:
         allow_population_by_field_name = True

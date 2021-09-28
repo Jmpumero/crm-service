@@ -1,7 +1,8 @@
 from __future__ import annotations
 from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
 from src.customer.schemas.post.bodys.blacklist import BlackListBody
-from src.customer.schemas.get.query_params import BlacklistQueryParamsSensor
+
+# from src.customer.schemas.get.query_params import CustomerQueryParamsSensor
 from config.config import Settings
 
 from fastapi import APIRouter, Depends
@@ -17,6 +18,8 @@ from .schemas import (
     CustomerCRUDResponse,
     SearchUpdateQueryParams,
     UpdateCustomerBody,
+    CustomerQueryParamsSensor,
+    SensorHistoryResponse,
 )
 
 from utils.remove_422 import remove_422
@@ -28,9 +31,8 @@ from fastapi import HTTPException
 
 global_settings = Settings()
 
-customers_router = APIRouter(
-    tags=["Customers"], dependencies=[Depends(keycloack_guard)]
-)
+customers_router = APIRouter(tags=["Customers"])
+# tags=["Customers"], dependencies=[Depends(keycloack_guard)]
 
 
 @customers_router.get("/customers/")
@@ -53,16 +55,17 @@ async def get_customers(
     return await service.get_customers_blacklist(query_params)
 
 
-@customers_router.get("/blacklist/{customer_id}/sensor")
+# enpoint que optiene el historial de un sensor del customer (para las tablas blacklist/crud)
+@customers_router.get("/customer/{customer_id}/history-sensor")
 @remove_422
 async def get_customer_sensor(
     customer_id: str,
-    query_params: BlacklistQueryParamsSensor = Depends(BlacklistQueryParamsSensor),
+    query_params: CustomerQueryParamsSensor = Depends(CustomerQueryParamsSensor),
 ):
     service = Service()
-    # la comentada se usara a futuro cuando se tenga data real...
-    # return await service.get_blacklist_sensor(customer_id, query_params)
-    return service.get_blacklist_sensor(customer_id, query_params)
+
+    response = await service.get_history_sensor(customer_id, query_params)
+    return SensorHistoryResponse(**response)
 
 
 @customers_router.get("/customers/{customer_id}/notes-comments")
@@ -149,3 +152,11 @@ async def update_customer(
 
     service = Service()
     return await service.update_customer(body)
+
+
+@customers_router.delete("/customer/{customer_id}")
+@remove_422
+async def delete_customer(customer_id: str):
+
+    service = Service()
+    return await service.delete_customer(customer_id)

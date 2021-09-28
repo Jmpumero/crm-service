@@ -57,9 +57,3 @@ class BlacklistCustomersResponse(BaseModel):
     customers: List[BlacklistCustomer]
     total_items: int
     total_show: int
-
-
-class BlacklistSensorResponse(BaseModel):
-    sensor_data: List[Any]
-    total_items: int
-    total_show: int

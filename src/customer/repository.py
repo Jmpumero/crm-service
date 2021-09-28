@@ -770,3 +770,33 @@ class MongoQueries(DwConnection):
                 "code": 400,
             }
         return resp
+
+    async def hard_delete_customer(self, customer_id):
+        return await self.clients_customer.find_one_and_delete({"_id": customer_id})
+
+    async def delete_one_customer(self, customer_id):
+
+        r_query = None
+        customer = None
+        customer = await self.clients_customer.find_one({"_id": customer_id})
+
+        if customer:
+            if customer["associated_sensors"]:
+                if len(customer["associated_sensors"]) > 0:
+                    r_query = await self.clients_customer.find_one_and_update(
+                        {"_id": customer_id},
+                        {"$set": {"customer_status": False}},
+                    )
+                else:
+                    r_query = await self.clients_customer.find_one_and_delete(
+                        {"_id": customer_id}
+                    )
+            else:
+                r_query = await self.clients_customer.find_one_and_delete(
+                    {"_id": customer_id}
+                )
+
+        return customer
+
+    async def merge_customers(self, body):
+        pass

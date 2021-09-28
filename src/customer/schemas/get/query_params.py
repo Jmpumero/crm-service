@@ -21,7 +21,7 @@ class BlacklistQueryParams(BaseModel):
     query: str = "disable"
 
 
-class BlacklistQueryParamsSensor(BaseModel):
+class CustomerQueryParamsSensor(BaseModel):
     skip: int = 0
     limit: int = 10
     sensor: str

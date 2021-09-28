@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Any
 from pydantic import BaseModel
 
 from pydantic import BaseModel, Field, validator
@@ -86,5 +86,7 @@ class SearchCustomersResponse(BaseModel):
     total_show: int
 
 
-class testagg(BaseModel):
-    nombre: str
+class SensorHistoryResponse(BaseModel):
+    sensor_data: List[Any]
+    total_items: int
+    total_show: int

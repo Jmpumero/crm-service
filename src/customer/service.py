@@ -19,10 +19,10 @@ from .schemas import (
     CustomerNotesAndcomments,
     NotesAndCommentsResponse,
     BlacklistCustomersResponse,
-    BlacklistSensorResponse,
+    SensorHistoryResponse,
     BlacklistCustomer,
     BlacklistQueryParams,
-    BlacklistQueryParamsSensor,
+    CustomerQueryParamsSensor,
     BlackListBody,
     CreateCustomerBody,
     SearchUpdateResponse,
@@ -31,6 +31,7 @@ from .schemas import (
     UpdateCustomerBody,
     BlackListBodyResponse,
     CustomerCRUDResponse,
+    SensorHistoryResponse,
 )
 
 
@@ -98,7 +99,7 @@ class Service(MongoQueries):
         }
         return SearchCustomersResponse(**finalresponse)
 
-    def get_customer_notes_comments(self, customer_id: int) -> CustomerNotesAndcomments:
+    def get_customer_notes_comments(self, customer_id: str) -> CustomerNotesAndcomments:
 
         comments = []
         data = {
@@ -123,7 +124,7 @@ class Service(MongoQueries):
 
         return NotesAndCommentsResponse(**finalresponse)
 
-    def get_profile_header(self, customer_id: int) -> CustomerProfileHeaderResponse:
+    def get_profile_header(self, customer_id: str) -> CustomerProfileHeaderResponse:
         data = {
             "id_": "djfaklsdf",
             "name": "john",
@@ -148,7 +149,7 @@ class Service(MongoQueries):
 
         return CustomerProfileHeaderResponse(**data)
 
-    def get_profile_details(self, customer_id: int) -> CustomerProfileDetailResponse:
+    def get_profile_details(self, customer_id: str) -> CustomerProfileDetailResponse:
         data = {
             "most_visited_hotel": "random hotel",
             "recency": "?",
@@ -272,8 +273,8 @@ class Service(MongoQueries):
 
         return self.build_blacklist_response(customers, total)
 
-    def get_blacklist_sensor(
-        self, customer_id, query_params: BlacklistQueryParamsSensor
+    async def get_history_sensor(
+        self, customer_id, query_params: CustomerQueryParamsSensor
     ):
 
         data_s = []
@@ -288,8 +289,8 @@ class Service(MongoQueries):
             pass
 
         data_s = [
-            {"fecha": "25-10-2020 15:00", "propiedad": "HPA", "duracion": "30min"},
-            {"fecha": "15-06-2020 16:50", "propiedad": "H Barcelona", "duracion": "1h"},
+            {"date": "25-10-2020 15:00", "property": "HPA", "duration": "30min"},
+            {"date": "15-06-2020 16:50", "property": "H Barcelona", "duration": "1h"},
         ]
 
         response = {
@@ -298,7 +299,7 @@ class Service(MongoQueries):
             "total_show": len(data_s),
         }
 
-        return BlacklistSensorResponse(**response)
+        return response
 
     async def post_blacklist_update_customer(self, body: BlackListBody):
 
@@ -394,4 +395,17 @@ class Service(MongoQueries):
         response = None
         response = await self.update_customer_(body)
 
+        return CustomerCRUDResponse(**response)
+
+    async def delete_customer(self, customer_id) -> CustomerCRUDResponse:
+        response = None
+        response = await self.delete_one_customer(customer_id)
+
+        if response != None:
+            response = {"msg": " Success Customer Update ", "code": 200}
+        else:
+            response = {
+                "msg": " Failed Customer Delete, Customer not found ",
+                "code": 404,
+            }
         return CustomerCRUDResponse(**response)

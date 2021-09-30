@@ -25,4 +25,5 @@ from .post import (
     CreateCustomerBody,
     CustomerCRUDResponse,
     UpdateCustomerBody,
+    MergeCustomerBody,
 )

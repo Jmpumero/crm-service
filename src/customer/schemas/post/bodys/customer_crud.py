@@ -62,20 +62,22 @@ class CreateCustomerBody(BaseModel):
     documentId: List[DocumentID]
     civil_status: str
     age: int
-    birthdate: str
+    birthdate: str = ""  # format '%Y-%m-%d
     language: List[Languages]
     signature: Optional[str]
-    social_media: Optional[List[SocialMedia]]
+    social_media: Optional[List[SocialMedia]] = []
     customer_avatar: Optional[str]
     customer_status: bool = True
     blacklist_status: bool = False
     associated_sensors: Optional[List[str]] = []
-
     country: Optional[str] = None
     city: Optional[str]
     postalCode: Optional[str]
-    blacklist_enable_motive: Optional[List[str]]
-    blacklist_disable_motive: Optional[List[str]]
+    blacklist_enable_motive: Optional[List[str]] = []
+    blacklist_disable_motive: Optional[List[str]] = []
+    create_at: str = ""  # format '%Y-%m-%dT%H:%M:%S', 2021-12-31T23:59:59
+    update_at: str = ""  # format '%Y-%m-%dT%H:%M:%S'
+    delete_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S'
 
     class Config:
         allow_population_by_field_name = True
@@ -101,6 +103,10 @@ class UpdateCustomerBody(BaseModel):
     social_media: Optional[List[SocialMedia]]
     customer_avatar: Optional[str]
     signature: Optional[str]
+    update_at: Optional[str]
+    blacklist_enable_motive: Optional[List[str]] = []
+    blacklist_disable_motive: Optional[List[str]] = []
+
     # postalCode: Optional[str]
     # country: Optional[str]
     # city: Optional[str]
@@ -122,20 +128,21 @@ class MergeCustomerBody(BaseModel):
     address: Optional[List[str]]
     postal_address: Optional[str]
     email: Optional[List[Emails]]
-    documentId: Optional[List[DocumentID]]
+    documentId: List[DocumentID]
     civil_status: Optional[str]
     age: Optional[int]
     birthdate: Optional[str]
     language: Optional[List[Languages]]
-    social_media: Optional[List[SocialMedia]]
-    customer_avatar: Optional[str]
     signature: Optional[str]
-    postalCode: Optional[str]
-    country: Optional[str]
+    social_media: Optional[List[SocialMedia]] = []
+    customer_avatar: Optional[str]
+    customer_status: bool = True
+    blacklist_status: bool = False
+    associated_sensors: Optional[List[str]] = []
+    country: Optional[str] = None
     city: Optional[str]
-    associated_sensors: Optional[List[str]]
-
-    class Config:
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
+    postalCode: Optional[str]
+    blacklist_enable_motive: Optional[List[str]] = []
+    blacklist_disable_motive: Optional[List[str]] = []
+    create_at: str = ""  # format '%Y-%m-%dT%H:%M:%S', 2021-12-31T23:59:59
+    update_at: str = ""  # format '%Y-%m-%dT%H:%M:%S'

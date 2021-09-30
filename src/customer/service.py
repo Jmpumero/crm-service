@@ -409,3 +409,8 @@ class Service(MongoQueries):
                 "code": 404,
             }
         return CustomerCRUDResponse(**response)
+
+    async def merger_customers_with_update(self, body) -> CustomerCRUDResponse:
+        response = None
+        response = await self.merge_customers(body)
+        return CustomerCRUDResponse(**response)

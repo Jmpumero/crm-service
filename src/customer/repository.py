@@ -1,3 +1,9 @@
+from datetime import datetime, timedelta
+from src.customer.schemas.post.bodys.customer_crud import (
+    CreateCustomerBody,
+    MergeCustomerBody,
+)
+from dateutil.relativedelta import relativedelta
 from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
 from starlette.responses import Response
 from src.customer.schemas.post.responses.blacklist import BlackListBodyResponse
@@ -578,7 +584,15 @@ class MongoQueries(DwConnection):
 
         inserted_customer = None
         response = None
-        customer = jsonable_encoder(data)
+        customer = dict(data)
+        today = datetime.utcnow()
+        today = datetime.strftime(today, "%Y-%m-%dT%H:%M:%S")
+        customer["create_at"] = today
+        customer["update_at"] = today
+        customer = CreateCustomerBody(**customer)
+
+        customer = jsonable_encoder(customer)
+
         try:
             inserted_customer = await self.clients_customer.insert_one(customer)
         except:
@@ -704,6 +718,8 @@ class MongoQueries(DwConnection):
 
     def build_query_update(self, data):
         query = {}
+        today = datetime.utcnow()
+        today = datetime.strftime(today, "%Y-%m-%dT%H:%M:%S")
         if data.name != "" and data.name != None:
             query["name"] = data.name
         if data.last_name != "" and data.last_name != None:
@@ -749,7 +765,7 @@ class MongoQueries(DwConnection):
             query["customer_avatar"] = data.customer_avatar
         if data.signature != "" and data.signature != None:
             query["name"] = data.signature
-
+        query["last_update"] = today
         return query
 
     async def update_customer_(self, data):
@@ -771,6 +787,33 @@ class MongoQueries(DwConnection):
             }
         return resp
 
+    async def update_many_customer_in_sensors(
+        self, old_customer_id, new_customer_id, sensors
+    ):
+
+        for i in range(0, len(sensors)):
+
+            if sensors[i] == "sensor_1":
+                await self.pms_collection.update_many(
+                    {"customer_id": old_customer_id},
+                    {"$set": {"customer_id": new_customer_id}},
+                )
+            elif sensors[i] == "sensor_2":
+                await self.cast_collection.update_many(
+                    {"customer_id": old_customer_id},
+                    {"$set": {"customer_id": new_customer_id}},
+                )
+            elif sensors[i] == "sensor_3":
+                await self.hotspot_collection.update_many(
+                    {"customer_id": old_customer_id},
+                    {"$set": {"customer_id": new_customer_id}},
+                )
+            elif sensors[i] == "sensor_4":
+                await self.butler_collection.update_many(
+                    {"customer_id": old_customer_id},
+                    {"$set": {"customer_id": new_customer_id}},
+                )
+
     async def hard_delete_customer(self, customer_id):
         return await self.clients_customer.find_one_and_delete({"_id": customer_id})
 
@@ -780,12 +823,15 @@ class MongoQueries(DwConnection):
         customer = None
         customer = await self.clients_customer.find_one({"_id": customer_id})
 
+        today = datetime.utcnow()
+        today = datetime.strftime(today, "%Y-%m-%dT%H:%M:%S")
+
         if customer:
             if customer["associated_sensors"]:
                 if len(customer["associated_sensors"]) > 0:
                     r_query = await self.clients_customer.find_one_and_update(
                         {"_id": customer_id},
-                        {"$set": {"customer_status": False}},
+                        {"$set": {"customer_status": False, "delete_at": today}},
                     )
                 else:
                     r_query = await self.clients_customer.find_one_and_delete(
@@ -798,5 +844,36 @@ class MongoQueries(DwConnection):
 
         return customer
 
-    async def merge_customers(self, body):
-        pass
+    async def merge_customers(self, data):
+        id_parent_a = data.id_parent_a
+        id_parent_b = data.id_parent_b
+        body = dict(data)
+
+        customer = {
+            k: v for k, v in body.items() if k not in ["id_parent_a", "id_parent_b"]
+        }
+        await self.hard_delete_customer(id_parent_a)
+        await self.hard_delete_customer(id_parent_b)
+        today = datetime.utcnow()
+        today = datetime.strftime(today, "%Y-%m-%dT%H:%M:%S")
+        customer["create_at"] = today
+        customer["update_at"] = today
+        customer = CreateCustomerBody(**customer)
+        customer = jsonable_encoder(customer)
+        new_customer = await self.clients_customer.insert_one(customer)
+
+        await self.update_many_customer_in_sensors(
+            id_parent_a, new_customer.inserted_id, data.associated_sensors
+        )
+        await self.update_many_customer_in_sensors(
+            id_parent_b, new_customer.inserted_id, data.associated_sensors
+        )
+
+        if new_customer.inserted_id != None:
+            resp = {"msg": " Success customers Merge", "code": 200}
+        else:
+            resp = {
+                "msg": " Failed Customers Merge ",
+                "code": 400,
+            }
+        return resp

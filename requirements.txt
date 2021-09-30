@@ -28,3 +28,4 @@ watchgod==0.7
 websockets==9.1
 motor
 pymongo
+python-dateutil==2.8.2

@@ -27,5 +27,7 @@ class ConnectionMongo:
         self.db = self.client.crm
 
         self.clients_customer = self.db.customer
-
-        self.sensors_collection = self.db.sensors
+        self.pms_collection = self.db.pms
+        self.cast_collection = self.db.cast
+        self.hotspot_collection = self.db.hotspot
+        self.butler_collection = self.db.butler

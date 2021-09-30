@@ -20,6 +20,7 @@ from .schemas import (
     UpdateCustomerBody,
     CustomerQueryParamsSensor,
     SensorHistoryResponse,
+    MergeCustomerBody,
 )
 
 from utils.remove_422 import remove_422
@@ -160,3 +161,11 @@ async def delete_customer(customer_id: str):
 
     service = Service()
     return await service.delete_customer(customer_id)
+
+
+@customers_router.post("/customer/merge", response_model=CustomerCRUDResponse)
+@remove_422
+async def created_customer_crud(body: MergeCustomerBody):
+
+    service = Service()
+    return await service.merger_customers_with_update(body)

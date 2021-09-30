@@ -1,3 +1,8 @@
+from typing import Any
+from src.customer.schemas.get.responses import customers
+from src.customer.schemas.get.responses import blacklist
+
+from .repository import MongoQueries
 import json
 
 from .repository import MongoQueries
@@ -12,6 +17,12 @@ from .schemas import (
     SearchCustomers,
     CustomerNotesAndcomments,
     NotesAndCommentsResponse,
+    BlacklistCustomersResponse,
+    BlacklistSensorResponse,
+    BlacklistCustomer,
+    BlacklistQueryParams,
+    BlacklistQueryParamsSensor,
+    BlackListBody,
 )
 
 
@@ -31,18 +42,18 @@ class Service(MongoQueries):
         total_customer = await self.total_customer()
 
         if query_params.query == "":
+            if query_params.column_name:  # ultima validacion especial
+                cursor = self.find_all_customers(
+                    query_params.skip,
+                    query_params.limit,
+                    query_params.column_name.replace(" ", ""),
+                    query_params.order,
+                    query_params.column_order.replace(" ", ""),
+                )
 
-            cursor = self.find_all_customers(
-                query_params.skip,
-                query_params.limit,
-                query_params.column_name.replace(" ", ""),
-                query_params.order,
-                query_params.column_order.replace(" ", ""),
-            )
+                for customer in await cursor.to_list(length=None):
 
-            for customer in await cursor.to_list(length=None):
-
-                customers.append(SearchCustomers(**customer))
+                    customers.append(SearchCustomers(**customer))
 
         else:
             if query_params.column_name.replace(" ", ""):
@@ -63,7 +74,7 @@ class Service(MongoQueries):
                         customers.append(SearchCustomers(**customer))
 
             else:
-                print("F :(")
+                print("Caso no valido error ")
 
         # response = self.build_response(customers, total_customer)
 
@@ -212,6 +223,77 @@ class Service(MongoQueries):
         }
 
         return CustomerMarketingSubscriptions(**data)
+
+    def build_blacklist_response(self, list_items, total):
+
+        response = {
+            "customers": list_items,
+            "total_items": total,
+            "total_show": len(list_items),
+        }
+        return BlacklistCustomersResponse(**response)
+
+    async def get_customers_blacklist(
+        self, query_params: BlacklistQueryParams
+    ) -> list[BlacklistCustomer]:
+        response = None
+        customers = []
+        cursor = None
+        total = 0
+        if query_params.query.replace(" ", "") != "":
+
+            if query_params.query.lower() == "disable":
+                total = await self.total_customer_in_blacklist(True)
+
+            elif query_params.query.lower() == "enable":
+                total = await self.total_customer_in_blacklist(False)
+
+            else:
+                print("valor de query errado")
+
+            cursor = self.blacklist_search(
+                query_params.query, query_params.skip, query_params.limit
+            )
+
+            if cursor != None:
+                for customer in await cursor.to_list(length=None):
+                    customers.append(BlacklistCustomer(**customer))
+        else:
+            print("el query no puede ser vacio")
+
+        return self.build_blacklist_response(customers, total)
+
+    def get_blacklist_sensor(
+        self, customer_id, query_params: BlacklistQueryParamsSensor
+    ):
+
+        data_s = []
+        total = 2
+        if query_params.sensor == "sensor_1":
+            pass
+        elif query_params.sensor == "sensor_2":
+            pass
+        elif query_params.sensor == "sensor_3":
+            pass
+        elif query_params.sensor == "sensor_4":
+            pass
+
+        data_s = [
+            {"fecha": "25-10-2020 15:00", "propiedad": "HPA", "duracion": "30min"},
+            {"fecha": "15-06-2020 16:50", "propiedad": "H Barcelona", "duracion": "1h"},
+        ]
+
+        response = {
+            "sensor_data": data_s,
+            "total_items": total,
+            "total_show": len(data_s),
+        }
+
+        return BlacklistSensorResponse(**response)
+
+    async def post_blacklist_update_customer(self, body: BlackListBody):
+
+        return await self.update_customer_in_blacklist(body)
 
     async def get_customer_sales_summary(self, customer_id):
         customer_in_redis = await main.app.state.redis_repo.get(str(customer_id))

@@ -1,3 +1,8 @@
+from starlette.responses import Response
+from src.customer.schemas.post.responses.blacklist import BlackListBodyResponse
+from fastapi.encoders import jsonable_encoder
+from src.customer.schemas.get.responses import blacklist, customers
+from src.customer.schemas.get import responses
 import pymongo
 from core.connection.connection import ConnectionMongo as DwConnection
 
@@ -13,7 +18,6 @@ from error_handlers.bad_gateway import BadGatewayException
 global_settings = Settings()
 
 search_projections = {
-    "_id": 0,
     "name": 1,
     "last_name": 1,
     "full_name": 1,
@@ -35,6 +39,24 @@ search_projections = {
         ]
     },
     "address": 1,
+}
+
+blacklist_customer_projections = {
+    "name": 1,
+    "last_name": 1,
+    "age": 1,
+    "email": 1,
+    "phone": 1,
+    "address": 1,
+    "documentId": 1,
+    "nationality": 1,
+    "civilStatus": 1,
+    "languages": 1,
+    "birthdate": 1,
+    "associated_sensors": 1,
+    "blacklist_status": 1,
+    "blacklist_enable_motive": 1,
+    "blacklist_disable_motive": 1,
 }
 
 
@@ -489,3 +511,61 @@ class MongoQueries(DwConnection):
                     return response.sort(column_order, pymongo.ASCENDING)
 
         return response
+
+    def blacklist_search(self, type, skip, limit):
+
+        cursor = None
+        if type == "enable":
+            cursor = (
+                self.clients_customer.find(
+                    {"blacklist_status": False}, blacklist_customer_projections
+                )
+                .skip(skip)
+                .limit(limit)
+            )
+        elif type == "disable":
+            cursor = (
+                self.clients_customer.find(
+                    {"blacklist_status": True}, blacklist_customer_projections
+                )
+                .skip(skip)
+                .limit(limit)
+            )
+
+        return cursor
+
+    def total_customer_in_blacklist(self, type):
+        total = self.clients_customer.count_documents({"blacklist_status": type})
+        return total
+
+    async def update_customer_in_blacklist(self, data) -> BlackListBodyResponse:
+        resp = None
+        if data.blacklist_status:
+            resp = await self.clients_customer.find_one_and_update(
+                {"_id": data.id},
+                {
+                    "$set": {
+                        "blacklist_status": data.blacklist_status,
+                        "blacklist_enable_motive": data.motives,
+                    }
+                },
+            )
+        else:
+            resp = await self.clients_customer.find_one_and_update(
+                {"_id": data.id},
+                {
+                    "$set": {
+                        "blacklist_status": data.blacklist_status,
+                        "blacklist_disable_motive": data.motives,
+                    }
+                },
+            )
+
+        if resp != None:
+            response = {"msg": " Success Customer Update ", "code": 200}
+        else:
+            response = {
+                "msg": " Failed Customer Update, Customer not found ",
+                "code": 400,
+            }
+        return BlackListBodyResponse(**response)

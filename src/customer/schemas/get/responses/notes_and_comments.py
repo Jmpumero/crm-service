@@ -21,5 +21,5 @@ class CustomerNotesAndcomments(BaseModel):
 
 class NotesAndCommentsResponse(BaseModel):
     customer_comments: List[CustomerNotesAndcomments]
-
+    #
     total_show: int

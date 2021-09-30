@@ -1,5 +1,8 @@
-from pydantic import BaseModel
+from typing import Optional
+
+from pydantic import BaseModel, Field
 
 
 class PutScoreCard(BaseModel):
-    name: str
+    class Config:
+        extra = "allow"

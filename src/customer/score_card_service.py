@@ -1,72 +1,100 @@
 from typing import Any
+from .repository import MongoQueries
 
 
-class ScoreCardService:
+class ScoreCardService(MongoQueries):
     async def get_customer_score_card(self, customer_id: str):
         data = [
             {
                 "name": "purchase_recurrence",
-                "data": {
-                    "range": {"min": 0, "max": 25},
-                    "score": 25,
-                    "date_range": {"min": "07/08/2021", "max": "27/09/2021"},
-                },
+                "data": [
+                    {
+                        "range": {"min": 0, "max": 25},
+                        "score": 25,
+                    }
+                ],
+                "date_range": {"min": "07/08/2021", "max": "27/09/2021"},
             },
             {
                 "name": "room_reservations",
                 "data": [
-                    {"room_type": {"type": "basic", "score": 25}},
+                    {"name": "room_type", "data": [{"type": "basic", "score": 25}]},
                     {
-                        "contracted_rate_per_night": {
-                            "range": {"min": 0, "max": 25},
-                            "score": 25,
-                        }
-                    },
-                    {"number_of_nights": {"range": {"min": 0, "max": 25}, "score": 25}},
-                    {
-                        "booking_anticipation": {
-                            "range": {"min": 0, "max": 25},
-                            "score": 25,
-                        }
+                        "name": "contracted_rate_per_night",
+                        "data": [
+                            {
+                                "range": {"min": 0, "max": 25},
+                                "score": 25,
+                            }
+                        ],
                     },
                     {
-                        "contracted_cancellation_policy": {
-                            "type": "basic",
-                            "score": 25,
-                        },
+                        "name": "number_of_nights",
+                        "data": [{"range": {"min": 0, "max": 25}, "score": 25}],
                     },
                     {
-                        "meal_plan_contracted": {"type": "basic", "score": 25},
+                        "name": "booking_anticipation",
+                        "data": [
+                            {
+                                "range": {"min": 0, "max": 25},
+                                "score": 25,
+                            }
+                        ],
+                    },
+                    {
+                        "name": "contracted_cancellation_policy",
+                        "data": [
+                            {
+                                "type": "basic",
+                                "score": 25,
+                            },
+                        ],
+                    },
+                    {
+                        "name": "meal_plan_contracted",
+                        "data": [{"type": "basic", "score": 25}],
                     },
                 ],
             },
             {
                 "name": "purchase_of_extra_services",
                 "data": [
-                    {"service_type": {"type": "basic", "socore": 25}},
+                    {"name": "service_type", "data": [{"type": "basic", "socore": 25}]},
                     {
-                        "amount_of_upsellings_contracted": {
-                            "range": {"min": 25, "max": 25},
-                            "score": 25,
-                        }
+                        "name": "amount_of_upsellings_contracted",
+                        "data": [
+                            {
+                                "range": {"min": 25, "max": 25},
+                                "score": 25,
+                            },
+                        ],
                     },
                     {
-                        "number_of_upsellings_purchased": {
-                            "range": {"min": 25, "max": 25},
-                            "score": 25,
-                        },
+                        "name": "number_of_upsellings_purchased",
+                        "data": [
+                            {
+                                "range": {"min": 25, "max": 25},
+                                "score": 25,
+                            }
+                        ],
                     },
                     {
-                        "number_of_cross_sellings_purchased": {
-                            "range": {"min": 25, "max": 25},
-                            "score": 25,
-                        }
+                        "name": "number_of_cross_sellings_purchased",
+                        "data": [
+                            {
+                                "range": {"min": 25, "max": 25},
+                                "score": 25,
+                            }
+                        ],
                     },
                     {
-                        "amount_of_upsellings_purchased": {
-                            "range": {"min": 25, "max": 25},
-                            "score": 25,
-                        }
+                        "name": "amount_of_upsellings_purchased",
+                        "data": [
+                            {
+                                "range": {"min": 25, "max": 25},
+                                "score": 25,
+                            }
+                        ],
                     },
                 ],
             },
@@ -74,29 +102,45 @@ class ScoreCardService:
                 "name": "purchase_in_the_restaurant",
                 "data": [
                     {
-                        "product_category": {"type": "basic", "socore": 25},
-                        "average_restaurant_ticket": {
-                            "range": {
-                                "min": 25,
-                                "max": 25,
-                            },
-                            "score": 25,
-                        },
-                        "time_spent_at_the_table": {
-                            "range": {
-                                "min": 25,
-                                "max": 25,
-                            },
-                            "score": 25,
-                        },
-                        "booking_anticipation": {
-                            "range": {
-                                "min": 25,
-                                "max": 25,
-                            },
-                            "score": 25,
-                        },
-                    }
+                        "name": "product_category",
+                        "data": [{"type": "basic", "socore": 25}],
+                    },
+                    {
+                        "name": "average_restaurant_ticket",
+                        "data": [
+                            {
+                                "range": {
+                                    "min": 25,
+                                    "max": 25,
+                                },
+                                "score": 25,
+                            }
+                        ],
+                    },
+                    {
+                        "name": "time_spent_at_the_table",
+                        "data": [
+                            {
+                                "range": {
+                                    "min": 25,
+                                    "max": 25,
+                                },
+                                "score": 25,
+                            }
+                        ],
+                    },
+                    {
+                        "name": "booking_anticipation",
+                        "data": [
+                            {
+                                "range": {
+                                    "min": 25,
+                                    "max": 25,
+                                },
+                                "score": 25,
+                            }
+                        ],
+                    },
                 ],
             },
         ]
@@ -104,6 +148,8 @@ class ScoreCardService:
         return data
 
     async def put_score_card(self, customer_id: str, data: Any):
-        print(data.dict())
+        # customer = await self.clients_customer.estimated_document_count()
+        # print(customer)
+        # data = data.dict()
 
         return "fino señores"

@@ -1,10 +1,7 @@
 from __future__ import annotations
-<<<<<<< HEAD
-from typing import Any
-=======
+from typing import Any, List
 from src.customer.schemas.post.bodys.blacklist import BlackListBody
 from src.customer.schemas.get.query_params import BlacklistQueryParamsSensor
->>>>>>> fc1c73712ba5e5c4b29598c29742cb8f2a031ccf
 from config.config import Settings
 
 from fastapi import APIRouter, Depends
@@ -43,7 +40,7 @@ async def get_customers(
 
 @customers_router.get("/blacklist/")
 @remove_422
-async def get_customers(
+async def get_customers_(
     query_params: BlacklistQueryParams = Depends(BlacklistQueryParams),
 ):
     service = Service()
@@ -132,7 +129,7 @@ async def get_customer_score_card(customer_id: str):
 
 
 @customers_router.put("/customers/{customer_id}/score-card")
-async def post_customer_score_card(customer_id: str, scoreCard: PutScoreCard):
+async def post_customer_score_card(customer_id: str, score_card: List[PutScoreCard]):
     service = ScoreCardService()
 
-    return await service.put_score_card(customer_id, scoreCard)
+    return await service.put_score_card(customer_id, score_card)

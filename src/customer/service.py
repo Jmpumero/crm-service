@@ -89,7 +89,7 @@ class Service(MongoQueries):
         }
         return SearchCustomersResponse(**finalresponse)
 
-    def get_customer_notes_comments(self, customer_id: int) -> CustomerNotesAndcomments:
+    def get_customer_notes_comments(self, customer_id: str) -> CustomerNotesAndcomments:
 
         comments = []
         data = {
@@ -114,7 +114,7 @@ class Service(MongoQueries):
 
         return NotesAndCommentsResponse(**finalresponse)
 
-    def get_profile_header(self, customer_id: int) -> CustomerProfileHeaderResponse:
+    def get_profile_header(self, customer_id: str) -> CustomerProfileHeaderResponse:
         data = {
             "id_": "djfaklsdf",
             "name": "john",
@@ -139,7 +139,7 @@ class Service(MongoQueries):
 
         return CustomerProfileHeaderResponse(**data)
 
-    def get_profile_details(self, customer_id: int) -> CustomerProfileDetailResponse:
+    def get_profile_details(self, customer_id: str) -> CustomerProfileDetailResponse:
         data = {
             "most_visited_hotel": "random hotel",
             "recency": "?",

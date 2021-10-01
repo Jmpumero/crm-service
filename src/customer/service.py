@@ -2,6 +2,10 @@ from typing import Any
 from src.customer.schemas.get import responses
 from src.customer.schemas.get.responses import customers
 from src.customer.schemas.get.responses import blacklist
+from src.customer.schemas.get.responses.customer_crud import (
+    SearchMerge,
+    SearchMergeResponse,
+)
 
 from .repository import MongoQueries
 import json
@@ -27,7 +31,7 @@ from .schemas import (
     CreateCustomerBody,
     SearchUpdateResponse,
     SearchUpdate,
-    SearchUpdateQueryParams,
+    SearchCrudQueryParams,
     UpdateCustomerBody,
     BlackListBodyResponse,
     CustomerCRUDResponse,
@@ -354,25 +358,29 @@ class Service(MongoQueries):
 
         return await self.insert_one_customer(body)
 
-    async def get_all_customer_in_update_view(
-        self, query_params: SearchUpdateQueryParams
+    async def get_all_customer_with_blacklist(
+        self, query_params: SearchCrudQueryParams
     ) -> SearchUpdateResponse:
         customers = []
+        special_query = {}
+        special_query["customer_status"] = True
+        special_query["blacklist_status"] = False
         cursor = None
         total_customer = await self.total_customer()
 
         if query_params.query == "":
 
-            cursor = self.find_all_customers_in_update_view(
+            cursor = self.find_all_customers_in_crud_view(
                 query_params.skip,
                 query_params.limit,
                 query_params.column_sort.replace(" ", ""),
                 query_params.order,
+                special_query,
             )
 
         else:
 
-            cursor = self.find_filter_customers_in_update_view(
+            cursor = self.find_filter_customers_in_crud_view(
                 query_params.query,
                 query_params.skip,
                 query_params.limit,

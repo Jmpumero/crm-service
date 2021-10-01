@@ -78,6 +78,7 @@ class CreateCustomerBody(BaseModel):
     create_at: str = ""  # format '%Y-%m-%dT%H:%M:%S', 2021-12-31T23:59:59
     update_at: str = ""  # format '%Y-%m-%dT%H:%M:%S'
     delete_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S'
+    general_score: Optional[int]
 
     class Config:
         allow_population_by_field_name = True
@@ -137,12 +138,12 @@ class MergeCustomerBody(BaseModel):
     social_media: Optional[List[SocialMedia]] = []
     customer_avatar: Optional[str]
     customer_status: bool = True
-    blacklist_status: bool = False
+    blacklist_status: Optional[bool]
     associated_sensors: Optional[List[str]] = []
     country: Optional[str] = None
     city: Optional[str]
     postalCode: Optional[str]
     blacklist_enable_motive: Optional[List[str]] = []
     blacklist_disable_motive: Optional[List[str]] = []
-    create_at: str = ""  # format '%Y-%m-%dT%H:%M:%S', 2021-12-31T23:59:59
-    update_at: str = ""  # format '%Y-%m-%dT%H:%M:%S'
+    create_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S', 2021-12-31T23:59:59
+    update_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S'

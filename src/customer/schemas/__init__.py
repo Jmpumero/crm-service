@@ -13,10 +13,12 @@ from .get import (
     BlacklistCustomersResponse,
     BlacklistCustomer,
     SensorHistoryResponse,
-    SearchUpdateQueryParams,
+    SearchCrudQueryParams,
     SearchUpdate,
     SearchUpdateResponse,
     SensorHistoryResponse,
+    SearchMerge,
+    SearchMergeResponse,
 )
 
 from .post import (

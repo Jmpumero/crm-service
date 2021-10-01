@@ -16,11 +16,14 @@ from .schemas import (
     BlacklistQueryParams,
     CreateCustomerBody,
     CustomerCRUDResponse,
-    SearchUpdateQueryParams,
+    SearchCrudQueryParams,
     UpdateCustomerBody,
     CustomerQueryParamsSensor,
     SensorHistoryResponse,
     MergeCustomerBody,
+    SearchUpdate,
+    SearchMergeResponse,
+    SearchMerge,
 )
 
 from utils.remove_422 import remove_422
@@ -138,11 +141,11 @@ async def created_customer_crud(body: CreateCustomerBody):
 @customers_router.get("/customers/update")
 @remove_422
 async def get_all_customer_in_crud(
-    query_params: SearchUpdateQueryParams = Depends(SearchUpdateQueryParams),
+    query_params: SearchCrudQueryParams = Depends(SearchCrudQueryParams),
 ):
 
     service = Service()
-    return await service.get_all_customer_in_update_view(query_params)
+    return await service.get_all_customer_with_blacklist(query_params)
 
 
 @customers_router.put("/customer/")
@@ -169,3 +172,13 @@ async def created_customer_crud(body: MergeCustomerBody):
 
     service = Service()
     return await service.merger_customers_with_update(body)
+
+
+@customers_router.get("/merge")
+@remove_422
+async def get_all_customer_in_crud(
+    query_params: SearchCrudQueryParams = Depends(SearchCrudQueryParams),
+):
+
+    service = Service()
+    return await service.get_all_customer_with_blacklist(query_params)

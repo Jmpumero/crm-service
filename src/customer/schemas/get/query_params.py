@@ -27,7 +27,7 @@ class CustomerQueryParamsSensor(BaseModel):
     sensor: str
 
 
-class SearchUpdateQueryParams(BaseModel):
+class SearchCrudQueryParams(BaseModel):
     query: str = ""
     skip: int = 0
     limit: int = 10

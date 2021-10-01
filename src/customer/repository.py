@@ -66,7 +66,7 @@ blacklist_customer_projections = {
     "blacklist_disable_motive": 1,
 }
 
-search_update_projections = {"blacklist_status": 0}
+# search_update_projections = {"blacklist_status": 0}
 
 
 class MongoQueries(DwConnection):
@@ -616,14 +616,15 @@ class MongoQueries(DwConnection):
 
         return CustomerCRUDResponse(**response)
 
-    def find_all_customers_in_update_view(self, skip, limit, column_sort, order):
+    def find_all_customers_in_crud_view(
+        self, skip, limit, column_sort, order, special_query
+    ):
+
         if column_sort:
             if order.lower() == "desc":
 
                 customers = (
-                    self.clients_customer.find(
-                        {"customer_status": True}, search_update_projections
-                    )
+                    self.clients_customer.find(special_query)
                     .skip(skip)
                     .limit(limit)
                     .sort(column_sort, pymongo.DESCENDING)
@@ -631,26 +632,15 @@ class MongoQueries(DwConnection):
             else:
 
                 customers = (
-                    self.clients_customer.find(
-                        {"customer_status": True}, search_update_projections
-                    )
+                    self.clients_customer.find(special_query)
                     .skip(skip)
                     .limit(limit)
                     .sort(column_sort, pymongo.ASCENDING)
                 )
-        else:
-            customers = (
-                self.clients_customer.find(
-                    {"customer_status": True},
-                    search_projections,
-                )
-                .skip(skip)
-                .limit(limit)
-            )
 
         return customers
 
-    def find_filter_customers_in_update_view(
+    def find_filter_customers_in_crud_view(
         self, query, skip, limit, column_sort, order
     ):
 
@@ -663,6 +653,12 @@ class MongoQueries(DwConnection):
                             "$or": [
                                 {
                                     "full_name": {
+                                        "$regex": f".*{query}.*",
+                                        "$options": "i",
+                                    }
+                                },
+                                {
+                                    "name": {
                                         "$regex": f".*{query}.*",
                                         "$options": "i",
                                     }
@@ -704,7 +700,6 @@ class MongoQueries(DwConnection):
                         },
                     ]
                 },
-                search_update_projections,
             )
             .skip(skip)
             .limit(limit)

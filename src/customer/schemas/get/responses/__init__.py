@@ -8,4 +8,9 @@ from .blacklist import (
     BlacklistCustomer,
     BlacklistCustomersResponse,
 )
-from .update_customer import SearchUpdate, SearchUpdateResponse
+from .customer_crud import (
+    SearchUpdate,
+    SearchUpdateResponse,
+    SearchMerge,
+    SearchMergeResponse,
+)

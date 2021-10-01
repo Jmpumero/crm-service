@@ -15,4 +15,5 @@ from .get import (
     BlacklistSensorResponse,
 )
 
+from .put import PutScoreCard
 from .post import BlackListBody, BlackListBodyResponse

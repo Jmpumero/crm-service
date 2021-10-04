@@ -21,9 +21,15 @@ from .schemas import (
     CustomerQueryParamsSensor,
     SensorHistoryResponse,
     MergeCustomerBody,
+    CreatedGeneralResponse,
     SearchUpdate,
     SearchMergeResponse,
     SearchMerge,
+    CrossSellingQueryParams,
+    CrossSellingResponse,
+    CrossSelling,
+    NewCrossSelling,
+    Product,
 )
 
 from utils.remove_422 import remove_422
@@ -182,3 +188,30 @@ async def get_all_customer_in_crud(
 
     service = Service()
     return await service.get_all_customer_with_blacklist(query_params)
+
+
+@customers_router.get("/cross-selling")
+@remove_422
+async def get_product_and_cross_selling_list(
+    query_params: CrossSellingQueryParams = Depends(CrossSellingQueryParams),
+):
+
+    service = Service()
+    return await service.get_product_and_cross_selling_list(query_params)
+
+
+@customers_router.post("/cross-selling/product", response_model=CreatedGeneralResponse)
+@remove_422
+async def created_cross_selling_product(body: Product):
+
+    service = Service()
+    return await service.post_create_cross_selling_product(body)
+
+
+@customers_router.post("/cross-selling", response_model=CreatedGeneralResponse)
+@remove_422
+async def created_cross_selling(body: NewCrossSelling):
+
+    service = Service()
+
+    return await service.post_create_cross_selling(body)

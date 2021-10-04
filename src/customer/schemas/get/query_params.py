@@ -33,3 +33,11 @@ class SearchCrudQueryParams(BaseModel):
     limit: int = 10
     column_sort: Optional[str] = "name"
     order: Optional[str] = "asc"
+
+
+class CrossSellingQueryParams(BaseModel):
+    skip: int = 0
+    limit: int = 10
+    # query: str = ""
+    # column_sort: Optional[str] = "name"
+    # order: Optional[str] = "asc"

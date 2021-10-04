@@ -35,3 +35,10 @@ class ConnectionMongo:
 
         self.products = self.db.product
         self.cross_selling = self.db.cross_selling
+        self.cross_selling.create_index(
+            [
+                ("principal_product._id", pymongo.ASCENDING),
+                ("secondary_product._id", pymongo.ASCENDING),
+            ],
+            unique=True,
+        )

@@ -32,10 +32,15 @@ from .schemas import (
     SearchUpdateResponse,
     SearchUpdate,
     SearchCrudQueryParams,
-    UpdateCustomerBody,
-    BlackListBodyResponse,
     CustomerCRUDResponse,
     SensorHistoryResponse,
+    UpdateCustomerBody,
+    BlackListBodyResponse,
+    CrossSelling,
+    CrossSellingQueryParams,
+    NewCrossSelling,
+    Product,
+    CreatedGeneralResponse,
 )
 
 
@@ -422,3 +427,13 @@ class Service(MongoQueries):
         response = None
         response = await self.merge_customers(body)
         return CustomerCRUDResponse(**response)
+
+    async def post_create_cross_selling_product(
+        self, body: Product
+    ) -> CreatedGeneralResponse:
+
+        return await self.insert_one_cross_selling_product(body)
+
+    async def post_create_cross_selling(self, body: NewCrossSelling) -> Any:
+
+        return await self.insert_many_cross_selling(body)

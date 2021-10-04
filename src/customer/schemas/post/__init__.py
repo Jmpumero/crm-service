@@ -3,5 +3,12 @@ from .bodys import (
     CreateCustomerBody,
     UpdateCustomerBody,
     MergeCustomerBody,
+    Product,
+    CrossSelling,
+    NewCrossSelling,
 )
-from .responses import BlackListBodyResponse, CustomerCRUDResponse
+from .responses import (
+    BlackListBodyResponse,
+    CustomerCRUDResponse,
+    CreatedGeneralResponse,
+)

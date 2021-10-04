@@ -14,3 +14,4 @@ from .customer_crud import (
     SearchMerge,
     SearchMergeResponse,
 )
+from .cross_selling import Product, CrossSellingResponse

@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
+from src.customer.schemas.get.responses.cross_selling import CrossSellingResponse
 from src.customer.schemas.post.bodys.customer_crud import (
     CreateCustomerBody,
     MergeCustomerBody,
 )
 from dateutil.relativedelta import relativedelta
+from src.customer.schemas.post.responses.cross_selling import CreatedGeneralResponse
 from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
 from starlette.responses import Response
 from src.customer.schemas.post.responses.blacklist import BlackListBodyResponse
@@ -12,7 +14,7 @@ from src.customer.schemas.get.responses import blacklist, customers
 from src.customer.schemas.get import responses
 import pymongo
 from core.connection.connection import ConnectionMongo as DwConnection
-
+from pymongo.errors import DuplicateKeyError
 from config.config import Settings
 
 from typing import Any
@@ -872,3 +874,68 @@ class MongoQueries(DwConnection):
                 "code": 400,
             }
         return resp
+
+    async def insert_one_cross_selling_product(self, data):
+
+        inserted_product = None
+        response = None
+
+        product = jsonable_encoder(data)
+
+        try:
+            inserted_product = await self.products.insert_one(product)
+        except:
+            response = {
+                "msg": " Failed inseting Product ",
+                "code": 400,
+            }
+
+        if inserted_product != None:
+
+            if inserted_product.acknowledged:
+                response = {
+                    "msg": " Success Product created ",
+                    "code": 200,
+                }
+            else:
+                response = {
+                    "msg": " Failed inseting Customer ",
+                    "code": 400,
+                }
+
+        return CreatedGeneralResponse(**response)
+
+    async def insert_many_cross_selling(self, data):
+
+        inserted_product = None
+        response = None
+
+        array_cs = jsonable_encoder(data.news_cross_selling)
+        # print(array_cs)
+        try:
+            inserted_product = await self.cross_selling.insert_many(array_cs)
+            return print(inserted_product.inserted_ids)
+        except DuplicateKeyError as exc:
+            pass
+            # raise exceptions.UniqueConstraintViolationError from exc
+        except Exception as e:
+            return print(e)
+            # print(e)
+            # response = {
+            #     "msg": " Failed inseting Product ",
+            #     "code": 400,
+            # }
+
+        if inserted_product != None:
+
+            if inserted_product.acknowledged:
+                response = {
+                    "msg": " Success Product created ",
+                    "code": 200,
+                }
+            else:
+                response = {
+                    "msg": " Failed inseting Customer ",
+                    "code": 400,
+                }
+        # return response

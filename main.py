@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
+from requests.models import Request, Response
 
 from config import Settings
 from core.redis.pool_connection import init_redis_pool
@@ -15,7 +16,6 @@ global_settings = Settings()
 app = FastAPI()
 
 app.include_router(customers_router)
-# app.include_router(sensor_router)  #para incluir rutas
 
 app.add_exception_handler(RequestValidationError, validation_error.handler)
 app.add_exception_handler(bad_gateway.BadGatewayException, bad_gateway.handler)

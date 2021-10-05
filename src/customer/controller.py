@@ -8,9 +8,13 @@ from fastapi import APIRouter, Depends
 
 from core import keycloack_guard
 from .service import Service
-from .score_card_service import ScoreCardService
-from .schemas import SearchCustomersQueryParams
-from .schemas import PutScoreCard
+from .services import (
+    ScoreCardService,
+    ProfileHeaderService,
+    ProfileDetailService,
+    MarketingSubscriptionsService,
+)
+from .schemas import SearchCustomersQueryParams, PutScoreCard
 
 from .schemas import SearchCustomersQueryParams, BlacklistQueryParams
 from .schemas import BlackListBodyResponse
@@ -71,17 +75,17 @@ async def get_customer_notes_comments(customer_id: str):
 @customers_router.get("/customers/{customer_id}/profile-header")
 @remove_422
 async def get_customer_profile_header(customer_id: str):
-    service = Service()
+    service = ProfileHeaderService()
 
-    return service.get_profile_header(customer_id)
+    return await service.get_profile_header(customer_id)
 
 
 @customers_router.get("/customers/{customer_id}/details")
 @remove_422
 async def get_customer_profile_detail(customer_id: str):
-    service = Service()
+    service = ProfileDetailService()
 
-    return service.get_profile_details(customer_id)
+    return await service.get_profile_details(customer_id)
 
 
 @customers_router.get("/customers/{customer_id}/logbook")
@@ -95,9 +99,9 @@ async def get_customer_logbook(customer_id: str):
 @customers_router.get("/customers/{customer_id}/marketing-subscriptions")
 @remove_422
 async def get_customer_marketing_subscriptions(customer_id: str):
-    service = Service()
+    service = MarketingSubscriptionsService()
 
-    return service.get_customer_marketing_subscriptions(customer_id)
+    return await service.get_customer_marketing_subscriptions(customer_id)
 
 
 @customers_router.post(

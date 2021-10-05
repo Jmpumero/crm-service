@@ -14,7 +14,6 @@ class Device(BaseModel):
 
 
 class Phone(BaseModel):
-    phone_iso_code: str
     phone: str
     is_primary: Optional[bool]
     subscribed: bool

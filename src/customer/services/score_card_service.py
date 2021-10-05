@@ -1,10 +1,8 @@
 from typing import Any
 
-import bson
-
 from src import customer
 
-from .repository import MongoQueries
+from ..repository import MongoQueries
 from fastapi import HTTPException
 
 """
@@ -215,7 +213,7 @@ example model of score:
 class ScoreCardService(MongoQueries):
     async def get_customer_score_card(self, customer_id: str):
         customer = await self.clients_customer.find_one(
-            {"_id": bson.ObjectId(customer_id)}, {"score": 1, "_id": 0}
+            {"_id": customer_id}, {"score": 1, "_id": 0}
         )
 
         return customer if customer else []
@@ -225,7 +223,7 @@ class ScoreCardService(MongoQueries):
             final_list = [elem.dict() for elem in data]
 
             await self.clients_customer.update_one(
-                {"_id": bson.ObjectId(customer_id)}, {"$set": {"score": final_list}}
+                {"_id": customer_id}, {"$set": {"score": final_list}}
             )
 
             return {"message": "update successfully"}

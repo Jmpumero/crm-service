@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, List
+from typing import List
 from src.customer.schemas.post.bodys.blacklist import BlackListBody
 from src.customer.schemas.get.query_params import BlacklistQueryParamsSensor
 from config.config import Settings
@@ -14,7 +14,14 @@ from .services import (
     ProfileDetailService,
     MarketingSubscriptionsService,
 )
-from .schemas import SearchCustomersQueryParams, PutScoreCard
+from .schemas import (
+    SearchCustomersQueryParams,
+    PutScoreCard,
+    CustomerProfileHeaderResponse,
+    CustomerProfileDetailResponse,
+    CustomerLogBook,
+    CustomerMarketingSubscriptions,
+)
 
 from .schemas import SearchCustomersQueryParams, BlacklistQueryParams
 from .schemas import BlackListBodyResponse
@@ -72,7 +79,10 @@ async def get_customer_notes_comments(customer_id: str):
     return service.get_customer_notes_comments(customer_id)
 
 
-@customers_router.get("/customers/{customer_id}/profile-header")
+@customers_router.get(
+    "/customers/{customer_id}/profile-header",
+    response_model=CustomerProfileHeaderResponse,
+)
 @remove_422
 async def get_customer_profile_header(customer_id: str):
     service = ProfileHeaderService()
@@ -80,7 +90,9 @@ async def get_customer_profile_header(customer_id: str):
     return await service.get_profile_header(customer_id)
 
 
-@customers_router.get("/customers/{customer_id}/details")
+@customers_router.get(
+    "/customers/{customer_id}/details", response_model=CustomerProfileDetailResponse
+)
 @remove_422
 async def get_customer_profile_detail(customer_id: str):
     service = ProfileDetailService()
@@ -88,7 +100,9 @@ async def get_customer_profile_detail(customer_id: str):
     return await service.get_profile_details(customer_id)
 
 
-@customers_router.get("/customers/{customer_id}/logbook")
+@customers_router.get(
+    "/customers/{customer_id}/logbook", response_model=CustomerLogBook
+)
 @remove_422
 async def get_customer_logbook(customer_id: str):
     service = Service()
@@ -96,7 +110,10 @@ async def get_customer_logbook(customer_id: str):
     return service.get_customer_logbook(customer_id)
 
 
-@customers_router.get("/customers/{customer_id}/marketing-subscriptions")
+@customers_router.get(
+    "/customers/{customer_id}/marketing-subscriptions",
+    response_model=CustomerMarketingSubscriptions,
+)
 @remove_422
 async def get_customer_marketing_subscriptions(customer_id: str):
     service = MarketingSubscriptionsService()

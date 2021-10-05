@@ -40,7 +40,8 @@ from .schemas import (
     CrossSellingQueryParams,
     NewCrossSelling,
     Product,
-    CreatedGeneralResponse,
+    CrossSellingCreatedResponse,
+    CrossSellingAndProductsResponse,
 )
 
 
@@ -430,10 +431,39 @@ class Service(MongoQueries):
 
     async def post_create_cross_selling_product(
         self, body: Product
-    ) -> CreatedGeneralResponse:
+    ) -> CrossSellingCreatedResponse:
 
         return await self.insert_one_cross_selling_product(body)
 
-    async def post_create_cross_selling(self, body: NewCrossSelling) -> Any:
+    async def post_create_cross_selling(
+        self, body: NewCrossSelling
+    ) -> CrossSellingCreatedResponse:
 
         return await self.insert_many_cross_selling(body)
+
+    async def get_product_and_cross_selling_items(
+        self,
+        query_params,
+    ) -> CrossSellingAndProductsResponse:
+        response = {}
+        total_cross_selling = 0
+        items_cross_selling = []
+        items_product = []
+
+        cursor_cross_selling = await self.get_all_cross_selling(query_params)
+        cursor_products = await self.get_all_products()
+        total_cross_selling = await self.get_total_cross_selling()
+
+        for item in await cursor_cross_selling.to_list(length=None):
+            items_cross_selling.append(CrossSelling(**item))
+
+        for product in await cursor_products.to_list(length=None):
+            items_product.append(Product(**product))
+
+        response = {
+            "products": items_product,
+            "cross_selling": items_cross_selling,
+            "total_cross_selling_items": total_cross_selling,
+            "total_cross_selling_show": len(items_cross_selling),
+        }
+        return CrossSellingAndProductsResponse(**response)

@@ -1,7 +1,6 @@
 from src.customer.schemas.post.bodys.cross_selling import CrossSelling
 from .get import (
     SearchCustomersQueryParams,
-    CrossSellingResponse,
     BlacklistQueryParams,
     CustomerQueryParamsSensor,
     SearchCustomersResponse,
@@ -22,6 +21,9 @@ from .get import (
     SearchMerge,
     SearchMergeResponse,
     CrossSellingQueryParams,
+    CrossSellingAndProductsResponse,
+    CrossSelling,
+    Product,
 )
 
 from .post import (
@@ -31,7 +33,7 @@ from .post import (
     CustomerCRUDResponse,
     UpdateCustomerBody,
     MergeCustomerBody,
-    CreatedGeneralResponse,
+    CrossSellingCreatedResponse,
     NewCrossSelling,
     CrossSelling,
     Product,

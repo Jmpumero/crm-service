@@ -1,11 +1,14 @@
 from datetime import datetime, timedelta
-from src.customer.schemas.get.responses.cross_selling import CrossSellingResponse
+
+# from src.customer.schemas.get.responses.cross_selling import CrossSellingResponse
 from src.customer.schemas.post.bodys.customer_crud import (
     CreateCustomerBody,
     MergeCustomerBody,
 )
 from dateutil.relativedelta import relativedelta
-from src.customer.schemas.post.responses.cross_selling import CreatedGeneralResponse
+from src.customer.schemas.post.responses.cross_selling import (
+    CrossSellingCreatedResponse,
+)
 from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
 from starlette.responses import Response
 from src.customer.schemas.post.responses.blacklist import BlackListBodyResponse
@@ -14,7 +17,7 @@ from src.customer.schemas.get.responses import blacklist, customers
 from src.customer.schemas.get import responses
 import pymongo
 from core.connection.connection import ConnectionMongo as DwConnection
-from pymongo.errors import DuplicateKeyError
+from pymongo.errors import DuplicateKeyError, BulkWriteError
 from config.config import Settings
 
 from typing import Any
@@ -59,7 +62,7 @@ blacklist_customer_projections = {
     "address": 1,
     "documentId": 1,
     "nationality": 1,
-    "civilStatus": 1,
+    "civil_status": 1,
     "languages": 1,
     "birthdate": 1,
     "associated_sensors": 1,
@@ -903,39 +906,61 @@ class MongoQueries(DwConnection):
                     "code": 400,
                 }
 
-        return CreatedGeneralResponse(**response)
+        return CrossSellingCreatedResponse(**response)
 
     async def insert_many_cross_selling(self, data):
 
         inserted_product = None
         response = None
+        duplicate_items = []
 
         array_cs = jsonable_encoder(data.news_cross_selling)
-        # print(array_cs)
+
         try:
             inserted_product = await self.cross_selling.insert_many(array_cs)
-            return print(inserted_product.inserted_ids)
-        except DuplicateKeyError as exc:
-            pass
-            # raise exceptions.UniqueConstraintViolationError from exc
-        except Exception as e:
-            return print(e)
-            # print(e)
-            # response = {
-            #     "msg": " Failed inseting Product ",
-            #     "code": 400,
-            # }
-
-        if inserted_product != None:
 
             if inserted_product.acknowledged:
                 response = {
-                    "msg": " Success Product created ",
+                    "msg": " Success Cross Selling created ",
                     "code": 200,
                 }
-            else:
-                response = {
-                    "msg": " Failed inseting Customer ",
-                    "code": 400,
-                }
-        # return response
+
+        except BulkWriteError as e:  # fallo al intetar escribir por llaves duplicadas
+
+            # print(e.details["writeErrors"])
+            duplicate_items.append(
+                e.details["writeErrors"][0]["op"]["principal_product"]["name"]
+            )
+            duplicate_items.append(
+                e.details["writeErrors"][0]["op"]["secondary_product"]["name"]
+            )
+
+            response = {
+                "msg": " Failed inserting Cross Selling, duplicate keys ",
+                "code": 406,
+                "details": duplicate_items,
+            }
+
+        except Exception as e:
+            response = {
+                "msg": " Failed inserting Cross Selling, desconocido ",
+                "code": 410,
+                "details": e.details["writeErrors"][0],
+            }
+
+        return response
+
+    async def get_all_cross_selling(self, data):
+
+        return (
+            self.cross_selling.find({})
+            .skip(data.skip)
+            .limit(data.limit)
+            .sort("principal_product", pymongo.ASCENDING)
+        )
+
+    async def get_all_products(self):
+        return self.products.find({}).sort("name", pymongo.ASCENDING)
+
+    def get_total_cross_selling(self):
+        return self.cross_selling.count_documents({})

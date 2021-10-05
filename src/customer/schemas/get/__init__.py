@@ -23,5 +23,6 @@ from .responses import (
     SearchMergeResponse,
     SearchMerge,
     Product,
-    CrossSellingResponse,
+    CrossSellingAndProductsResponse,
+    CrossSelling,
 )

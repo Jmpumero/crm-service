@@ -10,5 +10,5 @@ from .bodys import (
 from .responses import (
     BlackListBodyResponse,
     CustomerCRUDResponse,
-    CreatedGeneralResponse,
+    CrossSellingCreatedResponse,
 )

@@ -1,8 +1,9 @@
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from pydantic import BaseModel
 
 
-class CreatedGeneralResponse(BaseModel):
+class CrossSellingCreatedResponse(BaseModel):
     msg: str
     code: int
+    details: Optional[Any]

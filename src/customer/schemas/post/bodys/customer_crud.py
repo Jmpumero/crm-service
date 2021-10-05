@@ -60,10 +60,10 @@ class CreateCustomerBody(BaseModel):
     postal_address: str
     email: List[Emails]
     documentId: List[DocumentID]
-    civil_status: str
+    civil_status: str = ""
     age: int
     birthdate: str = ""  # format '%Y-%m-%d
-    language: List[Languages]
+    languages: List[Languages]
     signature: Optional[str]
     social_media: Optional[List[SocialMedia]] = []
     customer_avatar: Optional[str]

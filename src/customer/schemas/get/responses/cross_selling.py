@@ -17,14 +17,13 @@ class Product(BaseModel):
 
 
 class CrossSelling(BaseModel):
-    id_principal_product: str
-    id_secondary_product: str
-    name_principal_product: str
-    name_secondary_product: str
+    id: str
+    principal_product: Product
+    secondary_product: Product
 
 
-class CrossSellingResponse(BaseModel):
+class CrossSellingAndProductsResponse(BaseModel):
     products: List[Product]
     cross_selling: List[CrossSelling]
-    total_items: int
-    total_show: int
+    total_cross_selling_items: Optional[int]
+    total_cross_selling_show: Optional[int]

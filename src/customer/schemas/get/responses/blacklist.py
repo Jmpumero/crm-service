@@ -25,7 +25,7 @@ class Emails(BaseModel):
 
 
 class Languages(BaseModel):
-    lang: str
+    language: str
     isMain: bool
 
 
@@ -38,8 +38,8 @@ class BlacklistCustomer(BaseModel):
     phone: List[Phones]
     address: List[str]
     documentId: List[DocumentID]
-    nationality: str
-    civilStatus: str
+    nationality: Optional[List[str]]
+    civil_status: str
     languages: List[Languages]
     birthdate: str
     associated_sensors: List[str]

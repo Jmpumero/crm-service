@@ -1,25 +1,23 @@
 from __future__ import annotations
-from typing import Any, List
-from src.customer.schemas.post.bodys.blacklist import BlackListBody
-from src.customer.schemas.get.query_params import BlacklistQueryParamsSensor
-from config.config import Settings
+from typing import List
 
 from fastapi import APIRouter, Depends
 
+from src.customer.schemas.post.bodys.blacklist import BlackListBody
+from src.customer.schemas.get.query_params import BlacklistQueryParamsSensor
+from config.config import Settings
 from core import keycloack_guard
 from .service import Service
 from .score_card_service import ScoreCardService
 from .schemas import SearchCustomersQueryParams
 from .schemas import PutScoreCard
-
 from .schemas import SearchCustomersQueryParams, BlacklistQueryParams
 from .schemas import BlackListBodyResponse
 from utils.remove_422 import remove_422
-
 from error_handlers.schemas.validation_error import CustomValidationError
 from error_handlers.schemas.bad_gateway import BadGatewayError
 from error_handlers.schemas.unauthorized import UnauthorizedError
-from fastapi import HTTPException
+
 
 global_settings = Settings()
 

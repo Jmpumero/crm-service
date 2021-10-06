@@ -1,6 +1,6 @@
 import json
 from enum import Enum
-from typing import List, Optional
+from typing import Any, List, Optional
 from urllib.request import urlopen
 
 from fastapi import Security
@@ -18,10 +18,7 @@ from fastapi.security.base import SecurityBase
 from fastapi.security.utils import get_authorization_scheme_param
 from jose import jwt
 from jose.exceptions import JWTError
-from pydantic import BaseModel
 from starlette.status import HTTP_401_UNAUTHORIZED
-
-from config import Settings
 
 
 class GrantType(str, Enum):
@@ -31,59 +28,24 @@ class GrantType(str, Enum):
     PASSWORD = "password"
 
 
-def fetch_well_known(issuer: str) -> dict:
-    url = f"{issuer}/.well-known/openid-configuration"
-    with urlopen(url) as response:
-        if response.status != 200:
-            raise RuntimeError("fail to fetch well-known")
-        return json.load(response)
-
-
-def fetch_jwks(well_known: dict) -> dict:
-    url = well_known["jwks_uri"]
-    with urlopen(url) as response:
-        if response.status != 200:
-            raise RuntimeError("fail to fetch jwks")
-        return json.load(response)
-
-
-class JwtDecodeOptions(BaseModel):
-    verify_signature: Optional[bool]
-    verify_aud: Optional[bool]
-    verify_iat: Optional[bool]
-    verify_exp: Optional[bool]
-    verify_nbf: Optional[bool]
-    verify_iss: Optional[bool]
-    verify_sub: Optional[bool]
-    verify_jti: Optional[bool]
-    verify_at_hash: Optional[bool]
-    require_aud: Optional[bool]
-    require_iat: Optional[bool]
-    require_exp: Optional[bool]
-    require_nbf: Optional[bool]
-    require_iss: Optional[bool]
-    require_sub: Optional[bool]
-    require_jti: Optional[bool]
-    require_at_hash: Optional[bool]
-    leeway: Optional[int]
-
-
-class OidcResourceServer(SecurityBase):
+class OpenIDConnect(SecurityBase):
     def __init__(
         self,
-        issuer: str,
         *,
-        scheme_name: Optional[str] = "OpenID Connect",
+        url: str,
+        scheme_name: str = "OpenID Connect",
         allowed_grant_types: List[GrantType] = [GrantType.AUTHORIZATION_CODE],
         auto_error: Optional[bool] = True,
-        jwt_decode_options: Optional[JwtDecodeOptions] = None,
+        jwt_decode_options: Optional[dict[str, str]] = None,
+        audience: Optional[str] = "",
     ) -> None:
         self.scheme_name = scheme_name
         self.auto_error = auto_error
         self.jwt_decode_options = jwt_decode_options
+        self.audience = audience
 
-        self.well_known = fetch_well_known(issuer)
-        self.jwks = fetch_jwks(self.well_known)
+        self.well_known = self.get_well_known(url)
+        self.jwks = self.get_jwks(self.well_known)
 
         grant_types = set(self.well_known["grant_types_supported"])
         grant_types = grant_types.intersection(allowed_grant_types)
@@ -110,9 +72,9 @@ class OidcResourceServer(SecurityBase):
 
         self.model = OAuth2Model(flows=flows)
 
-    async def __call__(self, request: Request) -> Optional[str]:
+    async def __call__(self, request: Request) -> Any:
         authorization: str = request.headers.get("Authorization")
-        scheme, param = get_authorization_scheme_param(authorization)
+        scheme, token = get_authorization_scheme_param(authorization)
 
         if not authorization or scheme.lower() != "bearer":
             if self.auto_error:
@@ -126,7 +88,10 @@ class OidcResourceServer(SecurityBase):
 
         try:
             return jwt.decode(
-                param, self.jwks, audience="account", options=self.jwt_decode_options
+                token,
+                self.jwks,
+                audience=self.audience,
+                options=self.jwt_decode_options,
             )
         except JWTError:
             raise HTTPException(
@@ -135,22 +100,37 @@ class OidcResourceServer(SecurityBase):
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
+    def get_well_known(self, issuer: str) -> dict:
+        url = f"{issuer}/.well-known/openid-configuration"
 
-global_settings = Settings()
+        with urlopen(url) as response:
+            if response.status != 200:
+                raise RuntimeError("fail to fetch well-known")
+
+            return json.load(response)
+
+    def get_jwks(self, well_known: dict) -> dict:
+        url = well_known["jwks_uri"]
+
+        with urlopen(url) as response:
+            if response.status != 200:
+                raise RuntimeError("fail to fetch jwks")
+
+            return json.load(response)
+
 
 allowed_grant_types = [
     GrantType.IMPLICIT,
-    # GrantType.AUTHORIZATION_CODE,
-    # GrantType.PASSWORD,
-    # GrantType.CLIENT_CREDENTIALS,
+    GrantType.AUTHORIZATION_CODE,
+    GrantType.PASSWORD,
+    GrantType.CLIENT_CREDENTIALS,
 ]
 
-decode_options = JwtDecodeOptions(verify_aud=False)
-
-auth_scheme = OidcResourceServer(
-    "https://accounts.eroomsuite.com/auth/realms/EroomSuite",
+auth_scheme = OpenIDConnect(
+    url="https://accounts.eroomsuite.com/auth/realms/EroomSuite",
     scheme_name="Keycloak",
     allowed_grant_types=allowed_grant_types,
+    audience="account",
 )
 
 

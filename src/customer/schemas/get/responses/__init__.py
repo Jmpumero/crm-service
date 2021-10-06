@@ -15,3 +15,5 @@ from .customer_crud import (
     SearchMergeResponse,
 )
 from .cross_selling import Product, CrossSellingAndProductsResponse, CrossSelling
+
+from .segmenter import Segmenter, SegmenterResponse

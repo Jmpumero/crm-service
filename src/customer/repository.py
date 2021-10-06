@@ -964,3 +964,32 @@ class MongoQueries(DwConnection):
 
     def get_total_cross_selling(self):
         return self.cross_selling.count_documents({})
+
+    async def find_all_segments(self, params):
+
+        if params.filter == "" and params.tag == "" and params.status == "":
+            print("hola")
+            r = self.semengter.aggregate(
+                [
+                    {
+                        "$lookup": {
+                            "from": "customer",
+                            "localField": "author",
+                            "foreignField": "_id",
+                            "as": "author_details",
+                        }
+                    },
+                    {"$unwind": "$author_details"},
+                    {"$project": {"author": 0, "filter": 0, "applied_filters": 0}},
+                ]
+            )
+        elif params.filter != "" and params.tag == "" and params.status == "":
+            pass
+        elif params.filter == "" and params.tag != "" and params.status == "":
+            pass
+        elif params.filter == "" and params.tag == "" and params.status != "":
+            pass
+        elif params.filter != "" and params.tag != "" and params.status == "":
+            pass
+        elif params.filter != "" and params.tag == "" and params.status == "":
+            pass

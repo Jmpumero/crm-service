@@ -4,6 +4,7 @@ from .query_params import (
     CustomerQueryParamsSensor,
     SearchCrudQueryParams,
     CrossSellingQueryParams,
+    SegmenterQueryParams,
 )
 from .responses import (
     SearchCustomersResponse,
@@ -25,4 +26,6 @@ from .responses import (
     Product,
     CrossSellingAndProductsResponse,
     CrossSelling,
+    SegmenterResponse,
+    Segmenter,
 )

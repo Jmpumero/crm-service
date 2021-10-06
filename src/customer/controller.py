@@ -34,6 +34,9 @@ from .schemas import (
     NewCrossSelling,
     Product,
     CrossSellingAndProductsResponse,
+    Segmenter,
+    SegmenterResponse,
+    SegmenterQueryParams,
 )
 
 from utils.remove_422 import remove_422
@@ -140,6 +143,9 @@ async def get_customer_sales_summary(customer_id: int):
     return await service.get_customer_sales_summary(customer_id)
 
 
+#### CRUD ####
+
+
 @customers_router.post("/customer/", response_model=CustomerCRUDResponse)
 @remove_422
 async def created_customer_crud(body: CreateCustomerBody):
@@ -194,6 +200,9 @@ async def get_all_customer_in_crud(
     return await service.get_all_customer_with_blacklist(query_params)
 
 
+#### Cross Selling ####
+
+
 @customers_router.get("/cross-selling", response_model=CrossSellingAndProductsResponse)
 @remove_422
 async def get_product_and_cross_selling_list(
@@ -238,3 +247,14 @@ async def post_customer_score_card(customer_id: str, score_card: List[PutScoreCa
     service = ScoreCardService()
 
     return await service.put_score_card(customer_id, score_card)
+
+
+#### Segmenter ####
+@customers_router.get("/segmenter", response_model=Any)
+@remove_422
+async def get_segmenter_list(
+    query_params: SegmenterQueryParams = Depends(SegmenterQueryParams),
+):
+
+    service = Service()
+    return await service.get_segmenters(query_params)

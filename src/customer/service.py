@@ -1,11 +1,13 @@
 from typing import Any
 from src.customer.schemas.get import responses
+from src.customer.schemas.get.query_params import SegmenterQueryParams
 from src.customer.schemas.get.responses import customers
 from src.customer.schemas.get.responses import blacklist
 from src.customer.schemas.get.responses.customer_crud import (
     SearchMerge,
     SearchMergeResponse,
 )
+from src.customer.schemas.get.responses.segmenter import Segmenter
 
 from .repository import MongoQueries
 import json
@@ -467,3 +469,11 @@ class Service(MongoQueries):
             "total_cross_selling_show": len(items_cross_selling),
         }
         return CrossSellingAndProductsResponse(**response)
+
+    async def get_segmenters(self, query_params: SegmenterQueryParams) -> Any:
+        customers = []
+
+        segments = None
+        # total_customer = await self.total_customer()
+
+        segments = await self.find_all_segments(query_params)

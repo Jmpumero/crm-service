@@ -41,3 +41,11 @@ class CrossSellingQueryParams(BaseModel):
     # query: str = ""
     # column_sort: Optional[str] = "name"
     # order: Optional[str] = "asc"
+
+
+class SegmenterQueryParams(BaseModel):
+    skip: int = 0
+    limit: int = 10
+    filter: Optional[str] = ""
+    tag: Optional[str] = ""
+    status: Optional[str] = ""

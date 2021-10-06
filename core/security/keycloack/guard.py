@@ -20,6 +20,10 @@ from jose import jwt
 from jose.exceptions import JWTError
 from starlette.status import HTTP_401_UNAUTHORIZED
 
+from config import Settings
+
+global_settings = Settings()
+
 
 class GrantType(str, Enum):
     AUTHORIZATION_CODE = "authorization_code"
@@ -127,7 +131,7 @@ allowed_grant_types = [
 ]
 
 auth_scheme = OpenIDConnect(
-    url="https://accounts.eroomsuite.com/auth/realms/EroomSuite",
+    url=f"{global_settings.keycloack_server_url}/realms/{global_settings.keycloack_realm_name}",
     scheme_name="Keycloak",
     allowed_grant_types=allowed_grant_types,
     audience="account",

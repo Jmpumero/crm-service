@@ -1,4 +1,4 @@
-from .customers import SearchCustomersResponse, SearchCustomers
+from .customers import SearchCustomersResponse, SearchCustomers, SensorHistoryResponse
 from .details import CustomerProfileDetailResponse
 from .logbook import CustomerLogBook
 from .profile_header import CustomerProfileHeaderResponse
@@ -7,5 +7,11 @@ from .notes_and_comments import CustomerNotesAndcomments, NotesAndCommentsRespon
 from .blacklist import (
     BlacklistCustomer,
     BlacklistCustomersResponse,
-    BlacklistSensorResponse,
 )
+from .customer_crud import (
+    SearchUpdate,
+    SearchUpdateResponse,
+    SearchMerge,
+    SearchMergeResponse,
+)
+from .cross_selling import Product, CrossSellingAndProductsResponse, CrossSelling

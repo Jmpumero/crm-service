@@ -1,7 +1,9 @@
 from .query_params import (
     SearchCustomersQueryParams,
     BlacklistQueryParams,
-    BlacklistQueryParamsSensor,
+    CustomerQueryParamsSensor,
+    SearchCrudQueryParams,
+    CrossSellingQueryParams,
 )
 from .responses import (
     SearchCustomersResponse,
@@ -14,5 +16,13 @@ from .responses import (
     NotesAndCommentsResponse,
     BlacklistCustomersResponse,
     BlacklistCustomer,
-    BlacklistSensorResponse,
+    SensorHistoryResponse,
+    SearchUpdateResponse,
+    SearchUpdate,
+    SensorHistoryResponse,
+    SearchMergeResponse,
+    SearchMerge,
+    Product,
+    CrossSellingAndProductsResponse,
+    CrossSelling,
 )

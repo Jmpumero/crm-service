@@ -38,3 +38,4 @@ from .post import (
     CrossSelling,
     Product,
 )
+from .put import PutScoreCard

@@ -1,5 +1,6 @@
 from __future__ import annotations
 from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
+from typing import Any, List
 from src.customer.schemas.post.bodys.blacklist import BlackListBody
 
 # from src.customer.schemas.get.query_params import CustomerQueryParamsSensor
@@ -9,6 +10,9 @@ from fastapi import APIRouter, Depends
 
 from core import keycloack_guard
 from .service import Service
+from .score_card_service import ScoreCardService
+from .schemas import SearchCustomersQueryParams
+from .schemas import PutScoreCard
 
 from .schemas import (
     BlackListBodyResponse,
@@ -57,7 +61,7 @@ async def get_customers(
 
 @customers_router.get("/blacklist/")
 @remove_422
-async def get_customers(
+async def get_customers_(
     query_params: BlacklistQueryParams = Depends(BlacklistQueryParams),
 ):
     service = Service()
@@ -217,3 +221,20 @@ async def created_cross_selling(body: NewCrossSelling):
     service = Service()
 
     return await service.post_create_cross_selling(body)
+
+
+#### Score Card ####
+
+
+@customers_router.get("/customers/{customer_id}/score-card")
+async def get_customer_score_card(customer_id: str):
+    service = ScoreCardService()
+
+    return await service.get_customer_score_card(customer_id)
+
+
+@customers_router.put("/customers/{customer_id}/score-card")
+async def post_customer_score_card(customer_id: str, score_card: List[PutScoreCard]):
+    service = ScoreCardService()
+
+    return await service.put_score_card(customer_id, score_card)

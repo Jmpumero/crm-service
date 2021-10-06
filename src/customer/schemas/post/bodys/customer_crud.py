@@ -80,6 +80,9 @@ class CreateCustomerBody(BaseModel):
     delete_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S'
     general_score: Optional[int]
 
+    class Config:  # valida si falta un campo/campo desconocido
+        extra = "forbid"
+
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
@@ -100,7 +103,7 @@ class UpdateCustomerBody(BaseModel):
     civil_status: Optional[str]
     age: Optional[int]
     birthdate: Optional[str]
-    language: Optional[List[Languages]]
+    languages: Optional[List[Languages]]
     social_media: Optional[List[SocialMedia]]
     customer_avatar: Optional[str]
     signature: Optional[str]
@@ -133,7 +136,7 @@ class MergeCustomerBody(BaseModel):
     civil_status: Optional[str]
     age: Optional[int]
     birthdate: Optional[str]
-    language: Optional[List[Languages]]
+    languages: Optional[List[Languages]]
     signature: Optional[str]
     social_media: Optional[List[SocialMedia]] = []
     customer_avatar: Optional[str]
@@ -147,3 +150,6 @@ class MergeCustomerBody(BaseModel):
     blacklist_disable_motive: Optional[List[str]] = []
     create_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S', 2021-12-31T23:59:59
     update_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S'
+
+    class Config:  # valida si falta un campo/campo desconocido
+        extra = "forbid"

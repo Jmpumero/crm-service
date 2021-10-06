@@ -35,7 +35,7 @@ search_projections = {
     "full_name": 1,
     "age": 1,
     "nationality": 1,
-    "civilStatus": 1,
+    "civil_status": 1,
     "documentId": 1,
     "booking_id": 1,
     "phone": {

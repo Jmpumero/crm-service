@@ -1,25 +1,29 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
+from pydantic.fields import Field
 
 
 class CustomerProfileHeaderResponse(BaseModel):
-    id_: str
-    name: str
-    score: int
+    id_: str = Field(..., alias="_id")
+    name: Optional[str]
+    score: Optional[int]
     languages: List[str]
-    country: str
-    membership: str
-    gender: str
-    age: int
-    next_hotel_stay: str
-    next_stay_date: str
-    last_checkout_date: str
-    last_stay_hotel: str
-    total_stays: int
-    days_since_last_stay: str
-    lifetime_expenses: int
-    total_lodging_expenses: int
-    miscellaneous_expenses: int
-    average_expenditure_per_stay: int
-    average_days_before_booking: int
+    country: Optional[str]
+    membership: Optional[str]
+    gender: Optional[str]
+    age: Optional[int]
+    next_hotel_stay: Optional[str]
+    next_stay_date: Optional[str]
+    last_checkout_date: Optional[str]
+    last_stay_hotel: Optional[str]
+    total_stays: Optional[int]
+    days_since_last_stay: Optional[str]
+    lifetime_expenses: Optional[int]
+    total_lodging_expenses: Optional[int]
+    miscellaneous_expenses: Optional[int]
+    average_expenditure_per_stay: Optional[int]
+    average_days_before_booking: Optional[int]
+
+    class Config:
+        allow_population_by_field_name = True

@@ -28,9 +28,3 @@ class Settings(BaseSettings):
     keycloack_client_id: str = os.getenv("KEYCLOACK_CLIENT_ID", "")
     keycloack_client_secrect_key: str = os.getenv("KEYCLOACK_CLIENT_SECRECT_KEY", "")
     keycloack_realm_name: str = os.getenv("KEYCLOACK_REALM_NAME", "")
-
-
-# @lru_cache()
-# def get_settings() -> BaseSettings:
-#     log.info("Loading config settings from the environment...")
-#     return Settings()

@@ -1,7 +1,8 @@
+from src.customer.schemas.post.bodys.cross_selling import CrossSelling
 from .get import (
     SearchCustomersQueryParams,
     BlacklistQueryParams,
-    BlacklistQueryParamsSensor,
+    CustomerQueryParamsSensor,
     SearchCustomersResponse,
     CustomerProfileHeaderResponse,
     CustomerProfileDetailResponse,
@@ -12,8 +13,29 @@ from .get import (
     NotesAndCommentsResponse,
     BlacklistCustomersResponse,
     BlacklistCustomer,
-    BlacklistSensorResponse,
+    SensorHistoryResponse,
+    SearchCrudQueryParams,
+    SearchUpdate,
+    SearchUpdateResponse,
+    SensorHistoryResponse,
+    SearchMerge,
+    SearchMergeResponse,
+    CrossSellingQueryParams,
+    CrossSellingAndProductsResponse,
+    CrossSelling,
+    Product,
 )
 
+from .post import (
+    BlackListBody,
+    BlackListBodyResponse,
+    CreateCustomerBody,
+    CustomerCRUDResponse,
+    UpdateCustomerBody,
+    MergeCustomerBody,
+    CrossSellingCreatedResponse,
+    NewCrossSelling,
+    CrossSelling,
+    Product,
+)
 from .put import PutScoreCard
-from .post import BlackListBody, BlackListBodyResponse

@@ -28,4 +28,17 @@ class ConnectionMongo:
 
         self.clients_customer = self.db.customer
 
-        self.sensors_collection = self.db.sensors
+        self.pms_collection = self.db.pms
+        self.cast_collection = self.db.cast
+        self.hotspot_collection = self.db.hotspot
+        self.butler_collection = self.db.butler
+
+        self.products = self.db.product
+        self.cross_selling = self.db.cross_selling
+        self.cross_selling.create_index(
+            [
+                ("principal_product._id", pymongo.ASCENDING),
+                ("secondary_product._id", pymongo.ASCENDING),
+            ],
+            unique=True,
+        )

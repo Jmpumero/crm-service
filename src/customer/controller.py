@@ -1,10 +1,15 @@
 from __future__ import annotations
 from typing import List
+from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
+from typing import Any, List
+from src.customer.schemas.post.bodys.blacklist import BlackListBody
+
+from config.config import Settings
 
 from fastapi import APIRouter, Depends
 
 from src.customer.schemas.post.bodys.blacklist import BlackListBody
-from src.customer.schemas.get.query_params import BlacklistQueryParamsSensor
+
 from config.config import Settings
 from core import keycloack_guard
 from .service import Service
@@ -13,6 +18,29 @@ from .schemas import SearchCustomersQueryParams
 from .schemas import PutScoreCard
 from .schemas import SearchCustomersQueryParams, BlacklistQueryParams
 from .schemas import BlackListBodyResponse
+
+from .schemas import (
+    BlackListBodyResponse,
+    SearchCustomersQueryParams,
+    BlacklistQueryParams,
+    CreateCustomerBody,
+    CustomerCRUDResponse,
+    SearchCrudQueryParams,
+    UpdateCustomerBody,
+    CustomerQueryParamsSensor,
+    SensorHistoryResponse,
+    MergeCustomerBody,
+    CrossSellingCreatedResponse,
+    SearchUpdate,
+    SearchMergeResponse,
+    SearchMerge,
+    CrossSellingQueryParams,
+    CrossSelling,
+    NewCrossSelling,
+    Product,
+    CrossSellingAndProductsResponse,
+)
+
 from utils.remove_422 import remove_422
 from error_handlers.schemas.validation_error import CustomValidationError
 from error_handlers.schemas.bad_gateway import BadGatewayError
@@ -24,6 +52,7 @@ global_settings = Settings()
 customers_router = APIRouter(
     tags=["Customers"], dependencies=[Depends(keycloack_guard)]
 )
+# tags=["Customers"], dependencies=[Depends(keycloack_guard)]
 
 
 @customers_router.get("/customers/")
@@ -46,16 +75,17 @@ async def get_customers_(
     return await service.get_customers_blacklist(query_params)
 
 
-@customers_router.get("/blacklist/{customer_id}/sensor")
+# enpoint que optiene el historial de un sensor del customer (para las tablas blacklist/crud)
+@customers_router.get("/customer/{customer_id}/history-sensor")
 @remove_422
 async def get_customer_sensor(
     customer_id: str,
-    query_params: BlacklistQueryParamsSensor = Depends(BlacklistQueryParamsSensor),
+    query_params: CustomerQueryParamsSensor = Depends(CustomerQueryParamsSensor),
 ):
     service = Service()
-    # la comentada se usara a futuro cuando se tenga data real...
-    # return await service.get_blacklist_sensor(customer_id, query_params)
-    return service.get_blacklist_sensor(customer_id, query_params)
+
+    response = await service.get_history_sensor(customer_id, query_params)
+    return SensorHistoryResponse(**response)
 
 
 @customers_router.get("/customers/{customer_id}/notes-comments")
@@ -98,7 +128,7 @@ async def get_customer_marketing_subscriptions(customer_id: str):
     return service.get_customer_marketing_subscriptions(customer_id)
 
 
-@customers_router.post(
+@customers_router.put(
     "/blacklist/update/customer", response_model=BlackListBodyResponse
 )
 @remove_422
@@ -114,6 +144,89 @@ async def get_customer_sales_summary(customer_id: int):
     service = Service()
 
     return await service.get_customer_sales_summary(customer_id)
+
+
+@customers_router.post("/customer/", response_model=CustomerCRUDResponse)
+@remove_422
+async def created_customer_crud(body: CreateCustomerBody):
+
+    service = Service()
+    return await service.post_create_customer(body)
+
+
+@customers_router.get("/customers/update")
+@remove_422
+async def get_all_customer_in_crud(
+    query_params: SearchCrudQueryParams = Depends(SearchCrudQueryParams),
+):
+
+    service = Service()
+    return await service.get_all_customer_with_blacklist(query_params)
+
+
+@customers_router.put("/customer/")
+@remove_422
+async def update_customer(
+    body: UpdateCustomerBody,
+):
+
+    service = Service()
+    return await service.update_customer(body)
+
+
+@customers_router.delete("/customer/{customer_id}")
+@remove_422
+async def delete_customer(customer_id: str):
+
+    service = Service()
+    return await service.delete_customer(customer_id)
+
+
+@customers_router.post("/customer/merge", response_model=CustomerCRUDResponse)
+@remove_422
+async def created_customer_crud(body: MergeCustomerBody):
+
+    service = Service()
+    return await service.merger_customers_with_update(body)
+
+
+@customers_router.get("/merge")
+@remove_422
+async def get_all_customer_in_crud(
+    query_params: SearchCrudQueryParams = Depends(SearchCrudQueryParams),
+):
+
+    service = Service()
+    return await service.get_all_customer_with_blacklist(query_params)
+
+
+@customers_router.get("/cross-selling", response_model=CrossSellingAndProductsResponse)
+@remove_422
+async def get_product_and_cross_selling_list(
+    query_params: CrossSellingQueryParams = Depends(CrossSellingQueryParams),
+):
+
+    service = Service()
+    return await service.get_product_and_cross_selling_items(query_params)
+
+
+@customers_router.post(
+    "/cross-selling/product", response_model=CrossSellingCreatedResponse
+)
+@remove_422
+async def created_cross_selling_product(body: Product):
+
+    service = Service()
+    return await service.post_create_cross_selling_product(body)
+
+
+@customers_router.post("/cross-selling", response_model=CrossSellingCreatedResponse)
+@remove_422
+async def created_cross_selling(body: NewCrossSelling):
+
+    service = Service()
+
+    return await service.post_create_cross_selling(body)
 
 
 #### Score Card ####

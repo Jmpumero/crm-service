@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Any
 from pydantic import BaseModel
 
 from pydantic import BaseModel, Field, validator
@@ -52,7 +52,7 @@ class Emails(BaseModel):
 
 class Languages(BaseModel):
     language: str
-    is_main: bool
+    isMain: bool
 
 
 class SearchCustomers(BaseModel):
@@ -62,12 +62,12 @@ class SearchCustomers(BaseModel):
     last_name: str
     age: int
     email: Emails
-    phone: Phones
+    phone: Optional[Phones]
     address: List[str]
     documentId: List[DocumentID]
-    nationality: str
-    civilStatus: str
-    booking_id: str
+    nationality: Optional[List[str]]
+    civilStatus: Optional[str]
+    booking_id: Optional[str] = "1234"
 
     class Config:
         allow_population_by_field_name = True
@@ -86,5 +86,7 @@ class SearchCustomersResponse(BaseModel):
     total_show: int
 
 
-class testagg(BaseModel):
-    nombre: str
+class SensorHistoryResponse(BaseModel):
+    sensor_data: List[Any]
+    total_items: int
+    total_show: int

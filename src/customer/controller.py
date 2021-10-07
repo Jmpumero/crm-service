@@ -1,18 +1,23 @@
 from __future__ import annotations
+from typing import List
 from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
 from typing import Any, List
 from src.customer.schemas.post.bodys.blacklist import BlackListBody
 
-# from src.customer.schemas.get.query_params import CustomerQueryParamsSensor
 from config.config import Settings
 
 from fastapi import APIRouter, Depends
 
+from src.customer.schemas.post.bodys.blacklist import BlackListBody
+
+from config.config import Settings
 from core import keycloack_guard
 from .service import Service
 from .score_card_service import ScoreCardService
 from .schemas import SearchCustomersQueryParams
 from .schemas import PutScoreCard
+from .schemas import SearchCustomersQueryParams, BlacklistQueryParams
+from .schemas import BlackListBodyResponse
 
 from .schemas import (
     BlackListBodyResponse,
@@ -37,15 +42,16 @@ from .schemas import (
 )
 
 from utils.remove_422 import remove_422
-
 from error_handlers.schemas.validation_error import CustomValidationError
 from error_handlers.schemas.bad_gateway import BadGatewayError
 from error_handlers.schemas.unauthorized import UnauthorizedError
-from fastapi import HTTPException
+
 
 global_settings = Settings()
 
-customers_router = APIRouter(tags=["Customers"])
+customers_router = APIRouter(
+    tags=["Customers"], dependencies=[Depends(keycloack_guard)]
+)
 # tags=["Customers"], dependencies=[Depends(keycloack_guard)]
 
 

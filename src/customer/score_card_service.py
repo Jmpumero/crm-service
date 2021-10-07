@@ -2,8 +2,6 @@ from typing import Any
 
 import bson
 
-from src import customer
-
 from .repository import MongoQueries
 from fastapi import HTTPException
 

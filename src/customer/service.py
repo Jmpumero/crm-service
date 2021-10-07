@@ -1,6 +1,11 @@
 from typing import Any
+from src.customer.schemas.get import responses
 from src.customer.schemas.get.responses import customers
 from src.customer.schemas.get.responses import blacklist
+from src.customer.schemas.get.responses.customer_crud import (
+    SearchMerge,
+    SearchMergeResponse,
+)
 
 from .repository import MongoQueries
 import json
@@ -15,11 +20,25 @@ from .schemas import (
     CustomerNotesAndcomments,
     NotesAndCommentsResponse,
     BlacklistCustomersResponse,
-    BlacklistSensorResponse,
+    SensorHistoryResponse,
     BlacklistCustomer,
     BlacklistQueryParams,
-    BlacklistQueryParamsSensor,
+    CustomerQueryParamsSensor,
     BlackListBody,
+    CreateCustomerBody,
+    SearchUpdateResponse,
+    SearchUpdate,
+    SearchCrudQueryParams,
+    CustomerCRUDResponse,
+    SensorHistoryResponse,
+    UpdateCustomerBody,
+    BlackListBodyResponse,
+    CrossSelling,
+    CrossSellingQueryParams,
+    NewCrossSelling,
+    Product,
+    CrossSellingCreatedResponse,
+    CrossSellingAndProductsResponse,
 )
 
 
@@ -39,6 +58,7 @@ class Service(MongoQueries):
         total_customer = await self.total_customer()
 
         if query_params.query == "":
+
             if query_params.column_name:  # ultima validacion especial
                 cursor = self.find_all_customers(
                     query_params.skip,
@@ -49,7 +69,7 @@ class Service(MongoQueries):
                 )
 
                 for customer in await cursor.to_list(length=None):
-
+                    # print(customer)
                     customers.append(SearchCustomers(**customer))
 
         else:
@@ -177,8 +197,8 @@ class Service(MongoQueries):
 
         return self.build_blacklist_response(customers, total)
 
-    def get_blacklist_sensor(
-        self, customer_id, query_params: BlacklistQueryParamsSensor
+    async def get_history_sensor(
+        self, customer_id, query_params: CustomerQueryParamsSensor
     ):
 
         data_s = []
@@ -193,8 +213,8 @@ class Service(MongoQueries):
             pass
 
         data_s = [
-            {"fecha": "25-10-2020 15:00", "propiedad": "HPA", "duracion": "30min"},
-            {"fecha": "15-06-2020 16:50", "propiedad": "H Barcelona", "duracion": "1h"},
+            {"date": "25-10-2020 15:00", "property": "HPA", "duration": "30min"},
+            {"date": "15-06-2020 16:50", "property": "H Barcelona", "duration": "1h"},
         ]
 
         response = {
@@ -203,7 +223,7 @@ class Service(MongoQueries):
             "total_show": len(data_s),
         }
 
-        return BlacklistSensorResponse(**response)
+        return response
 
     async def post_blacklist_update_customer(self, body: BlackListBody):
 
@@ -253,3 +273,111 @@ class Service(MongoQueries):
             return data
 
         return json.loads(customer_in_redis)
+
+    async def post_create_customer(self, body: CreateCustomerBody):
+
+        return await self.insert_one_customer(body)
+
+    async def get_all_customer_with_blacklist(
+        self, query_params: SearchCrudQueryParams
+    ) -> SearchUpdateResponse:
+        customers = []
+        special_query = {}
+        special_query["customer_status"] = True
+        special_query["blacklist_status"] = False
+        cursor = None
+        total_customer = await self.total_customer()
+
+        if query_params.query == "":
+
+            cursor = self.find_all_customers_in_crud_view(
+                query_params.skip,
+                query_params.limit,
+                query_params.column_sort.replace(" ", ""),
+                query_params.order,
+                special_query,
+            )
+
+        else:
+
+            cursor = self.find_filter_customers_in_crud_view(
+                query_params.query,
+                query_params.skip,
+                query_params.limit,
+                query_params.column_sort.replace(" ", ""),
+                query_params.order,
+            )
+
+        for customer in await cursor.to_list(length=None):
+            # print(customer)
+            customers.append(SearchUpdate(**customer))
+
+        response = {
+            "customers": customers,
+            "total_items": total_customer,
+            "total_show": len(customers),
+        }
+        return SearchUpdateResponse(**response)
+
+    async def update_customer(self, body) -> CustomerCRUDResponse:
+        response = None
+        response = await self.update_customer_(body)
+
+        return CustomerCRUDResponse(**response)
+
+    async def delete_customer(self, customer_id) -> CustomerCRUDResponse:
+        response = None
+        response = await self.delete_one_customer(customer_id)
+
+        if response != None:
+            response = {"msg": " Success Customer Update ", "code": 200}
+        else:
+            response = {
+                "msg": " Failed Customer Delete, Customer not found ",
+                "code": 404,
+            }
+        return CustomerCRUDResponse(**response)
+
+    async def merger_customers_with_update(self, body) -> CustomerCRUDResponse:
+        response = None
+        response = await self.merge_customers(body)
+        return CustomerCRUDResponse(**response)
+
+    async def post_create_cross_selling_product(
+        self, body: Product
+    ) -> CrossSellingCreatedResponse:
+
+        return await self.insert_one_cross_selling_product(body)
+
+    async def post_create_cross_selling(
+        self, body: NewCrossSelling
+    ) -> CrossSellingCreatedResponse:
+
+        return await self.insert_many_cross_selling(body)
+
+    async def get_product_and_cross_selling_items(
+        self,
+        query_params,
+    ) -> CrossSellingAndProductsResponse:
+        response = {}
+        total_cross_selling = 0
+        items_cross_selling = []
+        items_product = []
+
+        cursor_cross_selling = await self.get_all_cross_selling(query_params)
+        cursor_products = await self.get_all_products()
+        total_cross_selling = await self.get_total_cross_selling()
+
+        for item in await cursor_cross_selling.to_list(length=None):
+            items_cross_selling.append(CrossSelling(**item))
+
+        for product in await cursor_products.to_list(length=None):
+            items_product.append(Product(**product))
+
+        response = {
+            "products": items_product,
+            "cross_selling": items_cross_selling,
+            "total_cross_selling_items": total_cross_selling,
+            "total_cross_selling_show": len(items_cross_selling),
+        }
+        return CrossSellingAndProductsResponse(**response)

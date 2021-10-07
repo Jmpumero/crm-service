@@ -1,2 +1,14 @@
-from .bodys import BlackListBody
-from .responses import BlackListBodyResponse
+from .bodys import (
+    BlackListBody,
+    CreateCustomerBody,
+    UpdateCustomerBody,
+    MergeCustomerBody,
+    Product,
+    CrossSelling,
+    NewCrossSelling,
+)
+from .responses import (
+    BlackListBodyResponse,
+    CustomerCRUDResponse,
+    CrossSellingCreatedResponse,
+)

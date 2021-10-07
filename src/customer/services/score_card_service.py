@@ -1,8 +1,14 @@
 from typing import Any
 
+<<<<<<< HEAD:src/customer/services/score_card_service.py
 from src import customer
 
 from ..repository import MongoQueries
+=======
+import bson
+
+from .repository import MongoQueries
+>>>>>>> da214dad9580727578cb40193277f5930bd99998:src/customer/score_card_service.py
 from fastapi import HTTPException
 
 """

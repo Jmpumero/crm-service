@@ -1,4 +1,5 @@
 from typing import Any
+from src.customer.schemas import get
 from src.customer.schemas.get import responses
 from src.customer.schemas.get.query_params import SegmenterQueryParams
 from src.customer.schemas.get.responses import customers
@@ -44,6 +45,7 @@ from .schemas import (
     Product,
     CrossSellingCreatedResponse,
     CrossSellingAndProductsResponse,
+    Segmenter,
 )
 
 
@@ -476,4 +478,6 @@ class Service(MongoQueries):
         segments = None
         # total_customer = await self.total_customer()
 
-        segments = await self.find_all_segments(query_params)
+        segments = await self.find_segments(query_params)
+        print(await self.get_all_author_in_segments())
+        return segments

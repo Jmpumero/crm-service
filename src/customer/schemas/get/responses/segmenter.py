@@ -32,3 +32,28 @@ class SegmenterResponse(BaseModel):
     tag_list: List[str]
     total_items: int
     total_show: int
+
+
+class SegmenterTable(BaseModel):
+    class Config:
+        extra = "allow"
+
+    # id: str = Field(..., alias="_id")
+    # name: str
+
+    # filter: Optional[str]
+    # status: str
+    # updated_at: str
+    # created_at: str
+    # deleted_at: str
+    # clients: int
+    # tags: List[str]
+    # date_from: Optional[str]
+    # date_to: Optional[str]
+    # applied_filters: Any
+    # author_details: Any
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}

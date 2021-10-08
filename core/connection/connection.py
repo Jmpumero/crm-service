@@ -43,4 +43,4 @@ class ConnectionMongo:
             unique=True,
         )
 
-        self.semengter = self.db.segmenter
+        self.segments = self.db.segmenter

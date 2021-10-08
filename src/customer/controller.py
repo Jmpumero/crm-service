@@ -156,7 +156,7 @@ async def created_customer_crud(body: CreateCustomerBody):
 
 @customers_router.get("/customers/update")
 @remove_422
-async def get_all_customer_in_crud(
+async def get_all_customer_in_crud_update(
     query_params: SearchCrudQueryParams = Depends(SearchCrudQueryParams),
 ):
 
@@ -184,7 +184,7 @@ async def delete_customer(customer_id: str):
 
 @customers_router.post("/customer/merge", response_model=CustomerCRUDResponse)
 @remove_422
-async def created_customer_crud(body: MergeCustomerBody):
+async def created_customer_crud_(body: MergeCustomerBody):
 
     service = Service()
     return await service.merger_customers_with_update(body)
@@ -192,7 +192,7 @@ async def created_customer_crud(body: MergeCustomerBody):
 
 @customers_router.get("/merge")
 @remove_422
-async def get_all_customer_in_crud(
+async def get_all_customer_in_crud_merge(
     query_params: SearchCrudQueryParams = Depends(SearchCrudQueryParams),
 ):
 

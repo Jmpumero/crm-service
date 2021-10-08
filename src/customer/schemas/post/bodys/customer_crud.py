@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Any
 from fastapi.openapi.models import Link
 
 from pydantic import BaseModel, Field
@@ -79,6 +79,7 @@ class CreateCustomerBody(BaseModel):
     update_at: str = ""  # format '%Y-%m-%dT%H:%M:%S'
     delete_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S'
     general_score: Optional[int]
+    stenant: Optional[Any]
 
     class Config:  # valida si falta un campo/campo desconocido
         extra = "forbid"
@@ -110,6 +111,7 @@ class UpdateCustomerBody(BaseModel):
     update_at: Optional[str]
     blacklist_enable_motive: Optional[List[str]] = []
     blacklist_disable_motive: Optional[List[str]] = []
+    stenant: Optional[Any]
 
     # postalCode: Optional[str]
     # country: Optional[str]
@@ -150,6 +152,7 @@ class MergeCustomerBody(BaseModel):
     blacklist_disable_motive: Optional[List[str]] = []
     create_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S', 2021-12-31T23:59:59
     update_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S'
+    stenant: Optional[Any]
 
     class Config:  # valida si falta un campo/campo desconocido
         extra = "forbid"

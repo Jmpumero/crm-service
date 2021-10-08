@@ -28,4 +28,5 @@ from .responses import (
     CrossSelling,
     SegmenterResponse,
     Segmenter,
+    SegmenterTable,
 )

@@ -46,6 +46,8 @@ class CrossSellingQueryParams(BaseModel):
 class SegmenterQueryParams(BaseModel):
     skip: int = 0
     limit: int = 10
-    filter: Optional[str] = ""
+    author: Optional[str] = ""
     tag: Optional[str] = ""
-    status: Optional[str] = ""
+    column_sort: Optional[str] = "name"
+    order_sort: Optional[str] = "asc"
+    # status: Optional[str] = ""

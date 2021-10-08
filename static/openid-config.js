@@ -47,7 +47,7 @@ const addClientSecret = async () => {
 }
 
 const setClientSecretAndClientId = async (event) => {
-    addClientId()
+    addClientId();
     addClientSecret();
 }
 

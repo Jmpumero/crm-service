@@ -268,7 +268,7 @@ async def get_customer_score_card(customer_id: str):
 
 @customers_router.put("/customers/{customer_id}/score-card")
 @remove_422
-async def post_customer_score_card(customer_id: str, score_card: List[PutScoreCard]):
+async def post_customer_score_card(customer_id: str, score_card: PutScoreCard):
     service = ScoreCardService()
 
     return await service.put_score_card(customer_id, score_card)

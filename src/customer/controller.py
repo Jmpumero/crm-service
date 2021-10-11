@@ -37,6 +37,7 @@ from .schemas import (
     Segmenter,
     SegmenterResponse,
     SegmenterQueryParams,
+    AuthorsInSegements,
 )
 
 from utils.remove_422 import remove_422
@@ -258,3 +259,11 @@ async def get_segmenter_list(
 
     service = Service()
     return await service.get_segmenters(query_params)
+
+
+@customers_router.get("/segmenter/authors", response_model=AuthorsInSegements)
+@remove_422
+async def get_author_segments_list():
+
+    service = Service()
+    return await service.get_author_segments_list()

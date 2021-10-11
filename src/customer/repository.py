@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Any, List
-
+from collections import OrderedDict
 import pymongo
 from config.config import Settings
 from core.connection.connection import ConnectionMongo as DwConnection
@@ -9,9 +9,10 @@ from error_handlers.bad_gateway import BadGatewayException
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from pymongo.errors import BulkWriteError, DuplicateKeyError, OperationFailure
-from src.customer.schemas.get import responses
+from src.customer.schemas.get import query_params, responses
 from src.customer.schemas.get.responses import blacklist, customers, segmenter
 from src.customer.schemas.get.responses.segmenter import (
+    AuthorsInSegements,
     Segmenter,
     SegmenterResponse,
     SegmenterTable,
@@ -81,9 +82,10 @@ class MongoQueries(DwConnection):
     # Metodos de Queries para el servicio de Clientes
 
     def total_customer(self):
-        # customers = self.clients_customer.estimated_document_count()
-        customers = self.clients_customer.count_documents({"customer_status": True})
-        return customers
+        total_customers = self.clients_customer.count_documents(
+            {"customer_status": True}
+        )
+        return total_customers
 
     def find_one_customer(self, client_id):
         customer = self.clients_customer.find_one({"id": client_id}, search_projections)
@@ -434,57 +436,6 @@ class MongoQueries(DwConnection):
             item = item_search.replace("-", "")
             return self.search_phone_local(constrain, item, "local_format", skip, limit)
 
-    def test_agr(
-        self, constrain, item_search, column, skip, limit
-    ):  # en desarrollo... pruebas con agregaciones
-        return self.clients_customer.aggregate(
-            [
-                {
-                    "$match": {
-                        "email": {
-                            "$elemMatch": {
-                                "email": "ablanca@jacidi.com",
-                                "isMain": True,
-                            }
-                        }
-                    }
-                },
-                {
-                    "$project": {
-                        "_id": 0,
-                        "id": 1,
-                        "full_name": 1,
-                        "age": 1,
-                        "nationality": 1,
-                        "civilStatus": 1,
-                        "documentId": 1,
-                        "phone": {
-                            "$arrayElemAt": [
-                                "$phone",
-                                {"$indexOfArray": ["$phone.isMain", True]},
-                            ]
-                        },
-                        "email": {
-                            "$arrayElemAt": [
-                                "$email",
-                                {"$indexOfArray": ["$email.isMain", True]},
-                            ]
-                        },
-                        "address": 1,
-                    }
-                },
-                {"$sort": {"email": 1}},
-                {
-                    "$project": {
-                        "email.isMain": 0,
-                        "phone.isMain": 0,
-                        "phone.areaCode": 0,
-                        "phone.countryCode": 0,
-                    }
-                },
-            ]
-        )
-
     def filter_search_customers(
         self, constrain, item_search, column, skip, limit, order, column_order
     ):
@@ -552,7 +503,9 @@ class MongoQueries(DwConnection):
         return cursor
 
     def total_customer_in_blacklist(self, type):
-        total = self.clients_customer.count_documents({"blacklist_status": type})
+        total = self.clients_customer.count_documents(
+            {"customer_status": True, "blacklist_status": type}
+        )
         return total
 
     async def update_customer_in_blacklist(self, data) -> BlackListBodyResponse:
@@ -970,8 +923,22 @@ class MongoQueries(DwConnection):
     async def find_segments(self, params) -> Any:
         r = None
         order = 1
+        column_target = "name"
+
         if params.order_sort == "desc":
             order = -1
+        if params.column_sort.lower() == "":
+            column_target = "name"
+        elif params.column_sort.lower() == "author":
+            column_target = "author_details.name"
+        elif params.column_sort.lower() == "ultima actualizacion":
+            column_target = "update_at"
+        elif params.column_sort.lower() == "estado":
+            column_target = "status"
+        elif params.column_sort.lower() == "fecha de creacion":
+            column_target = "created_at"
+        elif params.column_sort.lower() == "clientes":
+            column_target = "clients"
 
         if params.author == "" and params.tag == "":
 
@@ -1038,6 +1005,12 @@ class MongoQueries(DwConnection):
                                 },
                                 {"$skip": params.skip},
                                 {"$limit": params.limit},
+                                {
+                                    "$sort": {
+                                        f"{column_target}": order,
+                                        "_id": 1,
+                                    }
+                                },
                             ],
                         }
                     },
@@ -1131,7 +1104,7 @@ class MongoQueries(DwConnection):
                                     {"$limit": params.limit},
                                     {
                                         "$sort": {
-                                            f"{params.column_sort}": order,
+                                            f"{column_target }": order,
                                             "_id": 1,
                                         }
                                     },
@@ -1227,7 +1200,7 @@ class MongoQueries(DwConnection):
                                 {"$limit": params.limit},
                                 {
                                     "$sort": {
-                                        f"{params.column_sort}": order,
+                                        f"{column_target }": order,
                                         "_id": 1,
                                     }
                                 },
@@ -1319,7 +1292,7 @@ class MongoQueries(DwConnection):
                                 {"$limit": params.limit},
                                 {
                                     "$sort": {
-                                        f"{params.column_sort}": order,
+                                        f"{column_target }": order,
                                         "_id": 1,
                                     }
                                 },
@@ -1336,9 +1309,12 @@ class MongoQueries(DwConnection):
             ):  # por variar y provar ( mas eficiente)
                 resp = item
             # print(resp)
+
         return resp
 
-    async def get_all_author_in_segments(self):
+    async def get_all_author_in_segments(self) -> AuthorsInSegements:
+
+        final_response = {}
         authors = self.segments.aggregate(
             [
                 {
@@ -1367,18 +1343,20 @@ class MongoQueries(DwConnection):
         )
 
         resp = []
+
         if authors != None:
-            for item in await authors.to_list(
-                length=None
-            ):  # por variar y provar ( mas eficiente)
-                resp = item
+            for item in await authors.to_list(length=None):
+                resp = item  # en este caso no importa ya que siempre devolvera un unico objeto
 
-            # print(resp["authors"])
-            # print(len(resp["authors"]))
-            all_authors = []
-            author = {}
+            list_authors = []
+            temp_list = []
+
             for x in resp["authors"]:
+                if x["author"] not in temp_list:
+                    temp_list.append(x["author"])
+                    list_authors.append(
+                        dict(id=x["author"], name=x["author_details"]["name"])
+                    )
+            final_response["authors"] = list_authors
 
-                author["id"] = x["author"]
-                author["name"] = x["author_details"]["name"]
-        return authors
+        return final_response

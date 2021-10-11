@@ -97,7 +97,7 @@ class OpenIDConnect(SecurityBase):
                 audience=self.audience,
                 options=self.jwt_decode_options,
             )
-        except JWTError:
+        except JWTError as e:
             raise HTTPException(
                 status_code=HTTP_401_UNAUTHORIZED,
                 detail="JWT validation failed",
@@ -134,7 +134,7 @@ auth_scheme = OpenIDConnect(
     url=f"{global_settings.keycloack_server_url}/realms/{global_settings.keycloack_realm_name}",
     scheme_name="Keycloak",
     allowed_grant_types=allowed_grant_types,
-    audience="account",
+    audience="cast-master-api",
 )
 
 

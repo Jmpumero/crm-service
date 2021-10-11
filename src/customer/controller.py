@@ -1,18 +1,39 @@
 from __future__ import annotations
+from typing import List
 from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
 from typing import Any, List
 from src.customer.schemas.post.bodys.blacklist import BlackListBody
 
-# from src.customer.schemas.get.query_params import CustomerQueryParamsSensor
 from config.config import Settings
 
 from fastapi import APIRouter, Depends
 
+from src.customer.schemas.post.bodys.blacklist import BlackListBody
+
+from config.config import Settings
 from core import keycloack_guard
 from .service import Service
-from .score_card_service import ScoreCardService
+from .services import (
+    ScoreCardService,
+    ProfileHeaderService,
+    ProfileDetailService,
+    MarketingSubscriptionsService,
+)
+from .schemas import SearchCustomersQueryParams, PutScoreCard
+
 from .schemas import SearchCustomersQueryParams
 from .schemas import PutScoreCard
+from .schemas import (
+    SearchCustomersQueryParams,
+    PutScoreCard,
+    CustomerProfileHeaderResponse,
+    CustomerProfileDetailResponse,
+    CustomerLogBook,
+    CustomerMarketingSubscriptions,
+)
+
+from .schemas import SearchCustomersQueryParams, BlacklistQueryParams
+from .schemas import BlackListBodyResponse
 
 from .schemas import (
     BlackListBodyResponse,
@@ -41,15 +62,16 @@ from .schemas import (
 )
 
 from utils.remove_422 import remove_422
-
 from error_handlers.schemas.validation_error import CustomValidationError
 from error_handlers.schemas.bad_gateway import BadGatewayError
 from error_handlers.schemas.unauthorized import UnauthorizedError
-from fastapi import HTTPException
+
 
 global_settings = Settings()
 
-customers_router = APIRouter(tags=["Customers"])
+customers_router = APIRouter(
+    tags=["Customers"], dependencies=[Depends(keycloack_guard)]
+)
 # tags=["Customers"], dependencies=[Depends(keycloack_guard)]
 
 
@@ -94,23 +116,30 @@ async def get_customer_notes_comments(customer_id: str):
     return service.get_customer_notes_comments(customer_id)
 
 
-@customers_router.get("/customers/{customer_id}/profile-header")
+@customers_router.get(
+    "/customers/{customer_id}/profile-header",
+    response_model=CustomerProfileHeaderResponse,
+)
 @remove_422
 async def get_customer_profile_header(customer_id: str):
-    service = Service()
+    service = ProfileHeaderService()
 
-    return service.get_profile_header(customer_id)
+    return await service.get_profile_header(customer_id)
 
 
-@customers_router.get("/customers/{customer_id}/details")
+@customers_router.get(
+    "/customers/{customer_id}/details", response_model=CustomerProfileDetailResponse
+)
 @remove_422
 async def get_customer_profile_detail(customer_id: str):
-    service = Service()
+    service = ProfileDetailService()
 
-    return service.get_profile_details(customer_id)
+    return await service.get_profile_details(customer_id)
 
 
-@customers_router.get("/customers/{customer_id}/logbook")
+@customers_router.get(
+    "/customers/{customer_id}/logbook", response_model=CustomerLogBook
+)
 @remove_422
 async def get_customer_logbook(customer_id: str):
     service = Service()
@@ -118,12 +147,15 @@ async def get_customer_logbook(customer_id: str):
     return service.get_customer_logbook(customer_id)
 
 
-@customers_router.get("/customers/{customer_id}/marketing-subscriptions")
+@customers_router.get(
+    "/customers/{customer_id}/marketing-subscriptions",
+    response_model=CustomerMarketingSubscriptions,
+)
 @remove_422
 async def get_customer_marketing_subscriptions(customer_id: str):
-    service = Service()
+    service = MarketingSubscriptionsService()
 
-    return service.get_customer_marketing_subscriptions(customer_id)
+    return await service.get_customer_marketing_subscriptions(customer_id)
 
 
 @customers_router.put(
@@ -237,6 +269,7 @@ async def created_cross_selling(body: NewCrossSelling):
 
 
 @customers_router.get("/customers/{customer_id}/score-card")
+@remove_422
 async def get_customer_score_card(customer_id: str):
     service = ScoreCardService()
 
@@ -244,7 +277,8 @@ async def get_customer_score_card(customer_id: str):
 
 
 @customers_router.put("/customers/{customer_id}/score-card")
-async def post_customer_score_card(customer_id: str, score_card: List[PutScoreCard]):
+@remove_422
+async def post_customer_score_card(customer_id: str, score_card: PutScoreCard):
     service = ScoreCardService()
 
     return await service.put_score_card(customer_id, score_card)

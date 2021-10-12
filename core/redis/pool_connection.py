@@ -1,4 +1,5 @@
 import aioredis
+import logging
 
 from config import config
 
@@ -20,5 +21,9 @@ async def init_redis_pool() -> aioredis.Redis:
         encoding="utf-8",
         db=global_settings.redis_db,
     )
+
+    logger = logging.getLogger("uvicorn")
+
+    logger.info(f"REDIS: {global_settings.redis_url}")
 
     return redis

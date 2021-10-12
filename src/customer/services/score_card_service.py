@@ -1,8 +1,9 @@
 from typing import Any
 
+from fastapi import HTTPException, Response
+
 from ..repository import MongoQueries
 
-from fastapi import HTTPException
 
 """
 example model of score:
@@ -164,7 +165,7 @@ example model of score:
 
 class ScoreCardService(MongoQueries):
     async def get_customer_score_card(self, customer_id: str):
-        customer = await self.clients_customer.find_one(
+        customer = await self.customer.find_one(
             {"_id": customer_id}, {"score": 1, "_id": 0}
         )
 
@@ -172,11 +173,14 @@ class ScoreCardService(MongoQueries):
 
     async def put_score_card(self, customer_id: str, data: Any):
         try:
-            await self.clients_customer.update_one(
+            result = await self.customer.update_one(
                 {"_id": customer_id}, {"$set": {"score": data.dict()}}
             )
 
-            return {"message": "update successfully"}
+            if result.modified_count:
+                return {"message": "update successfully"}
+
+            return {"message": "client not updated"}
 
         except Exception as e:
             print(e)

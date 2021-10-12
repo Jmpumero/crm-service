@@ -5,7 +5,10 @@ from ..schemas import CustomerProfileDetailResponse
 
 class ProfileDetailService(MongoQueries):
     async def get_profile_details(self, customer_id: str) -> Any:
-        customer = await self.clients_customer.find_one({"_id": customer_id})
+        customer = await self.customer.find_one({"_id": customer_id})
+
+        if not customer:
+            return {}
 
         data = {
             "most_visited_hotel": "random hotel",
@@ -13,7 +16,7 @@ class ProfileDetailService(MongoQueries):
             "email": "".join(
                 [
                     emailDict["email"]
-                    for emailDict in customer["email"]
+                    for emailDict in customer.get("email")
                     if emailDict.get("isMain", False)
                 ]
             ),

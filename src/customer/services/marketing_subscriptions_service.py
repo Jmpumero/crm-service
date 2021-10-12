@@ -6,7 +6,10 @@ from ..schemas import CustomerMarketingSubscriptions
 
 class MarketingSubscriptionsService(MongoQueries):
     async def get_customer_marketing_subscriptions(self, customer_id: str) -> Any:
-        customer = await self.clients_customer.find_one({"_id": customer_id})
+        customer = await self.customer.find_one({"_id": customer_id})
+
+        if not customer:
+            return {}
 
         emails = [
             {
@@ -14,7 +17,7 @@ class MarketingSubscriptionsService(MongoQueries):
                 "subscribed": customer_email.get("subscribed", False),
                 "is_primary": customer_email.get("isMain", False),
             }
-            for customer_email in customer["email"]
+            for customer_email in customer.get("email")
         ]
 
         phones = [

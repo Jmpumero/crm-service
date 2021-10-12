@@ -5,10 +5,10 @@ from pydantic.fields import Field
 
 
 class CustomerProfileHeaderResponse(BaseModel):
-    id_: str = Field(..., alias="_id")
+    id_: Optional[str] = Field(None, alias="_id")
     name: Optional[str]
     score: Optional[int]
-    languages: List[str]
+    languages: Optional[List[str]]
     country: Optional[str]
     membership: Optional[str]
     gender: Optional[str]

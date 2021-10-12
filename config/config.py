@@ -1,10 +1,8 @@
-import logging
 import os
 from dotenv import load_dotenv
 
-from pydantic import BaseSettings
+from pydantic import BaseSettings, BaseModel
 
-log = logging.getLogger("uvicorn")
 load_dotenv()
 
 
@@ -15,7 +13,7 @@ class Settings(BaseSettings):
 
     mongodb_url: str = os.getenv("MONGODB_URL", "mongodb://127.0.0.1:27017/")
 
-    redis_url: str = os.environ.get("REDIS_URL", "redis://localhost:6379")
+    redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379")
     redis_password: str = os.getenv("REDIS_PASSWORD", "")
     redis_db: int = int(os.getenv("REDIS_DB", "0"))
 

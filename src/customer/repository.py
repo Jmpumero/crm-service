@@ -16,7 +16,7 @@ from fastapi.encoders import jsonable_encoder
 from src.customer.schemas.get.responses import blacklist, customers
 from src.customer.schemas.get import responses
 import pymongo
-from core.connection.connection import ConnectionMongo as DwConnection
+from core import startup_result
 from pymongo.errors import DuplicateKeyError, BulkWriteError
 from config.config import Settings
 
@@ -74,17 +74,25 @@ blacklist_customer_projections = {
 # search_update_projections = {"blacklist_status": 0}
 
 
-class MongoQueries(DwConnection):
+class MongoQueries:
+    def __init__(self):
+        self.connection = startup_result["mongo_connection"]
+        self.customer = self.connection.customer
+        self.cross_selling = self.connection.cross_selling
+        self.products = self.connection.products
+        self.pms_collection = self.connection.pms_collection
+        self.butler_collection = self.connection.butler_collection
+        self.cast_collection = self.connection.cast_collection
 
     # Metodos de Queries para el servicio de Clientes
 
     def total_customer(self):
-        # customers = self.clients_customer.estimated_document_count()
-        customers = self.clients_customer.count_documents({"customer_status": True})
+        # customers = self.customer.estimated_document_count()
+        customers = self.customer.count_documents({"customer_status": True})
         return customers
 
     def find_one_customer(self, client_id):
-        customer = self.clients_customer.find_one({"id": client_id}, search_projections)
+        customer = self.customer.find_one({"id": client_id}, search_projections)
         return customer
 
     def find_all_customers(self, skip, limit, column, order, column_order):
@@ -92,7 +100,7 @@ class MongoQueries(DwConnection):
             if order.lower() == "desc":
 
                 customers = (
-                    self.clients_customer.find({}, search_projections)
+                    self.customer.find({}, search_projections)
                     .skip(skip)
                     .limit(limit)
                     .sort(column_order, pymongo.DESCENDING)
@@ -100,14 +108,14 @@ class MongoQueries(DwConnection):
             else:
 
                 customers = (
-                    self.clients_customer.find({}, search_projections)
+                    self.customer.find({}, search_projections)
                     .skip(skip)
                     .limit(limit)
                     .sort(column, pymongo.ASCENDING)
                 )
         else:
             customers = (
-                self.clients_customer.find(
+                self.customer.find(
                     {},
                     search_projections,
                 )
@@ -126,7 +134,7 @@ class MongoQueries(DwConnection):
 
             # busca en el campo nombre, aquellos que contenga  'variable' en minscula y mayuscula
             return (
-                self.clients_customer.find(
+                self.customer.find(
                     {
                         f"{column}": {
                             "$regex": f".*{item_search}.*",
@@ -141,7 +149,7 @@ class MongoQueries(DwConnection):
         if constrain == "equal_to":
 
             return (
-                self.clients_customer.find(
+                self.customer.find(
                     {f"{column}": {"$eq": f"{item_search}"}}, search_projections
                 )
                 .skip(skip)
@@ -149,7 +157,7 @@ class MongoQueries(DwConnection):
             )
         if constrain == "starts_by":
             return (
-                self.clients_customer.find(
+                self.customer.find(
                     {
                         f"{column}": {
                             "$regex": f"\A{item_search}|\A{item_search.capitalize()}"
@@ -162,7 +170,7 @@ class MongoQueries(DwConnection):
             )
         if constrain == "ends_by":
             return (
-                self.clients_customer.find(
+                self.customer.find(
                     {
                         f"{column}": {
                             "$regex": f"\Z{item_search}|\Z{item_search.capitalize()}"
@@ -180,7 +188,7 @@ class MongoQueries(DwConnection):
         response = None
         if constrain == "contain":
             response = (
-                self.clients_customer.find(
+                self.customer.find(
                     {
                         "email": {
                             "$elemMatch": {
@@ -200,7 +208,7 @@ class MongoQueries(DwConnection):
         if constrain == "equal_to":
 
             response = (
-                self.clients_customer.find(
+                self.customer.find(
                     {"email": {"email": f"{item_search}", "isMain": True}},
                     search_projections,
                 )
@@ -209,7 +217,7 @@ class MongoQueries(DwConnection):
             )
         if constrain == "starts_by":
             response = (
-                self.clients_customer.find(
+                self.customer.find(
                     {
                         "email": {
                             "$elemMatch": {
@@ -228,7 +236,7 @@ class MongoQueries(DwConnection):
             )
         if constrain == "ends_by":
             response = (
-                self.clients_customer.find(
+                self.customer.find(
                     {
                         "email": {
                             "$elemMatch": {
@@ -264,7 +272,7 @@ class MongoQueries(DwConnection):
 
         if constrain == "contain":
             return (
-                self.clients_customer.find(
+                self.customer.find(
                     {
                         "phone": {
                             "$elemMatch": {
@@ -284,7 +292,7 @@ class MongoQueries(DwConnection):
         if constrain == "equal_to":
 
             return (
-                self.clients_customer.find(
+                self.customer.find(
                     {
                         "phone": {
                             "$elemMatch": {
@@ -300,7 +308,7 @@ class MongoQueries(DwConnection):
             )
         if constrain == "starts_by":
             return (
-                self.clients_customer.find(
+                self.customer.find(
                     {
                         "phone": {
                             "$elemMatch": {
@@ -319,7 +327,7 @@ class MongoQueries(DwConnection):
             )
         if constrain == "ends_by":
             return (
-                self.clients_customer.find(
+                self.customer.find(
                     {
                         "phone": {
                             "$elemMatch": {
@@ -344,7 +352,7 @@ class MongoQueries(DwConnection):
 
         if constrain == "contain":
             return (
-                self.clients_customer.find(
+                self.customer.find(
                     {
                         "phone": {
                             "$elemMatch": {
@@ -364,7 +372,7 @@ class MongoQueries(DwConnection):
         if constrain == "equal_to":
 
             return (
-                self.clients_customer.find(
+                self.customer.find(
                     {
                         "phone": {
                             "$elemMatch": {
@@ -380,7 +388,7 @@ class MongoQueries(DwConnection):
             )
         if constrain == "starts_by":
             return (
-                self.clients_customer.find(
+                self.customer.find(
                     {
                         "phone": {
                             "$elemMatch": {
@@ -399,7 +407,7 @@ class MongoQueries(DwConnection):
             )
         if constrain == "ends_by":
             return (
-                self.clients_customer.find(
+                self.customer.find(
                     {
                         "phone": {
                             "$elemMatch": {
@@ -435,7 +443,7 @@ class MongoQueries(DwConnection):
     def test_agr(
         self, constrain, item_search, column, skip, limit
     ):  # en desarrollo... pruebas con agregaciones
-        return self.clients_customer.aggregate(
+        return self.customer.aggregate(
             [
                 {
                     "$match": {
@@ -532,7 +540,7 @@ class MongoQueries(DwConnection):
         cursor = None
         if type == "enable":
             cursor = (
-                self.clients_customer.find(
+                self.customer.find(
                     {"blacklist_status": False}, blacklist_customer_projections
                 )
                 .skip(skip)
@@ -540,7 +548,7 @@ class MongoQueries(DwConnection):
             )
         elif type == "disable":
             cursor = (
-                self.clients_customer.find(
+                self.customer.find(
                     {"blacklist_status": True}, blacklist_customer_projections
                 )
                 .skip(skip)
@@ -550,13 +558,13 @@ class MongoQueries(DwConnection):
         return cursor
 
     def total_customer_in_blacklist(self, type):
-        total = self.clients_customer.count_documents({"blacklist_status": type})
+        total = self.customer.count_documents({"blacklist_status": type})
         return total
 
     async def update_customer_in_blacklist(self, data) -> BlackListBodyResponse:
         resp = None
         if data.blacklist_status:
-            resp = await self.clients_customer.find_one_and_update(
+            resp = await self.customer.find_one_and_update(
                 {"_id": data.id},
                 {
                     "$set": {
@@ -566,7 +574,7 @@ class MongoQueries(DwConnection):
                 },
             )
         else:
-            resp = await self.clients_customer.find_one_and_update(
+            resp = await self.customer.find_one_and_update(
                 {"_id": data.id},
                 {
                     "$set": {
@@ -599,7 +607,7 @@ class MongoQueries(DwConnection):
         customer = jsonable_encoder(customer)
 
         try:
-            inserted_customer = await self.clients_customer.insert_one(customer)
+            inserted_customer = await self.customer.insert_one(customer)
         except:
             response = {
                 "msg": " Failed inseting Customer ",
@@ -629,7 +637,7 @@ class MongoQueries(DwConnection):
             if order.lower() == "desc":
 
                 customers = (
-                    self.clients_customer.find(special_query)
+                    self.customer.find(special_query)
                     .skip(skip)
                     .limit(limit)
                     .sort(column_sort, pymongo.DESCENDING)
@@ -637,7 +645,7 @@ class MongoQueries(DwConnection):
             else:
 
                 customers = (
-                    self.clients_customer.find(special_query)
+                    self.customer.find(special_query)
                     .skip(skip)
                     .limit(limit)
                     .sort(column_sort, pymongo.ASCENDING)
@@ -650,7 +658,7 @@ class MongoQueries(DwConnection):
     ):
 
         customers = (
-            self.clients_customer.find(
+            self.customer.find(
                 {
                     "$and": [
                         {"customer_status": True},
@@ -773,7 +781,7 @@ class MongoQueries(DwConnection):
         query = self.build_query_update(data)
         resp = None
         if data.id != "" and data.id != None:
-            resp = await self.clients_customer.find_one_and_update(
+            resp = await self.customer.find_one_and_update(
                 {"_id": data.id},
                 {"$set": query},
             )
@@ -815,13 +823,13 @@ class MongoQueries(DwConnection):
                 )
 
     async def hard_delete_customer(self, customer_id):
-        return await self.clients_customer.find_one_and_delete({"_id": customer_id})
+        return await self.customer.find_one_and_delete({"_id": customer_id})
 
     async def delete_one_customer(self, customer_id):
 
         r_query = None
         customer = None
-        customer = await self.clients_customer.find_one({"_id": customer_id})
+        customer = await self.customer.find_one({"_id": customer_id})
 
         today = datetime.utcnow()
         today = datetime.strftime(today, "%Y-%m-%dT%H:%M:%S")
@@ -829,18 +837,16 @@ class MongoQueries(DwConnection):
         if customer:
             if customer["associated_sensors"]:
                 if len(customer["associated_sensors"]) > 0:
-                    r_query = await self.clients_customer.find_one_and_update(
+                    r_query = await self.customer.find_one_and_update(
                         {"_id": customer_id},
                         {"$set": {"customer_status": False, "delete_at": today}},
                     )
                 else:
-                    r_query = await self.clients_customer.find_one_and_delete(
+                    r_query = await self.customer.find_one_and_delete(
                         {"_id": customer_id}
                     )
             else:
-                r_query = await self.clients_customer.find_one_and_delete(
-                    {"_id": customer_id}
-                )
+                r_query = await self.customer.find_one_and_delete({"_id": customer_id})
 
         return customer
 
@@ -860,7 +866,7 @@ class MongoQueries(DwConnection):
         customer["update_at"] = today
         customer = CreateCustomerBody(**customer)
         customer = jsonable_encoder(customer)
-        new_customer = await self.clients_customer.insert_one(customer)
+        new_customer = await self.customer.insert_one(customer)
 
         await self.update_many_customer_in_sensors(
             id_parent_a, new_customer.inserted_id, data.associated_sensors

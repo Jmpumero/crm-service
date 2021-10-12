@@ -1,12 +1,12 @@
 from __future__ import annotations
-from typing import List
+from typing import List, Optional
 from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
 from typing import Any, List
 from src.customer.schemas.post.bodys.blacklist import BlackListBody
 
 from config.config import Settings
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 
 from src.customer.schemas.post.bodys.blacklist import BlackListBody
 
@@ -115,6 +115,7 @@ async def get_customer_notes_comments(customer_id: str):
 @customers_router.get(
     "/customers/{customer_id}/profile-header",
     response_model=CustomerProfileHeaderResponse,
+    response_model_exclude_none=True,
 )
 @remove_422
 async def get_customer_profile_header(customer_id: str):
@@ -124,7 +125,9 @@ async def get_customer_profile_header(customer_id: str):
 
 
 @customers_router.get(
-    "/customers/{customer_id}/details", response_model=CustomerProfileDetailResponse
+    "/customers/{customer_id}/details",
+    response_model=CustomerProfileDetailResponse,
+    response_model_exclude_none=True,
 )
 @remove_422
 async def get_customer_profile_detail(customer_id: str):
@@ -146,6 +149,7 @@ async def get_customer_logbook(customer_id: str):
 @customers_router.get(
     "/customers/{customer_id}/marketing-subscriptions",
     response_model=CustomerMarketingSubscriptions,
+    response_model_exclude_none=True,
 )
 @remove_422
 async def get_customer_marketing_subscriptions(customer_id: str):

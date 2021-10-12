@@ -1,11 +1,29 @@
 from datetime import datetime, timedelta
+from typing import Any, List
+from collections import OrderedDict
+import pymongo
+from config.config import Settings
+from core.connection.connection import ConnectionMongo as DwConnection
+from dateutil.relativedelta import relativedelta
+from error_handlers.bad_gateway import BadGatewayException
+from fastapi import HTTPException
+from fastapi.encoders import jsonable_encoder
+from pymongo.errors import BulkWriteError, DuplicateKeyError, OperationFailure
+from src.customer.schemas.get import query_params, responses
+from src.customer.schemas.get.responses import blacklist, customers, segmenter
+from src.customer.schemas.get.responses.segmenter import (
+    AuthorsInSegements,
+    Segmenter,
+    SegmenterResponse,
+    SegmenterTable,
+)
 
 # from src.customer.schemas.get.responses.cross_selling import CrossSellingResponse
 from src.customer.schemas.post.bodys.customer_crud import (
     CreateCustomerBody,
     MergeCustomerBody,
 )
-from dateutil.relativedelta import relativedelta
+from src.customer.schemas.post.responses.blacklist import BlackListBodyResponse
 from src.customer.schemas.post.responses.cross_selling import (
     CrossSellingCreatedResponse,
 )
@@ -87,9 +105,8 @@ class MongoQueries:
     # Metodos de Queries para el servicio de Clientes
 
     def total_customer(self):
-        # customers = self.customer.estimated_document_count()
-        customers = self.customer.count_documents({"customer_status": True})
-        return customers
+        total_customers = self.customer.count_documents({"customer_status": True})
+        return total_customers
 
     def find_one_customer(self, client_id):
         customer = self.customer.find_one({"id": client_id}, search_projections)
@@ -440,57 +457,6 @@ class MongoQueries:
             item = item_search.replace("-", "")
             return self.search_phone_local(constrain, item, "local_format", skip, limit)
 
-    def test_agr(
-        self, constrain, item_search, column, skip, limit
-    ):  # en desarrollo... pruebas con agregaciones
-        return self.customer.aggregate(
-            [
-                {
-                    "$match": {
-                        "email": {
-                            "$elemMatch": {
-                                "email": "ablanca@jacidi.com",
-                                "isMain": True,
-                            }
-                        }
-                    }
-                },
-                {
-                    "$project": {
-                        "_id": 0,
-                        "id": 1,
-                        "full_name": 1,
-                        "age": 1,
-                        "nationality": 1,
-                        "civilStatus": 1,
-                        "documentId": 1,
-                        "phone": {
-                            "$arrayElemAt": [
-                                "$phone",
-                                {"$indexOfArray": ["$phone.isMain", True]},
-                            ]
-                        },
-                        "email": {
-                            "$arrayElemAt": [
-                                "$email",
-                                {"$indexOfArray": ["$email.isMain", True]},
-                            ]
-                        },
-                        "address": 1,
-                    }
-                },
-                {"$sort": {"email": 1}},
-                {
-                    "$project": {
-                        "email.isMain": 0,
-                        "phone.isMain": 0,
-                        "phone.areaCode": 0,
-                        "phone.countryCode": 0,
-                    }
-                },
-            ]
-        )
-
     def filter_search_customers(
         self, constrain, item_search, column, skip, limit, order, column_order
     ):
@@ -558,7 +524,9 @@ class MongoQueries:
         return cursor
 
     def total_customer_in_blacklist(self, type):
-        total = self.customer.count_documents({"blacklist_status": type})
+        total = self.customer.count_documents(
+            {"customer_status": True, "blacklist_status": type}
+        )
         return total
 
     async def update_customer_in_blacklist(self, data) -> BlackListBodyResponse:
@@ -970,3 +938,444 @@ class MongoQueries:
 
     def get_total_cross_selling(self):
         return self.cross_selling.count_documents({})
+
+    async def find_segments(self, params) -> Any:
+        r = None
+        order = 1
+        column_target = "name"
+
+        if params.order_sort == "desc":
+            order = -1
+        if params.column_sort.lower() == "":
+            column_target = "name"
+        elif params.column_sort.lower() == "author":
+            column_target = "author_details.name"
+        elif params.column_sort.lower() == "ultima actualizacion":
+            column_target = "update_at"
+        elif params.column_sort.lower() == "estado":
+            column_target = "status"
+        elif params.column_sort.lower() == "fecha de creacion":
+            column_target = "created_at"
+        elif params.column_sort.lower() == "clientes":
+            column_target = "clients"
+
+        if params.author == "" and params.tag == "":
+
+            r = self.segments.aggregate(
+                [
+                    {
+                        "$facet": {
+                            "total_items": [
+                                {
+                                    "$lookup": {
+                                        "from": "customer",
+                                        "localField": "author",
+                                        "foreignField": "_id",
+                                        "as": "author_details",
+                                    }
+                                },
+                                {"$unwind": "$author_details"},
+                                {
+                                    "$project": {
+                                        "author": 0,
+                                        "filter": 0,
+                                        "applied_filters": 0,
+                                    }
+                                },
+                                {"$count": "total_items"},
+                            ],
+                            "total_show": [
+                                {
+                                    "$lookup": {
+                                        "from": "customer",
+                                        "localField": "author",
+                                        "foreignField": "_id",
+                                        "as": "author_details",
+                                    }
+                                },
+                                {"$unwind": "$author_details"},
+                                {
+                                    "$project": {
+                                        "author": 0,
+                                        "filter": 0,
+                                        "applied_filters": 0,
+                                    }
+                                },
+                                {"$skip": params.skip},
+                                {"$limit": params.limit},
+                                {"$count": "show_items"},
+                            ],
+                            "segments": [
+                                {
+                                    "$lookup": {
+                                        "from": "customer",
+                                        "localField": "author",
+                                        "foreignField": "_id",
+                                        "as": "author_details",
+                                    }
+                                },
+                                {"$unwind": "$author_details"},
+                                {
+                                    "$project": {
+                                        "author": 0,
+                                        "filter": 0,
+                                        "applied_filters": 0,
+                                    }
+                                },
+                                {"$skip": params.skip},
+                                {"$limit": params.limit},
+                                {
+                                    "$sort": {
+                                        f"{column_target}": order,
+                                        "_id": 1,
+                                    }
+                                },
+                            ],
+                        }
+                    },
+                ]
+            )
+        elif params.author != "" and params.tag != "":
+
+            tags = params.tag.replace("[", "").replace("]", "").split(",")
+
+            try:
+                r = self.segments.aggregate(
+                    [
+                        {
+                            "$facet": {
+                                "total_items": [
+                                    {
+                                        "$match": {
+                                            "tags": {"$in": tags},
+                                            "author": params.author,
+                                        }
+                                    },
+                                    {
+                                        "$lookup": {
+                                            "from": "customer",
+                                            "localField": "author",
+                                            "foreignField": "_id",
+                                            "as": "author_details",
+                                        }
+                                    },
+                                    {"$unwind": "$author_details"},
+                                    {
+                                        "$project": {
+                                            "author": 0,
+                                            "filter": 0,
+                                            "applied_filters": 0,
+                                        }
+                                    },
+                                    {"$count": "total_items"},
+                                ],
+                                "total_show": [
+                                    {
+                                        "$match": {
+                                            "tags": {"$in": tags},
+                                            "author": params.author,
+                                        }
+                                    },
+                                    {
+                                        "$lookup": {
+                                            "from": "customer",
+                                            "localField": "author",
+                                            "foreignField": "_id",
+                                            "as": "author_details",
+                                        }
+                                    },
+                                    {"$unwind": "$author_details"},
+                                    {
+                                        "$project": {
+                                            "author": 0,
+                                            "filter": 0,
+                                            "applied_filters": 0,
+                                        }
+                                    },
+                                    {"$skip": params.skip},
+                                    {"$limit": params.limit},
+                                    {"$count": "show_items"},
+                                ],
+                                "segments": [
+                                    {
+                                        "$match": {
+                                            "tags": {"$in": tags},
+                                            "author": params.author,
+                                        }
+                                    },
+                                    {
+                                        "$lookup": {
+                                            "from": "customer",
+                                            "localField": "author",
+                                            "foreignField": "_id",
+                                            "as": "author_details",
+                                        }
+                                    },
+                                    {"$unwind": "$author_details"},
+                                    {
+                                        "$project": {
+                                            "author": 0,
+                                            "filter": 0,
+                                            "applied_filters": 0,
+                                        }
+                                    },
+                                    {"$skip": params.skip},
+                                    {"$limit": params.limit},
+                                    {
+                                        "$sort": {
+                                            f"{column_target }": order,
+                                            "_id": 1,
+                                        }
+                                    },
+                                ],
+                            }
+                        },
+                    ]
+                )
+            except Exception as e:
+                print(e)
+            except OperationFailure as e:
+                print(e)
+                # {"$match": {"author": f"{params.author}"}}
+
+        elif params.author != "" and params.tag == "":
+            r = self.segments.aggregate(
+                [
+                    {
+                        "$facet": {
+                            "total_items": [
+                                {
+                                    "$match": {
+                                        "author": params.author,
+                                    }
+                                },
+                                {
+                                    "$lookup": {
+                                        "from": "customer",
+                                        "localField": "author",
+                                        "foreignField": "_id",
+                                        "as": "author_details",
+                                    }
+                                },
+                                {"$unwind": "$author_details"},
+                                {
+                                    "$project": {
+                                        "author": 0,
+                                        "filter": 0,
+                                        "applied_filters": 0,
+                                    }
+                                },
+                                {"$count": "total_items"},
+                            ],
+                            "total_show": [
+                                {
+                                    "$match": {
+                                        "author": params.author,
+                                    }
+                                },
+                                {
+                                    "$lookup": {
+                                        "from": "customer",
+                                        "localField": "author",
+                                        "foreignField": "_id",
+                                        "as": "author_details",
+                                    }
+                                },
+                                {"$unwind": "$author_details"},
+                                {
+                                    "$project": {
+                                        "author": 0,
+                                        "filter": 0,
+                                        "applied_filters": 0,
+                                    }
+                                },
+                                {"$skip": params.skip},
+                                {"$limit": params.limit},
+                                {"$count": "show_items"},
+                            ],
+                            "segments": [
+                                {
+                                    "$match": {
+                                        "author": params.author,
+                                    }
+                                },
+                                {
+                                    "$lookup": {
+                                        "from": "customer",
+                                        "localField": "author",
+                                        "foreignField": "_id",
+                                        "as": "author_details",
+                                    }
+                                },
+                                {"$unwind": "$author_details"},
+                                {
+                                    "$project": {
+                                        "author": 0,
+                                        "filter": 0,
+                                        "applied_filters": 0,
+                                    }
+                                },
+                                {"$skip": params.skip},
+                                {"$limit": params.limit},
+                                {
+                                    "$sort": {
+                                        f"{column_target }": order,
+                                        "_id": 1,
+                                    }
+                                },
+                            ],
+                        }
+                    },
+                ]
+            )
+        elif params.author == "" and params.tag != "":
+            tags = params.tag.replace("[", "").replace("]", "").split(",")
+
+            r = self.segments.aggregate(
+                [
+                    {
+                        "$facet": {
+                            "total_items": [
+                                {
+                                    "$match": {
+                                        "tags": {"$in": tags},
+                                    }
+                                },
+                                {
+                                    "$lookup": {
+                                        "from": "customer",
+                                        "localField": "author",
+                                        "foreignField": "_id",
+                                        "as": "author_details",
+                                    }
+                                },
+                                {"$unwind": "$author_details"},
+                                {
+                                    "$project": {
+                                        "author": 0,
+                                        "filter": 0,
+                                        "applied_filters": 0,
+                                    }
+                                },
+                                {"$count": "total_items"},
+                            ],
+                            "total_show": [
+                                {
+                                    "$match": {
+                                        "tags": {"$in": tags},
+                                    }
+                                },
+                                {
+                                    "$lookup": {
+                                        "from": "customer",
+                                        "localField": "author",
+                                        "foreignField": "_id",
+                                        "as": "author_details",
+                                    }
+                                },
+                                {"$unwind": "$author_details"},
+                                {
+                                    "$project": {
+                                        "author": 0,
+                                        "filter": 0,
+                                        "applied_filters": 0,
+                                    }
+                                },
+                                {"$skip": params.skip},
+                                {"$limit": params.limit},
+                                {"$count": "show_items"},
+                            ],
+                            "segments": [
+                                {
+                                    "$match": {
+                                        "tags": {"$in": tags},
+                                    }
+                                },
+                                {
+                                    "$lookup": {
+                                        "from": "customer",
+                                        "localField": "author",
+                                        "foreignField": "_id",
+                                        "as": "author_details",
+                                    }
+                                },
+                                {"$unwind": "$author_details"},
+                                {
+                                    "$project": {
+                                        "author": 0,
+                                        "filter": 0,
+                                        "applied_filters": 0,
+                                    }
+                                },
+                                {"$skip": params.skip},
+                                {"$limit": params.limit},
+                                {
+                                    "$sort": {
+                                        f"{column_target }": order,
+                                        "_id": 1,
+                                    }
+                                },
+                            ],
+                        }
+                    },
+                ]
+            )
+
+        resp = []
+        if r != None:
+            for item in await r.to_list(
+                length=params.limit
+            ):  # por variar y provar ( mas eficiente)
+                resp = item
+            # print(resp)
+
+        return resp
+
+    async def get_all_author_in_segments(self) -> AuthorsInSegements:
+
+        final_response = {}
+        authors = self.segments.aggregate(
+            [
+                {
+                    "$facet": {
+                        "authors": [
+                            {
+                                "$lookup": {
+                                    "from": "customer",
+                                    "localField": "author",
+                                    "foreignField": "_id",
+                                    "as": "author_details",
+                                }
+                            },
+                            {"$unwind": "$author_details"},
+                            {
+                                "$project": {
+                                    "author_details.name": 1,
+                                    "author": 1,
+                                    "_id": 0,
+                                }
+                            },
+                        ]
+                    }
+                },
+            ]
+        )
+
+        resp = []
+
+        if authors != None:
+            for item in await authors.to_list(length=None):
+                resp = item  # en este caso no importa ya que siempre devolvera un unico objeto
+
+            list_authors = []
+            temp_list = []
+
+            for x in resp["authors"]:
+                if x["author"] not in temp_list:
+                    temp_list.append(x["author"])
+                    list_authors.append(
+                        dict(id=x["author"], name=x["author_details"]["name"])
+                    )
+            final_response["authors"] = list_authors
+
+        return final_response

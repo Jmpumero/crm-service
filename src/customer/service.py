@@ -1,11 +1,14 @@
 from typing import Any
+from src.customer.schemas import get
 from src.customer.schemas.get import responses
+from src.customer.schemas.get.query_params import SegmenterQueryParams
 from src.customer.schemas.get.responses import customers
 from src.customer.schemas.get.responses import blacklist
 from src.customer.schemas.get.responses.customer_crud import (
     SearchMerge,
     SearchMergeResponse,
 )
+from src.customer.schemas.get.responses.segmenter import AuthorsInSegements, Segmenter
 
 from .repository import MongoQueries
 import json
@@ -39,6 +42,7 @@ from .schemas import (
     Product,
     CrossSellingCreatedResponse,
     CrossSellingAndProductsResponse,
+    Segmenter,
 )
 
 
@@ -48,7 +52,7 @@ class Service(MongoQueries):
 
     async def get_customers(
         self, query_params: SearchCustomersQueryParams
-    ) -> list[SearchCustomers]:
+    ) -> SearchCustomersResponse:
 
         customers = []
         cursor = None
@@ -94,7 +98,9 @@ class Service(MongoQueries):
 
         return self.build_response_search(customers, total_customer)
 
-    def build_response_search(self, list_items, total_customer):
+    def build_response_search(
+        self, list_items, total_customer
+    ) -> SearchCustomersResponse:
 
         finalresponse = {
             "customers": list_items,
@@ -166,7 +172,7 @@ class Service(MongoQueries):
 
     async def get_customers_blacklist(
         self, query_params: BlacklistQueryParams
-    ) -> list[BlacklistCustomer]:
+    ) -> BlacklistCustomersResponse:
         response = None
         customers = []
         cursor = None
@@ -382,3 +388,19 @@ class Service(MongoQueries):
             "total_cross_selling_show": len(items_cross_selling),
         }
         return CrossSellingAndProductsResponse(**response)
+
+    async def get_segmenters(self, query_params: SegmenterQueryParams) -> Any:
+
+        segments = None
+
+        segments = await self.find_segments(query_params)
+        segments["global_total_clients"] = await self.total_customer()
+        segments["total_enable_clients"] = (
+            await self.total_customer()
+        ) - await self.total_customer_in_blacklist(True)
+        return segments
+
+    async def get_author_segments_list(self) -> AuthorsInSegements:
+        authors = await self.get_all_author_in_segments()
+
+        return authors

@@ -55,6 +55,10 @@ from .schemas import (
     NewCrossSelling,
     Product,
     CrossSellingAndProductsResponse,
+    Segmenter,
+    SegmenterResponse,
+    SegmenterQueryParams,
+    AuthorsInSegements,
 )
 
 from utils.remove_422 import remove_422
@@ -172,6 +176,9 @@ async def get_customer_sales_summary(customer_id: int):
     return await service.get_customer_sales_summary(customer_id)
 
 
+#### CRUD ####
+
+
 @customers_router.post("/customer/", response_model=CustomerCRUDResponse)
 @remove_422
 async def created_customer_crud(body: CreateCustomerBody):
@@ -182,7 +189,7 @@ async def created_customer_crud(body: CreateCustomerBody):
 
 @customers_router.get("/customers/update")
 @remove_422
-async def get_all_customer_in_crud(
+async def get_all_customer_in_crud_update(
     query_params: SearchCrudQueryParams = Depends(SearchCrudQueryParams),
 ):
 
@@ -210,7 +217,7 @@ async def delete_customer(customer_id: str):
 
 @customers_router.post("/customer/merge", response_model=CustomerCRUDResponse)
 @remove_422
-async def created_customer_crud(body: MergeCustomerBody):
+async def created_customer_crud_(body: MergeCustomerBody):
 
     service = Service()
     return await service.merger_customers_with_update(body)
@@ -218,12 +225,15 @@ async def created_customer_crud(body: MergeCustomerBody):
 
 @customers_router.get("/merge")
 @remove_422
-async def get_all_customer_in_crud(
+async def get_all_customer_in_crud_merge(
     query_params: SearchCrudQueryParams = Depends(SearchCrudQueryParams),
 ):
 
     service = Service()
     return await service.get_all_customer_with_blacklist(query_params)
+
+
+#### Cross Selling ####
 
 
 @customers_router.get("/cross-selling", response_model=CrossSellingAndProductsResponse)
@@ -272,3 +282,22 @@ async def post_customer_score_card(customer_id: str, score_card: PutScoreCard):
     service = ScoreCardService()
 
     return await service.put_score_card(customer_id, score_card)
+
+
+#### Segmenter ####
+@customers_router.get("/segmenter", response_model=Any)
+@remove_422
+async def get_segmenter_list(
+    query_params: SegmenterQueryParams = Depends(SegmenterQueryParams),
+):
+
+    service = Service()
+    return await service.get_segmenters(query_params)
+
+
+@customers_router.get("/segmenter/authors", response_model=AuthorsInSegements)
+@remove_422
+async def get_author_segments_list():
+
+    service = Service()
+    return await service.get_author_segments_list()

@@ -24,6 +24,10 @@ from .get import (
     CrossSellingAndProductsResponse,
     CrossSelling,
     Product,
+    Segmenter,
+    SegmenterResponse,
+    SegmenterQueryParams,
+    AuthorsInSegements,
 )
 
 from .post import (

@@ -46,6 +46,7 @@ class BlacklistCustomer(BaseModel):
     blacklist_status: bool
     blacklist_enable_motive: List[str]
     blacklist_disable_motive: List[str]
+    stenant: Optional[Any]
 
     class Config:
         allow_population_by_field_name = True

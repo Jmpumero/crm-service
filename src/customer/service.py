@@ -12,7 +12,7 @@ from src.customer.schemas.get.responses.segmenter import AuthorsInSegments, Segm
 
 from .repository import MongoQueries
 import json
-
+from core import startup_result
 from .repository import MongoQueries
 
 from .schemas import (
@@ -44,9 +44,6 @@ from .schemas import (
     CrossSellingAndProductsResponse,
     Segmenter,
 )
-
-
-import main
 
 
 class Service(MongoQueries):
@@ -236,7 +233,9 @@ class Service(MongoQueries):
         return await self.update_customer_in_blacklist(body)
 
     async def get_customer_sales_summary(self, customer_id):
-        customer_in_redis = await main.app.state.redis_repo.get(str(customer_id))
+        customer_in_redis = await startup_result["redis_repository"].get(
+            str(customer_id)
+        )
 
         if not customer_in_redis:
             data = {
@@ -274,7 +273,9 @@ class Service(MongoQueries):
                 "segment_where_it_is_located": [],
             }
 
-            await main.app.state.redis_repo.set(str(customer_id), json.dumps(data))
+            await startup_result["redis_repository"].set(
+                str(customer_id), json.dumps(data)
+            )
 
             return data
 

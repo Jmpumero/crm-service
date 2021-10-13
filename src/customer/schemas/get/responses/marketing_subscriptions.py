@@ -3,23 +3,23 @@ from pydantic import BaseModel
 
 
 class Email(BaseModel):
-    email: str
-    subscribed: bool
+    email: Optional[str]
+    subscribed: Optional[bool]
     is_primary: Optional[bool]
 
 
 class Device(BaseModel):
-    mac_address: str
+    mac_address: Optional[str]
     subscribed: bool
 
 
 class Phone(BaseModel):
-    phone: str
+    phone: Optional[str]
     is_primary: Optional[bool]
-    subscribed: bool
+    subscribed: Optional[bool]
 
 
 class CustomerMarketingSubscriptions(BaseModel):
-    emails: List[Email]
-    devices: List[Device]
-    phones: List[Phone]
+    emails: Optional[List[Email]]
+    devices: Optional[List[Device]]
+    phones: Optional[List[Phone]]

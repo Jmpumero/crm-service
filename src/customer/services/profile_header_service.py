@@ -7,8 +7,11 @@ from ..schemas import (
 
 
 class ProfileHeaderService(MongoQueries):
+    def __init__(self):
+        super().__init__()
+
     async def get_profile_header(self, customer_id: str) -> Any:
-        customer = await self.clients_customer.find_one({"_id": customer_id})
+        customer = await self.customer.find_one({"_id": customer_id})
 
         if not customer:
             return {}

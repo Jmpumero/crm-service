@@ -1,20 +1,16 @@
-import pymongo
-from config.config import Settings
-
 from typing import Any
-
 from traceback import print_exc
+import logging
+
+import pymongo
 from dotenv import load_dotenv
-
-from fastapi import HTTPException
-from error_handlers.bad_gateway import BadGatewayException
-
 import motor.motor_asyncio
 
+from error_handlers.bad_gateway import BadGatewayException
+from config.config import Settings
 
 global_settings = Settings()
-
-
+log = logging.getLogger("uvicorn")
 load_dotenv()
 
 
@@ -24,9 +20,13 @@ class ConnectionMongo:
             global_settings.mongodb_url
         )
 
+        log.info(
+            f"MONGODB: {global_settings.mongodb_url[global_settings.mongodb_url.find('@')+1:global_settings.mongodb_url.find('/', global_settings.mongodb_url.find('@'))]}"
+        )
+
         self.db = self.client.crm
 
-        self.clients_customer = self.db.customer
+        self.customer = self.db.customer
 
         self.pms_collection = self.db.pms
         self.cast_collection = self.db.cast

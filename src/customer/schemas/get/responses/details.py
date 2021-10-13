@@ -1,20 +1,20 @@
-from typing import Any, List
+from typing import Any, List, Optional
 
 from pydantic import BaseModel
 
 
 class CustomerTermAccepted(BaseModel):
-    document_url: str
-    name: str
-    description: str
+    document_url: Optional[str]
+    name: Optional[str]
+    description: Optional[str]
 
 
 class CustomerProfileDetailResponse(BaseModel):
-    most_visited_hotel: str
-    recency: str
-    email: str
-    phone: str
-    social_networks: List[Any]
-    accepted_terms: List[CustomerTermAccepted]
-    interests: List[str]
-    communication_methods: Any
+    most_visited_hotel: Optional[str]
+    recency: Optional[str]
+    email: Optional[str]
+    phone: Optional[str]
+    social_networks: Optional[List[Any]]
+    accepted_terms: Optional[List[CustomerTermAccepted]]
+    interests: Optional[List[str]]
+    communication_methods: Optional[Any]

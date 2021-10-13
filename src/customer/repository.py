@@ -94,6 +94,18 @@ blacklist_customer_projections = {
             {"$indexOfArray": ["$email.isMain", True]},
         ]
     },
+    "phone_main": {
+        "$arrayElemAt": [
+            "$phone",
+            {"$indexOfArray": ["$phone.isMain", True]},
+        ]
+    },
+    "address_main": {
+        "$arrayElemAt": [
+            "$address",
+            {"$indexOfArray": ["$address.isMain", True]},
+        ]
+    },
 }
 
 # search_update_projections = {"blacklist_status": 0}

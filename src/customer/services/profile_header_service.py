@@ -12,6 +12,7 @@ class ProfileHeaderService(MongoQueries):
 
     async def get_profile_header(self, customer_id: str) -> Any:
         customer = await self.customer.find_one({"_id": customer_id})
+        languages = customer.get("language") or []
 
         if not customer:
             return {}
@@ -19,8 +20,8 @@ class ProfileHeaderService(MongoQueries):
         data = {
             "_id": customer.get("_id", None),
             "name": customer.get("name", None),
-            "score": 50,
-            "languages": [language["language"] for language in customer["language"]],
+            "score": 0,
+            "languages": [language.get("language", None) for language in languages],
             "country": customer.get("country", None),
             "membership": "?",
             "gender": "NO BINARY KEK",

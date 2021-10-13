@@ -6,6 +6,7 @@ from ..schemas import CustomerProfileDetailResponse
 class ProfileDetailService(MongoQueries):
     async def get_profile_details(self, customer_id: str) -> Any:
         customer = await self.customer.find_one({"_id": customer_id})
+        customer_phones = customer.get("phone") or []
 
         if not customer:
             return {}
@@ -23,7 +24,7 @@ class ProfileDetailService(MongoQueries):
             "phone": "".join(
                 [
                     customerDict["intl_format"]
-                    for customerDict in customer["phone"]
+                    for customerDict in customer_phones
                     if customerDict["isMain"]
                 ]
             ),

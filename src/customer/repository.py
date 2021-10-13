@@ -87,6 +87,7 @@ blacklist_customer_projections = {
     "blacklist_status": 1,
     "blacklist_enable_motive": 1,
     "blacklist_disable_motive": 1,
+    "customer_status": 1,
 }
 
 # search_update_projections = {"blacklist_status": 0}
@@ -508,7 +509,8 @@ class MongoQueries:
         if type == "enable":
             cursor = (
                 self.customer.find(
-                    {"blacklist_status": False}, blacklist_customer_projections
+                    {"blacklist_status": False, "customer_status": True},
+                    blacklist_customer_projections,
                 )
                 .skip(skip)
                 .limit(limit)
@@ -516,7 +518,8 @@ class MongoQueries:
         elif type == "disable":
             cursor = (
                 self.customer.find(
-                    {"blacklist_status": True}, blacklist_customer_projections
+                    {"blacklist_status": True, "customer_status": True},
+                    blacklist_customer_projections,
                 )
                 .skip(skip)
                 .limit(limit)

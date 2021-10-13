@@ -12,7 +12,7 @@ from pymongo.errors import BulkWriteError, DuplicateKeyError, OperationFailure
 from src.customer.schemas.get import query_params, responses
 from src.customer.schemas.get.responses import blacklist, customers, segmenter
 from src.customer.schemas.get.responses.segmenter import (
-    AuthorsInSegements,
+    AuthorsInSegments,
     Segmenter,
     SegmenterResponse,
     SegmenterTable,
@@ -483,6 +483,7 @@ class MongoQueries(DwConnection):
     def blacklist_search(self, type, skip, limit):
 
         cursor = None
+        # print(type)
         if type == "enable":
             cursor = (
                 self.clients_customer.find(
@@ -1117,7 +1118,6 @@ class MongoQueries(DwConnection):
                 print(e)
             except OperationFailure as e:
                 print(e)
-                # {"$match": {"author": f"{params.author}"}}
 
         elif params.author != "" and params.tag == "":
             r = self.segments.aggregate(
@@ -1312,7 +1312,7 @@ class MongoQueries(DwConnection):
 
         return resp
 
-    async def get_all_author_in_segments(self) -> AuthorsInSegements:
+    async def get_all_author_in_segments(self) -> AuthorsInSegments:
 
         final_response = {}
         authors = self.segments.aggregate(
@@ -1360,3 +1360,44 @@ class MongoQueries(DwConnection):
             final_response["authors"] = list_authors
 
         return final_response
+
+    async def facet_test(self) -> Any:
+        # r = self.clients_customer.aggregate(
+        #     [
+        #         {
+        #             "$facet": {
+        #                 "items": [
+        #                     {"$match": {"blacklist_status": False}},
+        #                 ],
+        #             },
+        #         },
+        #         {"$unwind": "$items"},
+        #         {"$match": {"items.civil_status": "single"}},
+        #         {
+        #             "$facet": {
+        #                 "result": [
+        #                     {"$match": {"items.age": 77}},
+        #                 ],
+        #             }
+        #         },
+        #     ]
+        # )
+
+        r = self.clients_customer.aggregate(
+            [
+                {"$match": {"civil_status": "single"}},
+                # {"$match": {"email.isMain": True, "email.email": "t23@hotmal.com"}},
+                # {"$match": {"age": 77}},
+            ],
+            allowDiskUse=True,
+        )
+        resp = []
+        if r != None:
+            for item in await r.to_list(
+                length=None
+            ):  # por variar y provar ( mas eficiente)
+                resp.append(item)
+
+        # print(resp)
+
+        return resp

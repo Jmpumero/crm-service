@@ -64,5 +64,5 @@ class AuthorSegment(BaseModel):
     name: str
 
 
-class AuthorsInSegements(BaseModel):
+class AuthorsInSegments(BaseModel):
     authors: List[AuthorSegment]

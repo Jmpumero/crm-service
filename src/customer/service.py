@@ -8,7 +8,7 @@ from src.customer.schemas.get.responses.customer_crud import (
     SearchMerge,
     SearchMergeResponse,
 )
-from src.customer.schemas.get.responses.segmenter import AuthorsInSegements, Segmenter
+from src.customer.schemas.get.responses.segmenter import AuthorsInSegments, Segmenter
 
 from .repository import MongoQueries
 import json
@@ -399,7 +399,12 @@ class Service(MongoQueries):
         ) - await self.total_customer_in_blacklist(True)
         return segments
 
-    async def get_author_segments_list(self) -> AuthorsInSegements:
+    async def get_author_segments_list(self) -> AuthorsInSegments:
         authors = await self.get_all_author_in_segments()
 
         return authors
+
+    async def get_test(self) -> Any:
+
+        r = await self.facet_test()
+        return r

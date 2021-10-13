@@ -59,6 +59,9 @@ class SearchUpdate(BaseModel):
     blacklist_disable_motive: Optional[List[str]]
     blacklist_status: Optional[bool]
     stenant: Optional[Any]
+    gender: Optional[str]
+    profession: Optional[str]
+    total_childrens: Optional[int]
     # class Config:
     #     allow_population_by_field_name = True
     #     arbitrary_types_allowed = True
@@ -99,7 +102,10 @@ class SearchMerge(BaseModel):
     blacklist_disable_motive: Optional[List[str]] = []
     create_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S', 2021-12-31T23:59:59
     update_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S'
-    stenant: Optional[Any]
+    stenant: Optional[Any] = None
+    gender: Optional[str]
+    profession: Optional[str]
+    total_childrens: Optional[int]
 
 
 class SearchMergeResponse(BaseModel):

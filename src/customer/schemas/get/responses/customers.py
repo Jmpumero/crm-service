@@ -66,7 +66,7 @@ class SearchCustomers(BaseModel):
     address: List[str]
     documentId: List[DocumentID]
     nationality: Optional[List[str]]
-    civilStatus: Optional[str]
+    civil_status: Optional[str]
     booking_id: Optional[str] = "1234"
 
     class Config:

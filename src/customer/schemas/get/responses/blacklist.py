@@ -47,6 +47,7 @@ class BlacklistCustomer(BaseModel):
     blacklist_enable_motive: List[str]
     blacklist_disable_motive: List[str]
     stenant: Optional[Any]
+    email_main: Emails
 
     class Config:
         allow_population_by_field_name = True

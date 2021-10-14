@@ -68,7 +68,12 @@ search_projections = {
             {"$indexOfArray": ["$email.isMain", True]},
         ]
     },
-    "address": 1,
+    "address": {
+        "$arrayElemAt": [
+            "$address",
+            {"$indexOfArray": ["$address.isMain", True]},
+        ]
+    },
 }
 
 blacklist_customer_projections = {
@@ -152,7 +157,7 @@ class MongoQueries:
         else:
             customers = (
                 self.customer.find(
-                    {},
+                    {"customer_status": True},
                     search_projections,
                 )
                 .skip(skip)
@@ -175,7 +180,8 @@ class MongoQueries:
                         f"{column}": {
                             "$regex": f".*{item_search}.*",
                             "$options": "i",
-                        }
+                        },
+                        "customer_status": True,
                     },
                     search_projections,
                 )
@@ -186,7 +192,8 @@ class MongoQueries:
 
             return (
                 self.customer.find(
-                    {f"{column}": {"$eq": f"{item_search}"}}, search_projections
+                    {f"{column}": {"$eq": f"{item_search}"}, "customer_status": True},
+                    search_projections,
                 )
                 .skip(skip)
                 .limit(limit)
@@ -196,7 +203,8 @@ class MongoQueries:
                 self.customer.find(
                     {
                         f"{column}": {
-                            "$regex": f"\A{item_search}|\A{item_search.capitalize()}"
+                            "$regex": f"\A{item_search}|\A{item_search.capitalize()}",
+                            "customer_status": True,
                         }
                     },
                     search_projections,
@@ -205,12 +213,15 @@ class MongoQueries:
                 .limit(limit)
             )
         if constrain == "ends_by":
+
             return (
                 self.customer.find(
                     {
                         f"{column}": {
-                            "$regex": f"\Z{item_search}|\Z{item_search.capitalize()}"
-                        }
+                            "$regex": rf"{item_search}\b",
+                            "$options": "i",
+                        },
+                        "customer_status": True,
                     },
                     search_projections,
                 )
@@ -234,7 +245,8 @@ class MongoQueries:
                                 },
                                 "isMain": True,
                             }
-                        }
+                        },
+                        "customer_status": True,
                     },
                     search_projections,
                 )
@@ -245,7 +257,10 @@ class MongoQueries:
 
             response = (
                 self.customer.find(
-                    {"email": {"email": f"{item_search}", "isMain": True}},
+                    {
+                        "email": {"email": f"{item_search}", "isMain": True},
+                        "customer_status": True,
+                    },
                     search_projections,
                 )
                 .skip(skip)
@@ -263,7 +278,8 @@ class MongoQueries:
                                 },
                                 "isMain": True,
                             }
-                        }
+                        },
+                        "customer_status": True,
                     },
                     search_projections,
                 )
@@ -277,12 +293,13 @@ class MongoQueries:
                         "email": {
                             "$elemMatch": {
                                 "email": {
-                                    "$regex": f"\Z{item_search}",
+                                    "$regex": rf"{item_search}\b",
                                     "$options": "i",
                                 },
                                 "isMain": True,
                             }
-                        }
+                        },
+                        "customer_status": True,
                     },
                     search_projections,
                 )
@@ -318,7 +335,8 @@ class MongoQueries:
                                 },
                                 "isMain": True,
                             }
-                        }
+                        },
+                        "customer_status": True,
                     },
                     search_projections,
                 )
@@ -335,7 +353,8 @@ class MongoQueries:
                                 f"{column}": f"{item_search}",
                                 "isMain": True,
                             }
-                        }
+                        },
+                        "customer_status": True,
                     },
                     search_projections,
                 )
@@ -354,7 +373,8 @@ class MongoQueries:
                                 },
                                 "isMain": True,
                             }
-                        }
+                        },
+                        "customer_status": True,
                     },
                     search_projections,
                 )
@@ -368,12 +388,13 @@ class MongoQueries:
                         "phone": {
                             "$elemMatch": {
                                 f"{column}": {
-                                    "$regex": f"\Z{item_search}",
+                                    "$regex": rf"{item_search}\b",
                                     "$options": "i",
                                 },
                                 "isMain": True,
                             }
-                        }
+                        },
+                        "customer_status": True,
                     },
                     search_projections,
                 )
@@ -398,7 +419,8 @@ class MongoQueries:
                                 },
                                 "isMain": True,
                             }
-                        }
+                        },
+                        "customer_status": True,
                     },
                     search_projections,
                 )
@@ -415,7 +437,8 @@ class MongoQueries:
                                 f"{column}": f"\+{item_search}",
                                 "isMain": True,
                             }
-                        }
+                        },
+                        "customer_status": True,
                     },
                     search_projections,
                 )
@@ -434,7 +457,8 @@ class MongoQueries:
                                 },
                                 "isMain": True,
                             }
-                        }
+                        },
+                        "customer_status": True,
                     },
                     search_projections,
                 )
@@ -448,12 +472,13 @@ class MongoQueries:
                         "phone": {
                             "$elemMatch": {
                                 f"{column}": {
-                                    "$regex": f"\Z\+{item_search}",
+                                    "$regex": rf"{item_search}\b",
                                     "$options": "i",
                                 },
                                 "isMain": True,
                             }
-                        }
+                        },
+                        "customer_status": True,
                     },
                     search_projections,
                 )
@@ -464,7 +489,7 @@ class MongoQueries:
         return response
 
     def filter_search_phone(self, constrain, item_search, column, skip, limit):
-        print(item_search)
+        # print(item_search)
         if item_search.find("+") > -1:
 
             item = item_search.replace(" ", "")

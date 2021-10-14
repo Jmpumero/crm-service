@@ -71,7 +71,8 @@ class Service(MongoQueries):
 
                 for customer in await cursor.to_list(length=None):
                     # print(customer)
-                    customers.append(SearchCustomers(**customer))
+                    # customers.append(SearchCustomers(**customer))
+                    customers.append(customer)
 
         else:
             if query_params.column_name.replace(" ", ""):

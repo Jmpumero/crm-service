@@ -49,6 +49,11 @@ class SocialMedia(BaseModel):
     customer_social_media: str
 
 
+class Addresses(BaseModel):
+    address: str
+    isMain: bool
+
+
 class CreateCustomerBody(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     name: str
@@ -56,7 +61,7 @@ class CreateCustomerBody(BaseModel):
     full_name: Optional[str]
     nationality: List[str]
     phone: List[Phones]
-    address: List[str]
+    address: List[Addresses]
     postal_address: str
     email: List[Emails]
     documentId: List[DocumentID]
@@ -100,7 +105,7 @@ class UpdateCustomerBody(BaseModel):
     full_name: Optional[str]
     nationality: Optional[List[str]]
     phone: Optional[List[Phones]]
-    address: Optional[List[str]]
+    address: Optional[List[Addresses]]
     postal_address: Optional[str]
     email: Optional[List[Emails]]
     documentId: Optional[List[DocumentID]]
@@ -136,7 +141,7 @@ class MergeCustomerBody(BaseModel):
     full_name: Optional[str]
     nationality: Optional[List[str]]
     phone: Optional[List[Phones]]
-    address: Optional[List[str]]
+    address: Optional[List[Addresses]]
     postal_address: Optional[str]
     email: Optional[List[Emails]]
     documentId: List[DocumentID]

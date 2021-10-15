@@ -32,6 +32,11 @@ class SocialMedia(BaseModel):
     customer_social_media: str
 
 
+class Addresses(BaseModel):
+    address: str
+    isMain: bool
+
+
 class SearchUpdate(BaseModel):
     id: str = Field(..., alias="_id")
     name: Optional[str]
@@ -39,7 +44,7 @@ class SearchUpdate(BaseModel):
     full_name: Optional[str]
     nationality: Optional[List[str]]
     phone: Optional[List[Phones]]
-    address: Optional[List[str]]
+    address: Optional[List[Addresses]]
     postal_address: Optional[str]
     email: Optional[List[Emails]]
     documentId: Optional[List[DocumentID]]
@@ -81,7 +86,7 @@ class SearchMerge(BaseModel):
     full_name: Optional[str]
     nationality: Optional[List[str]]
     phone: Optional[List[Phones]]
-    address: Optional[List[str]]
+    address: Optional[List[Addresses]]
     postal_address: Optional[str]
     email: Optional[List[Emails]]
     documentId: List[DocumentID]

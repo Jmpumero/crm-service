@@ -29,6 +29,11 @@ class Languages(BaseModel):
     isMain: bool
 
 
+class Addresses(BaseModel):
+    address: str
+    isMain: bool
+
+
 class BlacklistCustomer(BaseModel):
     id: str = Field(..., alias="_id")
     name: str
@@ -36,7 +41,7 @@ class BlacklistCustomer(BaseModel):
     age: int
     email: List[Emails]
     phone: List[Phones]
-    address: List[str]
+    address: List[Addresses]
     documentId: List[DocumentID]
     nationality: Optional[List[str]]
     civil_status: str
@@ -47,6 +52,9 @@ class BlacklistCustomer(BaseModel):
     blacklist_enable_motive: List[str]
     blacklist_disable_motive: List[str]
     stenant: Optional[Any]
+    email_main: Emails
+    phone_main: Phones
+    address_main: Addresses
 
     class Config:
         allow_population_by_field_name = True

@@ -90,13 +90,14 @@ class Service(MongoQueries):
                     for customer in await cursor.to_list(length=None):
 
                         # print(customer)
-                        customers.append(SearchCustomers(**customer))
+                        # customers.append(SearchCustomers(**customer))
+                        customers.append(customer)
 
             else:
                 print("Caso no valido error ")
 
         # response = self.build_response(customers, total_customer)
-
+        return customer
         return self.build_response_search(customers, total_customer)
 
     def build_response_search(
@@ -108,6 +109,7 @@ class Service(MongoQueries):
             "total_items": total_customer,
             "total_show": len(list_items),
         }
+        return finalresponse
         return SearchCustomersResponse(**finalresponse)
 
     def get_customer_notes_comments(self, customer_id: str) -> CustomerNotesAndcomments:

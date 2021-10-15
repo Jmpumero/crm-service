@@ -4,6 +4,9 @@ from ..schemas import CustomerProfileDetailResponse
 
 
 class ProfileDetailService(MongoQueries):
+    def __init__(self):
+        super().__init__()
+
     async def get_profile_details(self, customer_id: str) -> Any:
         customer = await self.customer.find_one({"_id": customer_id})
 

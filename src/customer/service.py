@@ -232,55 +232,6 @@ class Service(MongoQueries):
 
         return await self.update_customer_in_blacklist(body)
 
-    async def get_customer_sales_summary(self, customer_id):
-        customer_in_redis = await startup_result["redis_repository"].get(
-            str(customer_id)
-        )
-
-        if not customer_in_redis:
-            data = {
-                "total_revenue": [
-                    {"name": "upgrade_and_upselling", "quantity": 110},
-                    {"name": "food_and_beverage", "quantity": 150},
-                    {"name": "lodging", "quantity": 130},
-                ],
-                "frequent_visits": [
-                    {"name": "superior king", "quantity": 4},
-                    {"name": "king", "quantity": 2},
-                    {"name": "double", "quantity": 2},
-                ],
-                "most_contracted_services": [
-                    {"name": "extra key", "quantity": 118},
-                    {"name": "tablet rental", "quantity": 112},
-                    {"name": "spa access", "quantity": 220},
-                    {"name": "bottle of wine", "quantity": 80},
-                ],
-                "check_ins": [
-                    {"name": "complete", "quantity": 8},
-                    {"name": "no complete", "quantity": 2},
-                ],
-                "most_visited_pages": [
-                    {"name": "youtube", "quantity": 15},
-                    {"name": "twitter", "quantity": 7},
-                    {"name": "instagram", "quantity": 18},
-                    {"name": "google", "quantity": 44},
-                ],
-                "use_of_suite_applications": [],
-                "frequency_of_use_of_suite_applications": [
-                    {"name": "cast", "quantity": 7},
-                    {"name": "hostpod", "quantity": 11},
-                ],
-                "segment_where_it_is_located": [],
-            }
-
-            await startup_result["redis_repository"].set(
-                str(customer_id), json.dumps(data)
-            )
-
-            return data
-
-        return json.loads(customer_in_redis)
-
     async def post_create_customer(self, body: CreateCustomerBody):
 
         return await self.insert_one_customer(body)

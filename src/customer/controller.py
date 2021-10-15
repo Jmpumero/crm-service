@@ -18,6 +18,7 @@ from .services import (
     ProfileHeaderService,
     ProfileDetailService,
     MarketingSubscriptionsService,
+    SalesSummary,
 )
 from .schemas import SearchCustomersQueryParams, PutScoreCard
 
@@ -174,8 +175,8 @@ async def update_customer_in_blacklist(body: BlackListBody):
 
 @customers_router.get("/customers/{customer_id}/sales-summary")
 @remove_422
-async def get_customer_sales_summary(customer_id: int):
-    service = Service()
+async def get_customer_sales_summary(customer_id: str):
+    service = SalesSummary()
 
     return await service.get_customer_sales_summary(customer_id)
 

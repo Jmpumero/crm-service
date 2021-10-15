@@ -39,22 +39,22 @@ class BlacklistCustomer(BaseModel):
     name: str
     last_name: str
     age: int
-    email: List[Emails]
-    phone: List[Phones]
-    address: List[Addresses]
-    documentId: List[DocumentID]
+    email: Optional[List[Emails]] = ""
+    phone: Optional[List[Phones]] = ""
+    address: Optional[List[Addresses]] = ""
+    documentId: Optional[List[DocumentID]]
     nationality: Optional[List[str]]
-    civil_status: str
-    languages: List[Languages]
-    birthdate: str
-    associated_sensors: List[str]
+    civil_status: Optional[str]
+    languages: Optional[List[Languages]]
+    birthdate: Optional[str]
+    associated_sensors: Optional[List[str]]
     blacklist_status: bool
     blacklist_enable_motive: List[str]
     blacklist_disable_motive: List[str]
     stenant: Optional[Any]
-    email_main: Emails
-    phone_main: Phones
-    address_main: Addresses
+    email_main: Optional[Emails] = ""
+    phone_main: Optional[Phones] = ""
+    address_main: Optional[Addresses] = ""
 
     class Config:
         allow_population_by_field_name = True

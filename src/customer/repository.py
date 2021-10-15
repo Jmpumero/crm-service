@@ -68,7 +68,12 @@ search_projections = {
             {"$indexOfArray": ["$email.isMain", True]},
         ]
     },
-    "address": 1,
+    "address": {
+        "$arrayElemAt": [
+            "$address",
+            {"$indexOfArray": ["$address.isMain", True]},
+        ]
+    },
 }
 
 blacklist_customer_projections = {
@@ -132,255 +137,740 @@ class MongoQueries:
         return customer
 
     def find_all_customers(self, skip, limit, column, order, column_order):
-        if column_order:
-            if order.lower() == "desc":
 
-                customers = (
-                    self.customer.find({}, search_projections)
-                    .skip(skip)
-                    .limit(limit)
-                    .sort(column_order, pymongo.DESCENDING)
+        if column_order == "email":
+            if order.lower() == "desc":
+                # print(order)
+                customers = self.customer.aggregate(
+                    [
+                        {
+                            "$facet": {
+                                "items": [
+                                    {"$match": {"customer_status": True}},
+                                    {"$skip": skip},
+                                    {"$limit": limit},
+                                    {"$project": search_projections},
+                                    {
+                                        "$sort": {
+                                            "email.email": -1,
+                                            "_id": 1,
+                                        }
+                                    },
+                                ],
+                                "total_items": [
+                                    {"$match": {"customer_status": True}},
+                                    {"$count": "total"},
+                                ],
+                            }
+                        }
+                    ]
                 )
             else:
+                customers = self.customer.aggregate(
+                    [
+                        {
+                            "$facet": {
+                                "items": [
+                                    {"$match": {"customer_status": True}},
+                                    {"$skip": skip},
+                                    {"$limit": limit},
+                                    {"$project": search_projections},
+                                    {
+                                        "$sort": {
+                                            "email.email": 1,
+                                            "_id": 1,
+                                        }
+                                    },
+                                ],
+                                "total_items": [
+                                    {"$match": {"customer_status": True}},
+                                    {"$count": "total"},
+                                ],
+                            }
+                        }
+                    ]
+                )
 
-                customers = (
-                    self.customer.find({}, search_projections)
-                    .skip(skip)
-                    .limit(limit)
-                    .sort(column, pymongo.ASCENDING)
+        elif column_order:
+            if order.lower() == "desc":
+                # print(order)
+                customers = self.customer.aggregate(
+                    [
+                        {
+                            "$facet": {
+                                "items": [
+                                    {"$match": {"customer_status": True}},
+                                    {"$skip": skip},
+                                    {"$limit": limit},
+                                    {"$project": search_projections},
+                                    {
+                                        "$sort": {
+                                            f"{column_order}": -1,
+                                            "_id": 1,
+                                        }
+                                    },
+                                ],
+                                "total_items": [
+                                    {"$match": {"customer_status": True}},
+                                    {"$count": "total"},
+                                ],
+                            }
+                        }
+                    ]
+                )
+            else:
+                # print(order)
+                customers = self.customer.aggregate(
+                    [
+                        {
+                            "$facet": {
+                                "items": [
+                                    {"$match": {"customer_status": True}},
+                                    {"$skip": skip},
+                                    {"$limit": limit},
+                                    {"$project": search_projections},
+                                    {
+                                        "$sort": {
+                                            f"{column_order}": 1,
+                                            "_id": 1,
+                                        }
+                                    },
+                                ],
+                                "total_items": [
+                                    {"$match": {"customer_status": True}},
+                                    {"$count": "total"},
+                                ],
+                            }
+                        }
+                    ]
                 )
         else:
-            customers = (
-                self.customer.find(
-                    {},
-                    search_projections,
-                )
-                .skip(skip)
-                .limit(limit)
+            customers = self.customer.aggregate(
+                [
+                    {
+                        "$facet": {
+                            "items": [
+                                {"$match": {"customer_status": True}},
+                                {"$skip": skip},
+                                {"$limit": limit},
+                                {"$project": search_projections},
+                                {
+                                    "$sort": {
+                                        f"{column_order}": 1,
+                                        "_id": 1,
+                                    }
+                                },
+                            ],
+                            "total_items": [
+                                {"$match": {"customer_status": True}},
+                                {"$count": "total"},
+                            ],
+                        }
+                    }
+                ]
             )
 
         return customers
 
     def search_customer_name(
-        self, constrain, item_search, column, skip, limit, order, column_order
+        self, constrain, item_search, column, skip, limit, order_sort, column_order
     ):
-
+        # print(column_order)
+        # print(column)
+        # print(constrain)
+        order = 1
+        if order_sort == "desc":
+            order = -1
         response = ""
         if constrain == "contain":
 
-            # busca en el campo nombre, aquellos que contenga  'variable' en minscula y mayuscula
-            return (
-                self.customer.find(
+            return self.customer.aggregate(
+                [
                     {
-                        f"{column}": {
-                            "$regex": f".*{item_search}.*",
-                            "$options": "i",
+                        "$facet": {
+                            "items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        f"{column}": {
+                                            "$regex": f".*{item_search}.*",
+                                            "$options": "i",
+                                        }
+                                    }
+                                },
+                                {"$project": search_projections},
+                                {"$skip": skip},
+                                {"$limit": limit},
+                                {
+                                    "$sort": {
+                                        f"{column_order}": order,
+                                        "_id": 1,
+                                    }
+                                },
+                            ],
+                            "total_items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        f"{column}": {
+                                            "$regex": f".*{item_search}.*",
+                                            "$options": "i",
+                                        }
+                                    }
+                                },
+                                {"$project": search_projections},
+                                {"$count": "total"},
+                            ],
                         }
-                    },
-                    search_projections,
-                )
-                .skip(skip)
-                .limit(limit)
+                    }
+                ]
             )
+
         if constrain == "equal_to":
 
-            return (
-                self.customer.find(
-                    {f"{column}": {"$eq": f"{item_search}"}}, search_projections
-                )
-                .skip(skip)
-                .limit(limit)
+            return self.customer.aggregate(
+                [
+                    {
+                        "$facet": {
+                            "items": [
+                                {"$match": {"customer_status": True}},
+                                {"$match": {f"{column}": {"$eq": f"{item_search}"}}},
+                                {"$project": search_projections},
+                                {"$skip": skip},
+                                {"$limit": limit},
+                                {
+                                    "$sort": {
+                                        f"{column_order}": order,
+                                        "_id": 1,
+                                    }
+                                },
+                            ],
+                            "total_items": [
+                                {"$match": {"customer_status": True}},
+                                {"$match": {f"{column}": {"$eq": f"{item_search}"}}},
+                                {"$project": search_projections},
+                                {"$count": "total"},
+                            ],
+                        }
+                    }
+                ]
             )
         if constrain == "starts_by":
-            return (
-                self.customer.find(
+
+            return self.customer.aggregate(
+                [
                     {
-                        f"{column}": {
-                            "$regex": f"\A{item_search}|\A{item_search.capitalize()}"
+                        "$facet": {
+                            "items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        f"{column}": {
+                                            "$regex": f"\A{item_search}",
+                                            "$options": "i",
+                                        }
+                                    }
+                                },
+                                {"$project": search_projections},
+                                {"$skip": skip},
+                                {"$limit": limit},
+                                {
+                                    "$sort": {
+                                        f"{column_order}": order,
+                                        "_id": 1,
+                                    }
+                                },
+                            ],
+                            "total_items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        f"{column}": {
+                                            "$regex": f".*{item_search}.*",
+                                            "$options": "i",
+                                        }
+                                    }
+                                },
+                                {"$project": search_projections},
+                                {"$count": "total"},
+                            ],
                         }
-                    },
-                    search_projections,
-                )
-                .skip(skip)
-                .limit(limit)
+                    }
+                ]
             )
+
         if constrain == "ends_by":
-            return (
-                self.customer.find(
+
+            return self.customer.aggregate(
+                [
                     {
-                        f"{column}": {
-                            "$regex": f"\Z{item_search}|\Z{item_search.capitalize()}"
+                        "$facet": {
+                            "items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        f"{column}": {
+                                            "$regex": rf"{item_search}\b",
+                                            "$options": "i",
+                                        }
+                                    }
+                                },
+                                {"$project": search_projections},
+                                {"$skip": skip},
+                                {"$limit": limit},
+                                {
+                                    "$sort": {
+                                        f"{column_order}": order,
+                                        "_id": 1,
+                                    }
+                                },
+                            ],
+                            "total_items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        f"{column}": {
+                                            "$regex": rf"{item_search}\b",
+                                            "$options": "i",
+                                        }
+                                    }
+                                },
+                                {"$project": search_projections},
+                                {"$count": "total"},
+                            ],
                         }
-                    },
-                    search_projections,
-                )
-                .skip(skip)
-                .limit(limit)
+                    }
+                ]
             )
 
     def search_customer_email(
-        self, constrain, item_search, column, skip, limit, order, column_order
+        self, constrain, item_search, column, skip, limit, sort_order, column_order
     ):
+        # print(column_order)
+        # print(column)
+        # print(sort_order)
+        order = 1
+        if sort_order == "desc":
+            order = -1
         response = None
         if constrain == "contain":
-            response = (
-                self.customer.find(
+
+            response = self.customer.aggregate(
+                [
                     {
-                        "email": {
-                            "$elemMatch": {
-                                "email": {
-                                    "$regex": f".*{item_search.lower()}.*",
-                                    "$options": "i",
+                        "$facet": {
+                            "items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        "email": {
+                                            "$elemMatch": {
+                                                "email": {
+                                                    "$regex": f".*{item_search.lower()}.*",
+                                                    "$options": "i",
+                                                },
+                                                "isMain": True,
+                                            }
+                                        }
+                                    }
                                 },
-                                "isMain": True,
-                            }
+                                {"$project": search_projections},
+                                {"$skip": skip},
+                                {"$limit": limit},
+                                {
+                                    "$sort": {
+                                        f"{column_order}": order,
+                                        "_id": 1,
+                                    }
+                                },
+                            ],
+                            "total_items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        "email": {
+                                            "$elemMatch": {
+                                                "email": {
+                                                    "$regex": f".*{item_search.lower()}.*",
+                                                    "$options": "i",
+                                                },
+                                                "isMain": True,
+                                            }
+                                        }
+                                    }
+                                },
+                                {"$project": search_projections},
+                                {"$count": "total"},
+                            ],
                         }
-                    },
-                    search_projections,
-                )
-                .skip(skip)
-                .limit(limit)
+                    }
+                ]
             )
+
         if constrain == "equal_to":
 
-            response = (
-                self.customer.find(
-                    {"email": {"email": f"{item_search}", "isMain": True}},
-                    search_projections,
-                )
-                .skip(skip)
-                .limit(limit)
+            response = self.customer.aggregate(
+                [
+                    {
+                        "$facet": {
+                            "items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        "email": {
+                                            "email": f"{item_search}",
+                                            "isMain": True,
+                                        }
+                                    }
+                                },
+                                {"$project": search_projections},
+                                {"$skip": skip},
+                                {"$limit": limit},
+                                {
+                                    "$sort": {
+                                        f"{column_order}": order,
+                                        "_id": 1,
+                                    }
+                                },
+                            ],
+                            "total_items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        "$match": {
+                                            "email": {
+                                                "email": f"{item_search}",
+                                                "isMain": True,
+                                            }
+                                        }
+                                    }
+                                },
+                                {"$project": search_projections},
+                                {"$count": "total"},
+                            ],
+                        }
+                    }
+                ]
             )
+
         if constrain == "starts_by":
-            response = (
-                self.customer.find(
+
+            response = self.customer.aggregate(
+                [
                     {
-                        "email": {
-                            "$elemMatch": {
-                                "email": {
-                                    "$regex": f"\A{item_search}",
-                                    "$options": "i",
+                        "$facet": {
+                            "items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        "email": {
+                                            "$elemMatch": {
+                                                "email": {
+                                                    "$regex": f"\A{item_search}",
+                                                    "$options": "i",
+                                                },
+                                                "isMain": True,
+                                            }
+                                        }
+                                    }
                                 },
-                                "isMain": True,
-                            }
+                                {"$project": search_projections},
+                                {"$skip": skip},
+                                {"$limit": limit},
+                                {
+                                    "$sort": {
+                                        f"{column_order}": order,
+                                        "_id": 1,
+                                    }
+                                },
+                            ],
+                            "total_items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        "email": {
+                                            "$elemMatch": {
+                                                "email": {
+                                                    "$regex": f"\A{item_search}",
+                                                    "$options": "i",
+                                                },
+                                                "isMain": True,
+                                            }
+                                        }
+                                    }
+                                },
+                                {"$project": search_projections},
+                                {"$count": "total"},
+                            ],
                         }
-                    },
-                    search_projections,
-                )
-                .skip(skip)
-                .limit(limit)
+                    }
+                ]
             )
+
         if constrain == "ends_by":
-            response = (
-                self.customer.find(
+
+            response = self.customer.aggregate(
+                [
                     {
-                        "email": {
-                            "$elemMatch": {
-                                "email": {
-                                    "$regex": f"\Z{item_search}",
-                                    "$options": "i",
+                        "$facet": {
+                            "items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        "email": {
+                                            "$elemMatch": {
+                                                "email": {
+                                                    "$regex": rf"{item_search}\b",
+                                                    "$options": "i",
+                                                },
+                                                "isMain": True,
+                                            }
+                                        }
+                                    }
                                 },
-                                "isMain": True,
-                            }
+                                {"$project": search_projections},
+                                {"$skip": skip},
+                                {"$limit": limit},
+                                {
+                                    "$sort": {
+                                        f"{column_order}": order,
+                                        "_id": 1,
+                                    }
+                                },
+                            ],
+                            "total_items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        "email": {
+                                            "$elemMatch": {
+                                                "email": {
+                                                    "$regex": rf"{item_search}\b",
+                                                    "$options": "i",
+                                                },
+                                                "isMain": True,
+                                            }
+                                        }
+                                    }
+                                },
+                                {"$project": search_projections},
+                                {"$count": "total"},
+                            ],
                         }
-                    },
-                    search_projections,
-                )
-                .skip(skip)
-                .limit(limit)
+                    }
+                ]
             )
 
-        if column_order:
-
-            if order.lower() == "desc":
-
-                return response.sort(column_order, pymongo.DESCENDING)
-            else:
-                return response.sort(column_order, pymongo.ASCENDING)
-
-        else:
-            return response
-
-        # return response
+        return response
 
     def search_phone_local(self, constrain, item_search, column, skip, limit):
         response = ""
 
+        print(column)
+        print(constrain)
+
         if constrain == "contain":
-            return (
-                self.customer.find(
+
+            return self.customer.aggregate(
+                [
                     {
-                        "phone": {
-                            "$elemMatch": {
-                                f"{column}": {
-                                    "$regex": f".*{item_search.lower()}.*",
-                                    "$options": "i",
+                        "$facet": {
+                            "items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        "phone": {
+                                            "$elemMatch": {
+                                                f"{column}": {
+                                                    "$regex": f".*{item_search.lower()}.*",
+                                                    "$options": "i",
+                                                },
+                                                "isMain": True,
+                                            }
+                                        }
+                                    }
                                 },
-                                "isMain": True,
-                            }
+                                {"$project": search_projections},
+                                {"$skip": skip},
+                                {"$limit": limit},
+                                # {
+                                #     "$sort": {
+                                #         f"{column_order}": order,
+                                #         "_id": 1,
+                                #     }
+                                # },
+                            ],
+                            "total_items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        "phone": {
+                                            "$elemMatch": {
+                                                f"{column}": {
+                                                    "$regex": f".*{item_search.lower()}.*",
+                                                    "$options": "i",
+                                                },
+                                                "isMain": True,
+                                            }
+                                        }
+                                    }
+                                },
+                                {"$project": search_projections},
+                                {"$count": "total"},
+                            ],
                         }
-                    },
-                    search_projections,
-                )
-                .skip(skip)
-                .limit(limit)
+                    }
+                ]
             )
+
         if constrain == "equal_to":
 
-            return (
-                self.customer.find(
+            return self.customer.aggregate(
+                [
                     {
-                        "phone": {
-                            "$elemMatch": {
-                                f"{column}": f"{item_search}",
-                                "isMain": True,
-                            }
+                        "$facet": {
+                            "items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        "phone": {
+                                            "$elemMatch": {
+                                                f"{column}": f"{item_search}",
+                                                "isMain": True,
+                                            }
+                                        }
+                                    }
+                                },
+                                {"$project": search_projections},
+                                {"$skip": skip},
+                                {"$limit": limit},
+                                # {
+                                #     "$sort": {
+                                #         f"{column_order}": order,
+                                #         "_id": 1,
+                                #     }
+                                # },
+                            ],
+                            "total_items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "phone": {
+                                        "$elemMatch": {
+                                            f"{column}": f"{item_search}",
+                                            "isMain": True,
+                                        }
+                                    }
+                                },
+                                {"$project": search_projections},
+                                {"$count": "total"},
+                            ],
                         }
-                    },
-                    search_projections,
-                )
-                .skip(skip)
-                .limit(limit)
+                    }
+                ]
             )
         if constrain == "starts_by":
-            return (
-                self.customer.find(
+
+            return self.customer.aggregate(
+                [
                     {
-                        "phone": {
-                            "$elemMatch": {
-                                f"{column}": {
-                                    "$regex": f"\A{item_search}",
-                                    "$options": "i",
+                        "$facet": {
+                            "items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        "phone": {
+                                            "$elemMatch": {
+                                                f"{column}": {
+                                                    "$regex": f"\A{item_search}",
+                                                    "$options": "i",
+                                                },
+                                                "isMain": True,
+                                            }
+                                        }
+                                    }
                                 },
-                                "isMain": True,
-                            }
-                        }
-                    },
-                    search_projections,
-                )
-                .skip(skip)
-                .limit(limit)
-            )
-        if constrain == "ends_by":
-            return (
-                self.customer.find(
-                    {
-                        "phone": {
-                            "$elemMatch": {
-                                f"{column}": {
-                                    "$regex": f"\Z{item_search}",
-                                    "$options": "i",
+                                {"$project": search_projections},
+                                {"$skip": skip},
+                                {"$limit": limit},
+                                # {
+                                #     "$sort": {
+                                #         f"{column_order}": order,
+                                #         "_id": 1,
+                                #     }
+                                # },
+                            ],
+                            "total_items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "phone": {
+                                        "$elemMatch": {
+                                            f"{column}": {
+                                                "$regex": f"\A{item_search}",
+                                                "$options": "i",
+                                            },
+                                            "isMain": True,
+                                        }
+                                    }
                                 },
-                                "isMain": True,
-                            }
+                                {"$project": search_projections},
+                                {"$count": "total"},
+                            ],
                         }
-                    },
-                    search_projections,
-                )
-                .skip(skip)
-                .limit(limit)
+                    }
+                ]
             )
 
+        if constrain == "ends_by":
+
+            return self.customer.aggregate(
+                [
+                    {
+                        "$facet": {
+                            "items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        "phone": {
+                                            "$elemMatch": {
+                                                f"{column}": {
+                                                    "$regex": rf"{item_search}\b",
+                                                    "$options": "i",
+                                                },
+                                                "isMain": True,
+                                            }
+                                        }
+                                    }
+                                },
+                                {"$project": search_projections},
+                                {"$skip": skip},
+                                {"$limit": limit},
+                                # {
+                                #     "$sort": {
+                                #         f"{column_order}": order,
+                                #         "_id": 1,
+                                #     }
+                                # },
+                            ],
+                            "total_items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "phone": {
+                                        "$elemMatch": {
+                                            f"{column}": {
+                                                "$regex": rf"{item_search}\b",
+                                                "$options": "i",
+                                            },
+                                            "isMain": True,
+                                        }
+                                    }
+                                },
+                                {"$project": search_projections},
+                                {"$count": "total"},
+                            ],
+                        }
+                    }
+                ]
+            )
         return response
 
     def search_phone_intl(self, constrain, item_search, column, skip, limit):
@@ -398,7 +888,8 @@ class MongoQueries:
                                 },
                                 "isMain": True,
                             }
-                        }
+                        },
+                        "customer_status": True,
                     },
                     search_projections,
                 )
@@ -415,7 +906,8 @@ class MongoQueries:
                                 f"{column}": f"\+{item_search}",
                                 "isMain": True,
                             }
-                        }
+                        },
+                        "customer_status": True,
                     },
                     search_projections,
                 )
@@ -434,7 +926,8 @@ class MongoQueries:
                                 },
                                 "isMain": True,
                             }
-                        }
+                        },
+                        "customer_status": True,
                     },
                     search_projections,
                 )
@@ -448,12 +941,13 @@ class MongoQueries:
                         "phone": {
                             "$elemMatch": {
                                 f"{column}": {
-                                    "$regex": f"\Z\+{item_search}",
+                                    "$regex": rf"{item_search}\b",
                                     "$options": "i",
                                 },
                                 "isMain": True,
                             }
-                        }
+                        },
+                        "customer_status": True,
                     },
                     search_projections,
                 )
@@ -464,7 +958,7 @@ class MongoQueries:
         return response
 
     def filter_search_phone(self, constrain, item_search, column, skip, limit):
-        print(item_search)
+        # print(item_search)
         if item_search.find("+") > -1:
 
             item = item_search.replace(" ", "")
@@ -486,7 +980,7 @@ class MongoQueries:
                 constrain, item_search, column, skip, limit, order, column_order
             )
         elif column == "phone":
-
+            # print(column)
             response = self.filter_search_phone(
                 constrain, item_search, column, skip, limit
             )
@@ -503,20 +997,20 @@ class MongoQueries:
                 constrain, item_search, column, skip, limit, order, column_order
             )
 
-        if response:
-            if column_order:
+        # if response:
+        #     if column_order:
 
-                if column_order == "email":
-                    column_order = column_order + ".email"
+        #         if column_order == "email":
+        #             column_order = column_order + ".email"
 
-                if column_order == "phone":
-                    column_order = column_order + ".intl_format"
+        #         if column_order == "phone":
+        #             column_order = column_order + ".intl_format"
 
-                if order.lower() == "desc":
-                    print(column_order)
-                    return response.sort(column_order, pymongo.DESCENDING)
-                else:
-                    return response.sort(column_order, pymongo.ASCENDING)
+        #         if order.lower() == "desc":
+        #             print(column_order)
+        #             return response.sort(column_order, pymongo.DESCENDING)
+        #         else:
+        #             return response.sort(column_order, pymongo.ASCENDING)
 
         return response
 

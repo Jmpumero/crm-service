@@ -55,6 +55,11 @@ class Languages(BaseModel):
     isMain: bool
 
 
+class Addresses(BaseModel):
+    address: str
+    isMain: bool
+
+
 class SearchCustomers(BaseModel):
     id: str = Field(..., alias="_id")
     # id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
@@ -67,7 +72,7 @@ class SearchCustomers(BaseModel):
     documentId: Optional[List[DocumentID]]
     nationality: Optional[List[str]]
     civil_status: Optional[str]
-    booking_id: Optional[str] = "1234"
+    booking_id: Optional[str] = "1234rtyu345"
 
     class Config:
         allow_population_by_field_name = True

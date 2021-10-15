@@ -63,13 +63,13 @@ class Addresses(BaseModel):
 class SearchCustomers(BaseModel):
     id: str = Field(..., alias="_id")
     # id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    name: str
-    last_name: str
-    age: int
+    name: Optional[str]
+    last_name: Optional[str]
+    age: Optional[int]
     email: Emails
     phone: Optional[Phones]
-    address: Optional[Addresses]
-    documentId: List[DocumentID]
+    address: Optional[List[Any]]
+    documentId: Optional[List[DocumentID]]
     nationality: Optional[List[str]]
     civil_status: Optional[str]
     booking_id: Optional[str] = "1234rtyu345"

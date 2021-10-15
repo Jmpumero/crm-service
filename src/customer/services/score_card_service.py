@@ -164,6 +164,9 @@ example model of score:
 
 
 class ScoreCardService(MongoQueries):
+    def __init__(self):
+        super().__init__()
+
     async def get_customer_score_card(self, customer_id: str):
         customer = await self.customer.find_one(
             {"_id": customer_id}, {"score": 1, "_id": 0}

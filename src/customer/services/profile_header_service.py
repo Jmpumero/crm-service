@@ -25,7 +25,7 @@ class ProfileHeaderService(MongoQueries):
             "languages": [language.get("language", None) for language in languages],
             "country": customer.get("country", None),
             "membership": "?",
-            "gender": "NO BINARY KEK",
+            "gender": "M",
             "age": customer.get("age", None),
             "next_hotel_stay": "random hotel",
             "next_stay_date": "25/10/2021",

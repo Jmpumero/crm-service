@@ -4,30 +4,22 @@ from ..schemas import CustomerProfileDetailResponse
 
 
 class ProfileDetailService(MongoQueries):
+    def __init__(self):
+        super().__init__()
+
     async def get_profile_details(self, customer_id: str) -> Any:
         customer = await self.customer.find_one({"_id": customer_id})
-        customer_phones = customer.get("phone") or []
 
         if not customer:
             return {}
 
+        customer_phones = customer.get("phone") or []
+
         data = {
             "most_visited_hotel": "random hotel",
             "recency": "?",
-            "email": "".join(
-                [
-                    emailDict["email"]
-                    for emailDict in customer.get("email")
-                    if emailDict.get("isMain", False)
-                ]
-            ),
-            "phone": "".join(
-                [
-                    customerDict["intl_format"]
-                    for customerDict in customer_phones
-                    if customerDict["isMain"]
-                ]
-            ),
+            "email": [emailDict["email"] for emailDict in customer.get("email")],
+            "phone": [customerDict["intl_format"] for customerDict in customer_phones],
             "social_networks": [
                 {"name": "Instagram", "username": "@randomuser"},
                 {"name": "Facebook", "username": "@randomuserfacebook"},

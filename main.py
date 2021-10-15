@@ -47,7 +47,6 @@ remove_422s(app)
 
 @app.get("/")
 async def read_root() -> dict[str, str]:
-    print(startup_result)
     return {
         "Hello": "World"
     }  # cuenta la leyenda que si borras el hola mundo te ira mal el resto del proyecto

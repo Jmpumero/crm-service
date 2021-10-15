@@ -12,10 +12,11 @@ class ProfileHeaderService(MongoQueries):
 
     async def get_profile_header(self, customer_id: str) -> Any:
         customer = await self.customer.find_one({"_id": customer_id})
-        languages = customer.get("language") or []
 
         if not customer:
             return {}
+
+        languages = customer.get("language") or []
 
         data = {
             "_id": customer.get("_id", None),
@@ -24,7 +25,7 @@ class ProfileHeaderService(MongoQueries):
             "languages": [language.get("language", None) for language in languages],
             "country": customer.get("country", None),
             "membership": "?",
-            "gender": "NO BINARY KEK",
+            "gender": "M",
             "age": customer.get("age", None),
             "next_hotel_stay": "random hotel",
             "next_stay_date": "25/10/2021",

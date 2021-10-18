@@ -42,3 +42,21 @@ class ProfileDetailService(MongoQueries):
         }
 
         return CustomerProfileDetailResponse(**data)
+
+    async def get_contact_modal_info(self, customer_id: str):
+        customer = await self.customer.find_one({"_id": customer_id})
+
+        if not customer:
+            return {}
+
+        emails = customer.get("email")
+        phones = customer.get("phone")
+        addresses = customer.get("address")
+        social_medias = customer.get("social_media")
+
+        return {
+            "emails": emails,
+            "phones": phones,
+            "addresses": addresses,
+            "social_medias": social_medias,
+        }

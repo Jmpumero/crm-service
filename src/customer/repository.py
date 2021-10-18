@@ -446,9 +446,15 @@ class MongoQueries:
     def search_customer_email(
         self, constrain, item_search, column, skip, limit, sort_order, column_order
     ):
+
         # print(column_order)
         # print(column)
-        # print(sort_order)
+
+        if column_order == "email":
+            column_order = column_order + ".email"
+        if column_order == "phone":
+            column_order = column_order + ".phone"
+
         order = 1
         if sort_order == "desc":
             order = -1
@@ -996,21 +1002,6 @@ class MongoQueries:
             response = self.search_customer_name(
                 constrain, item_search, column, skip, limit, order, column_order
             )
-
-        # if response:
-        #     if column_order:
-
-        #         if column_order == "email":
-        #             column_order = column_order + ".email"
-
-        #         if column_order == "phone":
-        #             column_order = column_order + ".intl_format"
-
-        #         if order.lower() == "desc":
-        #             print(column_order)
-        #             return response.sort(column_order, pymongo.DESCENDING)
-        #         else:
-        #             return response.sort(column_order, pymongo.ASCENDING)
 
         return response
 

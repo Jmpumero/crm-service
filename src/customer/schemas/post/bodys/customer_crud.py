@@ -75,7 +75,7 @@ class CreateCustomerBody(BaseModel):
     customer_status: bool = True
     blacklist_status: bool = False
     associated_sensors: Optional[List[str]] = []
-    country: Optional[str] = None
+    country: Optional[str] = ""
     city: Optional[str]
     postalCode: Optional[str]
     blacklist_enable_motive: Optional[List[str]] = []

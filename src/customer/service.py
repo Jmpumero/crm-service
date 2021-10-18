@@ -57,6 +57,7 @@ class Service(MongoQueries):
         customers = []
         cursor = None
         total_customer = await self.total_customer()
+        customer = None
 
         if query_params.query == "":
 
@@ -71,11 +72,11 @@ class Service(MongoQueries):
 
                 for customer in await cursor.to_list(length=None):
                     # print(customer)
-                    # customers.append(SearchCustomers(**customer))
+
                     customers.append(customer)
 
         else:
-            if query_params.column_name.replace(" ", ""):
+            if query_params.column_name.replace(" ", "") and query_params.contain != "":
 
                 cursor = self.filter_search_customers(
                     query_params.contain,
@@ -86,7 +87,8 @@ class Service(MongoQueries):
                     query_params.order,
                     query_params.column_order,
                 )
-                if cursor:
+                if cursor != None:
+
                     for customer in await cursor.to_list(length=None):
 
                         # print(customer)
@@ -96,21 +98,14 @@ class Service(MongoQueries):
             else:
                 print("Caso no valido error ")
 
-        # response = self.build_response(customers, total_customer)
-        return customer
-        return self.build_response_search(customers, total_customer)
+        if customer != None:
 
-    def build_response_search(
-        self, list_items, total_customer
-    ) -> SearchCustomersResponse:
-
-        finalresponse = {
-            "customers": list_items,
-            "total_items": total_customer,
-            "total_show": len(list_items),
-        }
-        return finalresponse
-        return SearchCustomersResponse(**finalresponse)
+            return SearchCustomersResponse(**customer)
+        else:
+            resp = {}
+            resp["items"] = []
+            resp["total_items"] = 0
+            return resp
 
     def get_customer_notes_comments(self, customer_id: str) -> CustomerNotesAndcomments:
 
@@ -291,7 +286,7 @@ class Service(MongoQueries):
         response = await self.delete_one_customer(customer_id)
 
         if response != None:
-            response = {"msg": " Success Customer Update ", "code": 200}
+            response = {"msg": " Success Customer deleted ", "code": 204}
         else:
             response = {
                 "msg": " Failed Customer Delete, Customer not found ",

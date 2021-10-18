@@ -108,6 +108,8 @@ blacklist_customer_projections = {
     },
 }
 
+
+
 # search_update_projections = {"blacklist_status": 0}
 
 
@@ -120,6 +122,7 @@ class MongoQueries:
         self.pms_collection = self.connection.pms_collection
         self.butler_collection = self.connection.butler_collection
         self.cast_collection = self.connection.cast_collection
+        self.hotspot_collection = self.connection.hotspot_collection
 
     # Metodos de Queries para el servicio de Clientes
 

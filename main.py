@@ -12,6 +12,7 @@ from core import on_startup, on_shutdown, startup_result
 from error_handlers import validation_error, bad_gateway, bad_request, unauthorized
 from utils.remove_422 import remove_422s
 from src.customer.controller import customers_router
+from src.customer.profile_sensors_endpoint.controller import sensor_router
 
 
 global_settings = Settings()
@@ -32,6 +33,7 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+app.include_router(sensor_router)
 app.include_router(customers_router)
 app.include_router(get_openapi_router(app))
 

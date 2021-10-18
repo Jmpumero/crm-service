@@ -9,7 +9,7 @@ from error_handlers.schemas.unauthorized import UnauthorizedError
 from error_handlers.schemas.validation_error import CustomValidationError
 from utils.remove_422 import remove_422
 
-from ..services.cast_service import ProfileSensorsService
+from ..services.cast_service import CastService
 from ..schemas.response.customers_sensors import CastResponse
 
 from config.config import Settings
@@ -29,7 +29,7 @@ sensor_router = APIRouter(
     response_model=CastResponse,
     response_model_exclude_unset=True,
     responses={400: {"model": CustomValidationError}},
-    status_code=201,
+    status_code=200,
 )
 @remove_422
 async def get_cast(customer_id: str, sensor: str):
@@ -37,7 +37,7 @@ async def get_cast(customer_id: str, sensor: str):
     Get sensor data from DW :
     """
     
-    cast_stats = ProfileSensorsService()
+    cast_stats = CastService()
 
     
     return await cast_stats.get_cast_stats(customer_id, sensor)

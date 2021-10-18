@@ -48,18 +48,28 @@ from error_handlers.bad_gateway import BadGatewayException
 
 global_settings = Settings()
 
-aggregation_connections = {
+connections_proy = {
     '_id':0, 
     'customer_id':1, 
     'data.startDate': 1
 }
 
-aggregation_playback = {
+playback_proy = {
     '_id':0,
     'customer_id': 1,
     'data.playback_pair.metadata.title': 1,
     'data.playback_pair.endDate':1,
     'data.playback_pair.startDate':1,    
+}
+
+history_proy = {
+    '_id': 0,
+    'data.startDate': 1,
+    'data.playback_pair.appName': 1,
+    'data.playback_pair.content': 1,
+    'data.playback_pair.startDate': 1,
+    'data.playback_pair.endDate': 1,
+    'data.deviceId': 1
 }
 
 class CastQueries(MongoQueries):
@@ -83,7 +93,7 @@ class CastQueries(MongoQueries):
         if sensor == 'sensor_1':
             result = None
         elif sensor == 'sensor_2':
-            result = self.cast_collection.find({'customer_id': customer_id}, aggregation_connections
+            result = self.cast_collection.find({'customer_id': customer_id}, connections_proy
                                                ).sort([('data.startDate', 1)]).limit(1)
         elif sensor == 'sensor_3':
             result = None
@@ -96,7 +106,7 @@ class CastQueries(MongoQueries):
         if sensor == 'sensor_1':
             result = None
         elif sensor == 'sensor_2':
-            result = self.cast_collection.find({'customer_id': customer_id}, aggregation_connections).sort([('data.startDate', -1)]).limit(1)
+            result = self.cast_collection.find({'customer_id': customer_id}, connections_proy).sort([('data.startDate', -1)]).limit(1)
         elif sensor == 'sensor_3':
             result = None
         elif sensor == 'sensor_4':
@@ -104,13 +114,19 @@ class CastQueries(MongoQueries):
 
         return result
 
-    def most_used_device(self):
-        pass
-
     def last_playback(self, customer_id):
-        result = self.cast_collection.find({'customer_id': customer_id}, aggregation_playback).sort([('data.startDate', -1)]).limit(1)
+        result = self.cast_collection.find({'customer_id': customer_id}, playback_proy).sort([('data.startDate', -1)]).limit(1)
 
         return result
 
-    def playback_history(self):
-        pass
+    def playback_history(self, customer_id, sensor):
+        if sensor == 'sensor_1':
+            result = None
+        elif sensor == 'sensor_2':
+            result = self.cast_collection.find({'customer_id': customer_id}, history_proy)
+        elif sensor == 'sensor_3':
+            result = None
+        elif sensor == 'sensor_4':
+            result = None
+
+        return result

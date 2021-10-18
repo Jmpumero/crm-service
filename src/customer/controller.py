@@ -212,7 +212,7 @@ async def update_customer(
     return await service.update_customer(body)
 
 
-@customers_router.delete("/customer/{customer_id}")
+@customers_router.delete("/customer/{customer_id}", response_model=CustomerCRUDResponse)
 @remove_422
 async def delete_customer(customer_id: str):
 

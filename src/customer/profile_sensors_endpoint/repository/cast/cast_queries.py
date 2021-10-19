@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any, List
 from collections import OrderedDict
-import pymongo
+from bson.son import SON
 from config.config import Settings
 from core.connection.connection import ConnectionMongo as DwConnection
 from dateutil.relativedelta import relativedelta
@@ -130,3 +130,13 @@ class CastQueries(MongoQueries):
             result = None
 
         return result
+
+    def group_by_most_used_app(self, customer_id):
+        pipeline = [
+            {'$match': { 'customer_id': customer_id } },
+            {"$group": {"_id": "$data.playback_pair.appName", "count": {"$sum": 1}}},
+            {"$sort": SON([("count", -1), ("_id", -1)])}
+        ]
+        most_used = self.cast_collection.aggregate(pipeline)
+
+        return most_used

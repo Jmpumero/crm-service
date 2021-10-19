@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 
 class MostVisitedApp(BaseModel):
-    app_name: Optional[int]
+    app_name: Optional[str]
     app_avg_visit_time: Optional[str]
     app_usual_visit_hour: Optional[str]
 

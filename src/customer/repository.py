@@ -17,6 +17,7 @@ from src.customer.schemas.get.responses.segmenter import (
     SegmenterResponse,
     SegmenterTable,
 )
+from core.connection.connection import ConnectionMongo
 
 # from src.customer.schemas.get.responses.cross_selling import CrossSellingResponse
 from src.customer.schemas.post.bodys.customer_crud import (
@@ -119,14 +120,6 @@ blacklist_customer_projections = {
 class MongoQueries(ConnectionMongo):
     def __init__(self):
         super().__init__()
-
-        self.cross_selling.create_index(
-            [
-                ("principal_product._id", pymongo.ASCENDING),
-                ("secondary_product._id", pymongo.ASCENDING),
-            ],
-            unique=True,
-        )
 
     # Metodos de Queries para el servicio de Clientes
 

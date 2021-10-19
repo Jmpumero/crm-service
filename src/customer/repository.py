@@ -43,6 +43,7 @@ from typing import Any
 from fastapi import HTTPException
 from error_handlers.bad_gateway import BadGatewayException
 
+from src.customer.repositories import HistorySensorQueries
 
 global_settings = Settings()
 
@@ -118,6 +119,14 @@ blacklist_customer_projections = {
 class MongoQueries(ConnectionMongo):
     def __init__(self):
         super().__init__()
+
+        self.cross_selling.create_index(
+            [
+                ("principal_product._id", pymongo.ASCENDING),
+                ("secondary_product._id", pymongo.ASCENDING),
+            ],
+            unique=True,
+        )
 
     # Metodos de Queries para el servicio de Clientes
 
@@ -1880,26 +1889,6 @@ class MongoQueries(ConnectionMongo):
         return final_response
 
     async def facet_test(self) -> Any:
-        # r = self.clients_customer.aggregate(
-        #     [
-        #         {
-        #             "$facet": {
-        #                 "items": [
-        #                     {"$match": {"blacklist_status": False}},
-        #                 ],
-        #             },
-        #         },
-        #         {"$unwind": "$items"},
-        #         {"$match": {"items.civil_status": "single"}},
-        #         {
-        #             "$facet": {
-        #                 "result": [
-        #                     {"$match": {"items.age": 77}},
-        #                 ],
-        #             }
-        #         },
-        #     ]
-        # )
 
         r = self.customer.aggregate(
             [

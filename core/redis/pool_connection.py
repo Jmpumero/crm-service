@@ -6,7 +6,7 @@ from config import config
 global_settings = config.Settings()
 
 
-async def init_redis_pool() -> aioredis.Redis:
+async def get_redis() -> aioredis.Redis:
 
     if global_settings.redis_password:
         redis = await aioredis.from_url(
@@ -26,4 +26,7 @@ async def init_redis_pool() -> aioredis.Redis:
 
     logger.info(f"REDIS: {global_settings.redis_url}")
 
-    return redis
+    try:
+        yield redis
+    finally:
+        await redis.close()

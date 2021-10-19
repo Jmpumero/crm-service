@@ -12,7 +12,6 @@ from src.customer.schemas.get.responses.segmenter import AuthorsInSegments, Segm
 
 from .repository import MongoQueries
 import json
-from core import startup_result
 from .repository import MongoQueries
 from src.customer.repositories import HistorySensorQueries
 from .schemas import (
@@ -142,7 +141,7 @@ class Service(MongoQueries):
             "another_contacts": [
                 {
                     "date": "22/02/2021",
-                    "souce": "PMS",
+                    "source": "PMS",
                     "data": "random data",
                     "property_name": "HPA",
                 },

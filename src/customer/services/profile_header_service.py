@@ -21,6 +21,7 @@ class ProfileHeaderService(MongoQueries):
         data = {
             "_id": customer.get("_id", None),
             "name": customer.get("name", None),
+            "image": "https://picsum.photos/200/300",
             "last_name": customer.get("last_name", None),
             "score": 0,
             "languages": [language.get("language", None) for language in languages],

@@ -4,7 +4,6 @@ from collections import OrderedDict
 import pymongo
 from config.config import Settings
 from core.connection.connection import ConnectionMongo as DwConnection
-from core import startup_result
 from dateutil.relativedelta import relativedelta
 from error_handlers.bad_gateway import BadGatewayException
 from fastapi import HTTPException
@@ -39,15 +38,9 @@ from fastapi import HTTPException
 from error_handlers.bad_gateway import BadGatewayException
 
 
-class HistorySensorQueries:
+class HistorySensorQueries(DwConnection):
     def __init__(self):
-        self.connection = startup_result["mongo_connection"]
-        self.customer = self.connection.customer
-        self.cross_selling = self.connection.cross_selling
-        self.products = self.connection.products
-        self.pms_collection = self.connection.pms_collection
-        self.butler_collection = self.connection.butler_collection
-        self.cast_collection = self.connection.cast_collection
+        super().__init__()
 
     async def get_customer_sensor_1(
         cls, id

@@ -1,2 +1,2 @@
-from .pool_connection import init_redis_pool
+from .pool_connection import get_redis
 from .repository import RedisRepository

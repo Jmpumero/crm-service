@@ -1,17 +1,16 @@
 import json
 
+from aioredis.client import Redis
+
 from src.customer.repository import MongoQueries
-from core import startup_result
 
 
 class SalesSummary(MongoQueries):
     def __init__(self):
         super().__init__()
 
-    async def get_customer_sales_summary(self, customer_id):
-        customer_in_redis = await startup_result["redis_repository"].get(
-            str(customer_id)
-        )
+    async def get_customer_sales_summary(self, customer_id, redis: Redis):
+        customer_in_redis = await redis.get(str(customer_id))
 
         if customer_in_redis:
             return json.loads(customer_in_redis)
@@ -46,9 +45,7 @@ class SalesSummary(MongoQueries):
             "segment_where_it_is_located": [],
         }
 
-        await startup_result["redis_repository"].set(
-            str(customer_id), json.dumps(data), expire=120
-        )
+        await redis.set(str(customer_id), json.dumps(data), ex=120)
 
         return data
 

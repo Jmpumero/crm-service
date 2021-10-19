@@ -34,7 +34,7 @@ class ProfileDetailService(MongoQueries):
             "interests": ["Basketball", "Chess", "CSGO"],
             "communication_methods": {
                 "email": {"sent": 125, "opened": 15},
-                "hostpod": {"ads_viewed": 16},
+                "hotspot": {"ads_viewed": 16},
                 "sms": {"sent_sms": 514},
                 "signage": {"ads_sent": 100, "used_devices": 4},
                 "butler": {"ads_sent": 16},

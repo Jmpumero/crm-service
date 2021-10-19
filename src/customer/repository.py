@@ -34,10 +34,9 @@ from fastapi.encoders import jsonable_encoder
 from src.customer.schemas.get.responses import blacklist, customers
 from src.customer.schemas.get import responses
 import pymongo
-from core import startup_result
 from pymongo.errors import DuplicateKeyError, BulkWriteError
 from config.config import Settings
-
+from core.connection.connection import ConnectionMongo
 from typing import Any
 
 
@@ -116,15 +115,9 @@ blacklist_customer_projections = {
 # search_update_projections = {"blacklist_status": 0}
 
 
-class MongoQueries:
+class MongoQueries(ConnectionMongo):
     def __init__(self):
-        self.connection = startup_result["mongo_connection"]
-        self.customer = self.connection.customer
-        self.cross_selling = self.connection.cross_selling
-        self.products = self.connection.products
-        self.pms_collection = self.connection.pms_collection
-        self.butler_collection = self.connection.butler_collection
-        self.cast_collection = self.connection.cast_collection
+        super().__init__()
 
     # Metodos de Queries para el servicio de Clientes
 
@@ -1908,7 +1901,7 @@ class MongoQueries:
         #     ]
         # )
 
-        r = self.clients_customer.aggregate(
+        r = self.customer.aggregate(
             [
                 {"$match": {"civil_status": "single"}},
                 # {"$match": {"email.isMain": True, "email.email": "t23@hotmal.com"}},

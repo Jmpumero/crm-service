@@ -1,5 +1,7 @@
 from __future__ import annotations
 from typing import List, Optional
+
+from aioredis.client import Redis
 from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
 from typing import Any, List
 from src.customer.schemas.post.bodys.blacklist import BlackListBody
@@ -20,8 +22,8 @@ from .services import (
     MarketingSubscriptionsService,
     SalesSummary,
 )
+from core import get_redis
 from .schemas import SearchCustomersQueryParams, PutScoreCard
-
 from .schemas import SearchCustomersQueryParams
 from .schemas import PutScoreCard
 from .schemas import (
@@ -185,10 +187,12 @@ async def update_customer_in_blacklist(body: BlackListBody):
 
 @customers_router.get("/customers/{customer_id}/sales-summary")
 @remove_422
-async def get_customer_sales_summary(customer_id: str):
+async def get_customer_sales_summary(
+    customer_id: str, redis: Redis = Depends(get_redis)
+):
     service = SalesSummary()
 
-    return await service.get_customer_sales_summary(customer_id)
+    return await service.get_customer_sales_summary(customer_id, redis)
 
 
 #### CRUD ####

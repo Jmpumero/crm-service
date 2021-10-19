@@ -12,10 +12,10 @@ class DocumentID(BaseModel):
 
 
 class Phones(BaseModel):
-    local_format: str
+    local_format: Optional[str]
     intl_format: str
-    areaCode: str
-    countryCode: str
+    areaCode: Optional[str]
+    countryCode: Optional[str]
     isMain: bool
 
 

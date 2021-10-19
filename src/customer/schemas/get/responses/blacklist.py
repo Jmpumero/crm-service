@@ -36,9 +36,9 @@ class Addresses(BaseModel):
 
 class BlacklistCustomer(BaseModel):
     id: str = Field(..., alias="_id")
-    name: str
-    last_name: str
-    age: int
+    name: Optional[str]
+    last_name: Optional[str]
+    age: Optional[int]
     email: Optional[List[Emails]] = ""
     phone: Optional[List[Phones]] = ""
     address: Optional[List[Addresses]] = ""

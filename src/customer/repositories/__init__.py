@@ -1,0 +1,1 @@
+from .history_sensor import HistorySensorQueries

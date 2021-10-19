@@ -14,7 +14,7 @@ from .repository import MongoQueries
 import json
 from core import startup_result
 from .repository import MongoQueries
-
+from src.customer.repositories import HistorySensorQueries
 from .schemas import (
     SearchCustomersQueryParams,
     SearchCustomersResponse,
@@ -201,10 +201,13 @@ class Service(MongoQueries):
     async def get_history_sensor(
         self, customer_id, query_params: CustomerQueryParamsSensor
     ):
-
+        a = await HistorySensorQueries.get_customer_sensor_1(
+            self, customer_id, query_params.sensor
+        )
         data_s = []
         total = 2
         if query_params.sensor == "sensor_1":
+            # self.get_customer
             pass
         elif query_params.sensor == "sensor_2":
             pass

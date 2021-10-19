@@ -44,6 +44,7 @@ from typing import Any
 from fastapi import HTTPException
 from error_handlers.bad_gateway import BadGatewayException
 
+from src.customer.repositories import HistorySensorQueries
 
 global_settings = Settings()
 
@@ -125,6 +126,14 @@ class MongoQueries:
         self.pms_collection = self.connection.pms_collection
         self.butler_collection = self.connection.butler_collection
         self.cast_collection = self.connection.cast_collection
+
+        self.cross_selling.create_index(
+            [
+                ("principal_product._id", pymongo.ASCENDING),
+                ("secondary_product._id", pymongo.ASCENDING),
+            ],
+            unique=True,
+        )
 
     # Metodos de Queries para el servicio de Clientes
 
@@ -1887,26 +1896,6 @@ class MongoQueries:
         return final_response
 
     async def facet_test(self) -> Any:
-        # r = self.clients_customer.aggregate(
-        #     [
-        #         {
-        #             "$facet": {
-        #                 "items": [
-        #                     {"$match": {"blacklist_status": False}},
-        #                 ],
-        #             },
-        #         },
-        #         {"$unwind": "$items"},
-        #         {"$match": {"items.civil_status": "single"}},
-        #         {
-        #             "$facet": {
-        #                 "result": [
-        #                     {"$match": {"items.age": 77}},
-        #                 ],
-        #             }
-        #         },
-        #     ]
-        # )
 
         r = self.clients_customer.aggregate(
             [

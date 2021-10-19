@@ -108,7 +108,7 @@ async def get_customer_sensor(
     service = Service()
 
     response = await service.get_history_sensor(customer_id, query_params)
-    return SensorHistoryResponse(**response)
+    return response
 
 
 @customers_router.get("/customers/{customer_id}/notes-comments")

@@ -200,13 +200,11 @@ class Service(MongoQueries):
     async def get_history_sensor(
         self, customer_id, query_params: CustomerQueryParamsSensor
     ):
-        a = await HistorySensorQueries.get_customer_sensor_1(
-            self, customer_id, query_params.sensor
-        )
         data_s = []
         total = 2
         if query_params.sensor == "sensor_1":
-            # self.get_customer
+
+            r = await HistorySensorQueries.get_customer_sensor_1(self, customer_id)
             pass
         elif query_params.sensor == "sensor_2":
             pass
@@ -226,7 +224,7 @@ class Service(MongoQueries):
             "total_show": len(data_s),
         }
 
-        return response
+        return r
 
     async def post_blacklist_update_customer(self, body: BlackListBody):
 

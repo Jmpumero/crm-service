@@ -38,10 +38,10 @@ class DocumentID(BaseModel):
 
 
 class Phones(BaseModel):
-    local_format: str
+    local_format: Optional[str]
     intl_format: str
-    areaCode: str
-    countryCode: str
+    areaCode: Optional[str]
+    countryCode: Optional[str]
     isMain: bool
 
 
@@ -62,13 +62,12 @@ class Addresses(BaseModel):
 
 class SearchCustomers(BaseModel):
     id: str = Field(..., alias="_id")
-    # id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     name: Optional[str]
     last_name: Optional[str]
     age: Optional[int]
     email: Emails
     phone: Optional[Phones]
-    address: Optional[List[Any]]
+    address: Optional[Addresses]
     documentId: Optional[List[DocumentID]]
     nationality: Optional[List[str]]
     civil_status: Optional[str]
@@ -85,10 +84,14 @@ class ResponseMetaData(BaseModel):
     message: str
 
 
+class TotalItem(BaseModel):
+    total: int
+
+
 class SearchCustomersResponse(BaseModel):
-    customers: List[SearchCustomers]
-    total_items: int
-    total_show: int
+    items: List[SearchCustomers]
+    total_items: List[TotalItem]
+    # total_show: int
 
 
 class SensorHistoryResponse(BaseModel):

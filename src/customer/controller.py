@@ -1,5 +1,7 @@
 from __future__ import annotations
 from typing import List, Optional
+
+from aioredis.client import Redis
 from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
 from typing import Any, List
 from src.customer.schemas.post.bodys.blacklist import BlackListBody
@@ -20,8 +22,8 @@ from .services import (
     MarketingSubscriptionsService,
     SalesSummary,
 )
+from core import get_redis
 from .schemas import SearchCustomersQueryParams, PutScoreCard
-
 from .schemas import SearchCustomersQueryParams
 from .schemas import PutScoreCard
 from .schemas import (
@@ -106,7 +108,7 @@ async def get_customer_sensor(
     service = Service()
 
     response = await service.get_history_sensor(customer_id, query_params)
-    return SensorHistoryResponse(**response)
+    return response
 
 
 @customers_router.get("/customers/{customer_id}/notes-comments")
@@ -139,6 +141,16 @@ async def get_customer_profile_detail(customer_id: str):
     service = ProfileDetailService()
 
     return await service.get_profile_details(customer_id)
+
+
+@customers_router.get(
+    "/customers/{customer_id}/details/modal-info",
+)
+@remove_422
+async def get_contact_modal_info(customer_id: str):
+    service = ProfileDetailService()
+
+    return await service.get_contact_modal_info(customer_id)
 
 
 @customers_router.get(
@@ -175,10 +187,12 @@ async def update_customer_in_blacklist(body: BlackListBody):
 
 @customers_router.get("/customers/{customer_id}/sales-summary")
 @remove_422
-async def get_customer_sales_summary(customer_id: str):
+async def get_customer_sales_summary(
+    customer_id: str, redis: Redis = Depends(get_redis)
+):
     service = SalesSummary()
 
-    return await service.get_customer_sales_summary(customer_id)
+    return await service.get_customer_sales_summary(customer_id, redis)
 
 
 #### CRUD ####
@@ -212,7 +226,7 @@ async def update_customer(
     return await service.update_customer(body)
 
 
-@customers_router.delete("/customer/{customer_id}")
+@customers_router.delete("/customer/{customer_id}", response_model=CustomerCRUDResponse)
 @remove_422
 async def delete_customer(customer_id: str):
 

@@ -17,7 +17,7 @@ class ProfileDetailService(MongoQueries):
 
         data = {
             "most_visited_hotel": "random hotel",
-            "recency": "?",
+            "recency": 0,
             "email": [emailDict["email"] for emailDict in customer.get("email")],
             "phone": [customerDict["intl_format"] for customerDict in customer_phones],
             "social_networks": [

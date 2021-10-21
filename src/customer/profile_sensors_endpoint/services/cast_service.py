@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Any, Optional
 
 from starlette import status
-from ..schemas.response.customers_sensors import HistoryData
+from ..schemas.response.customers_sensors import HistoryData, VisitedApps
 from src.customer.profile_sensors_endpoint.repository.cast_hotspot import CastHotSpotQueries
 
 from fastapi.responses import JSONResponse
@@ -14,14 +14,16 @@ class CastService(CastHotSpotQueries):
 
     async def get_cast_stats(self, customer_id: str, sensor : str) -> Any:
         try:
-            connection_avg_time_list = []
+            connections_list = []
+            connection_time_list = []
             playback_avg_time_list = []
             playback_most_used_app_list = []
+            playback_used_apps_list = []
             most_used_device_list = []
 
-            count = self.count_connections(customer_id)
+            connections = self.get_connections(customer_id)
 
-            connections = self.get_connections(customer_id, sensor)
+            #connections = self.get_connections(customer_id, sensor)
             
             oldest_connection = self.first_connection(customer_id, sensor)
             
@@ -33,9 +35,15 @@ class CastService(CastHotSpotQueries):
 
             most_used_device = self.group_by_most_used_device(customer_id)
 
-            playback_history = self.playback_history(customer_id, skip=None, limit=None)
+            #playback_history = self.playback_history(customer_id, skip=None, limit=None)
+
+            async for conn in connections:
+                print(conn)
+                connections_list.append(conn)
 
             async for app in most_used_app:
+                playback_used_apps_list.append(VisitedApps(app_name = app['_id'],
+                                                           visit_count = app['count']))
                 playback_most_used_app_list.append(app)
 
             async for device in most_used_device:
@@ -50,17 +58,17 @@ class CastService(CastHotSpotQueries):
             async for playback in recent_playback:
                 last_playback = playback
 
-            async for conn in connections:
-                connection_startDate = datetime.strptime(conn['data']['startDate'], '%Y-%m-%dT%H:%M:%S.%f')
-                connection_endDate = datetime.strptime(conn['data']['endDate'], '%Y-%m-%dT%H:%M:%S.%f')
-                diff = connection_endDate - connection_startDate
-                connection_avg_time_list.append(diff/ timedelta(hours = 1))
+            # async for conn in connections:
+            #     connection_startDate = datetime.strptime(conn['data']['startDate'], '%Y-%m-%dT%H:%M:%S.%f')
+            #     connection_endDate = datetime.strptime(conn['data']['endDate'], '%Y-%m-%dT%H:%M:%S.%f')
+            #     diff = connection_endDate - connection_startDate
+            #     connection_time_list.append(diff/ timedelta(hours = 1))
 
-            async for playback in playback_history:
-                playback_startDate = datetime.strptime(playback['data']['playback_pair']['startDate'], '%Y-%m-%dT%H:%M:%S.%f')
-                playback_endDate = datetime.strptime(playback['data']['playback_pair']['endDate'], '%Y-%m-%dT%H:%M:%S.%f')
-                diff = playback_endDate - playback_startDate
-                playback_avg_time_list.append(diff/ timedelta(hours = 1))
+            # async for playback in playback_history:
+            #     playback_startDate = datetime.strptime(playback['data']['playback_pair']['startDate'], '%Y-%m-%dT%H:%M:%S.%f')
+            #     playback_endDate = datetime.strptime(playback['data']['playback_pair']['endDate'], '%Y-%m-%dT%H:%M:%S.%f')
+            #     diff = playback_endDate - playback_startDate
+            #     playback_avg_time_list.append(diff/ timedelta(hours = 1))
 
             #AVERAGE CONNECTION TIME
             last_playback_startDate = datetime.strptime(last_playback['data']['playback_pair']['startDate'], '%Y-%m-%dT%H:%M:%S.%f')
@@ -73,12 +81,14 @@ class CastService(CastHotSpotQueries):
                     'status_code':status.HTTP_200_OK,
                     'message': 'Ok'
                 },
-                'cast_connections': 0, #POR IMPLEMENTAR
-                'cast_avg_connection_time': f"{round(statistics.mean(connection_avg_time_list), 2)} hours",
+                'cast_connections': len(connections_list),
+                'cast_avg_connection_time': "PENDIENTE",
+                #'cast_avg_connection_time': f"{round(statistics.mean(connection_avg_time_list), 2)} hours",
+                'cast_visited_apps': playback_used_apps_list,
                 'cast_most_visited_app': {
                     'app_name':playback_most_used_app_list[0]['_id'],
-                    'app_avg_visit_time': f"{round(statistics.mean(playback_avg_time_list), 3)} hours",
-                    'app_usual_visit_hour': 'POR IMPLEMENTAR'
+                    'app_visits': playback_most_used_app_list[0]['count'], 
+                    'app_avg_visit_time': f"{round(playback_most_used_app_list[0]['average'], 2)} hours",
                 },
                 'cast_first_connection': first_connection,
                 'cast_last_connection': last_connection,
@@ -96,12 +106,12 @@ class CastService(CastHotSpotQueries):
             response = {
                 'cast_meta_response':{
                     'status_code':status.HTTP_404_NOT_FOUND,
-                    'message': f"Customer doesn't have interaction with this sensor {e}"
+                    'message': f"Customer doesn't have interaction with this sensor, error: {e}"
                 }
             }
             return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=response) 
 
-    async def get_cast_history(self, customer_id: str, skip: Optional[int] = None, limit: Optional[int] = None):
+    async def get_cast_history(self, customer_id: str, skip: Optional[int] = 0, limit: Optional[int] = None):
         playback_history_list = []
         playback_avg_time_list = []
 
@@ -122,12 +132,15 @@ class CastService(CastHotSpotQueries):
                                                             duration= str(diff).split('.')[0],
                                                             device= playback_item['data']['deviceId']))
             response = {
-                'playback_history_meta_response':{
+                'response':{
                     'status_code':status.HTTP_200_OK,
                     'message': 'Ok',
                 },
-                'playback_history_count': playback_count,
-                'playback_history_data': playback_history_list
+                '_id': customer_id,
+                'total_items': playback_count,
+                'showing': limit,
+                'skip':skip,
+                'data': playback_history_list
             }
             return response
         else:

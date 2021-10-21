@@ -56,18 +56,17 @@ class CastHotSpotQueries(MongoQueries):
 
         return count
 
+    # def get_connections(self, customer_id, sensor):
+    #     if sensor == 'sensor_1':
+    #         result = None
+    #     elif sensor == 'sensor_2':
+    #         result = self.cast_collection.find({'customer_id': customer_id}, cast_connections_proy)
+    #     elif sensor == 'sensor_3':
+    #         result = self.hotspot_collection.find({'customer_id': customer_id}, hotspot_connections_proy)
+    #     elif sensor == 'sensor_4':
+    #         result = None
 
-    def get_connections(self, customer_id, sensor):
-        if sensor == 'sensor_1':
-            result = None
-        elif sensor == 'sensor_2':
-            result = self.cast_collection.find({'customer_id': customer_id}, cast_connections_proy)
-        elif sensor == 'sensor_3':
-            result = self.hotspot_collection.find({'customer_id': customer_id}, hotspot_connections_proy)
-        elif sensor == 'sensor_4':
-            result = None
-
-        return result
+    #     return result
 
     def first_connection(self, customer_id, sensor):
         if sensor == 'sensor_1':
@@ -102,14 +101,13 @@ class CastHotSpotQueries(MongoQueries):
         return result
 
     def playback_history(self, customer_id, skip, limit):
-        if not skip or not limit:
-            result = self.cast_collection.find({'customer_id': customer_id}, history_proy)
+        if skip or limit:
+            result = self.cast_collection.find({'customer_id': customer_id}, history_proy).skip(skip).limit(limit)
         else:
             result = self.cast_collection.find({'customer_id': customer_id}, history_proy)
         return result
 
-
-    def count_connections(self, customer_id):
+    def get_connections(self, customer_id):
         pipeline = [
             {
                 '$match': { 'customer_id': customer_id } 
@@ -117,9 +115,12 @@ class CastHotSpotQueries(MongoQueries):
             {
                 '$group': {
                     '_id': "$data._id",
-                    "count": {"$sum": 1}
+                    'start': { '$first': "$data.startDate" }
+,
+                    'end': { '$first': "$data.endDate" }
+ 
                 }
-            }
+            },
         ]
         connections = self.cast_collection.aggregate(pipeline)
 
@@ -132,8 +133,29 @@ class CastHotSpotQueries(MongoQueries):
             {
                 "$group": {
                     "_id": "$data.playback_pair.appName", 
-                    "count": {"$sum": 1}
-                    }
+                    "count": {"$sum": 1},
+                    "average": {'$avg': {
+                                        '$divide': 
+                                            [
+                                                {'$subtract': 
+                                                    [
+                                                        { 
+                                                            '$dateFromString': {
+                                                                'dateString': "$data.playback_pair.endDate",
+                                                            } 
+                                                        }, 
+                                                        {
+                                                            '$dateFromString': {
+                                                                'dateString': "$data.playback_pair.startDate",
+                                                            } 
+                                                        },
+                                                    ]
+                                                },
+                                                3600000
+                                            ]
+                                        }       
+                                }           
+                }
             },
             {
                 "$sort": SON([("count", -1), ("_id", -1)])

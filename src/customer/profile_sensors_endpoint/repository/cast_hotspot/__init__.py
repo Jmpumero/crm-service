@@ -1,1 +1,1 @@
-from .cast_queries import CastHotSpotQueries
+from .queries import CastHotSpotQueries

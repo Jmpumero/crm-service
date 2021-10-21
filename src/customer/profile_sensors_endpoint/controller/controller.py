@@ -52,7 +52,7 @@ async def get_cast(customer_id: str):
     status_code=status.HTTP_200_OK,
 )
 @remove_422
-async def get_cast_history(customer_id: str, skip: Optional[int] = None, limit: Optional[int] = None):
+async def get_cast_history(customer_id: str, skip: Optional[int] = 0, limit: int = global_settings.pagination_limit):
     """
     Get sensor data from DW :
     """
@@ -68,11 +68,11 @@ async def get_cast_history(customer_id: str, skip: Optional[int] = None, limit: 
     status_code=status.HTTP_200_OK,
 )
 @remove_422
-async def get_hotspot(customer_id: str, sensor: str):
+async def get_hotspot(customer_id: str):
     """
     Get sensor data from DW :
     """
 
     hotspot_stats = HotspotService()
-    return await hotspot_stats.get_hotspot_stats(customer_id, sensor)
+    return await hotspot_stats.get_hotspot_stats(customer_id, sensor='sensor_3')
 

@@ -8,6 +8,7 @@ class Response(BaseModel):
 
 class MostVisitedApp(BaseModel):
     app_name: Optional[str]
+    app_visits: Optional[int]
     app_avg_visit_time: Optional[str]
     app_usual_visit_hour: Optional[str]
 
@@ -31,14 +32,23 @@ class HistoryData(BaseModel):
     device: Optional[str]
 
 class PlaybackHistory(BaseModel):
-    playback_history_meta_response: Response
-    playback_history_count: int
-    playback_history_data:Optional[List[HistoryData]]
+    response: Response
+    _id: str
+    total_items: int
+    showing: int
+    skip: Optional[int]
+    data:Optional[List[HistoryData]]
+
+class VisitedApps(BaseModel):
+    app_name: str
+    visit_count: int
+    visit_average_time: Optional[int]
 
 class CastResponse(BaseModel):
     cast_meta_response: Response
     cast_connections: Optional[int]
     cast_avg_connection_time: Optional[str]
+    cast_visited_apps: Optional[List[VisitedApps]]
     cast_most_visited_app: Optional[MostVisitedApp]
     cast_most_visited_app_graph: Optional[List[MostVisitedAppGraph]]
     cast_first_connection: Optional[str]

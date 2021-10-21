@@ -89,8 +89,8 @@ class TotalItem(BaseModel):
 
 
 class SearchCustomersResponse(BaseModel):
-    items: List[SearchCustomers]
-    total_items: List[TotalItem]
+    items: Optional[List[SearchCustomers]]
+    total_items: Optional[List[TotalItem]]
     # total_show: int
 
 

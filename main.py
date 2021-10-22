@@ -9,9 +9,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import Settings
 from core import get_openapi_router
 from core import on_startup, on_shutdown
-from error_handlers import validation_error, bad_gateway, bad_request, unauthorized
+from http_exceptions import (
+    BadGatewayException,
+    BadRequestException,
+    UnauthorizedException,
+    BadRequestError as BadRequestSchema,
+    BadGatewayError as BadGatewaySchema,
+)
 from utils.remove_422 import remove_422s
-from src.customer.controller import customers_router
+from src import customers_router, customers_profile_router
 
 
 global_settings = Settings()
@@ -33,6 +39,7 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.include_router(customers_router)
+app.include_router(customers_profile_router)
 app.include_router(get_openapi_router(app))
 
 app.add_exception_handler(RequestValidationError, validation_error.handler)

@@ -1,10 +1,6 @@
 import os
-from typing import Any
 
 from pydantic import BaseSettings
-from logging import getLogger
-
-log = getLogger("uvicorn")
 
 
 class Settings(BaseSettings):

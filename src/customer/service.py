@@ -1,4 +1,5 @@
 from typing import Any
+from datetime import datetime, timedelta
 from src.customer.schemas import get
 from src.customer.schemas.get import responses
 from src.customer.schemas.get.query_params import SegmenterQueryParams
@@ -74,6 +75,8 @@ class Service(MongoQueries):
                     customers.append(customer)
 
         else:
+            # print("***********")
+            # print(query_params.query)
             if query_params.column_name.replace(" ", "") and query_params.contain != "":
 
                 cursor = self.filter_search_customers(
@@ -97,7 +100,7 @@ class Service(MongoQueries):
                 print("Caso no valido error ")
 
         if customer != None:
-
+            # print(customer)
             return SearchCustomersResponse(**customer)
         else:
             resp = {}
@@ -196,34 +199,77 @@ class Service(MongoQueries):
 
         return self.build_blacklist_response(customers, total)
 
+    def time_duration_to_milliseconds(self, time_to_convert):
+        # function that convert a datatime.time to milliseconds integer
+        return round(time_to_convert.total_seconds() * 1000)
+
     async def get_history_sensor(
         self, customer_id, query_params: CustomerQueryParamsSensor
     ):
-        data_s = []
-        total = 2
-        if query_params.sensor == "sensor_1":
+        items = []
+        response = {}
+        resp = None
 
-            r = await HistorySensorQueries.get_customer_sensor_1(self, customer_id)
-            pass
-        elif query_params.sensor == "sensor_2":
-            pass
-        elif query_params.sensor == "sensor_3":
-            pass
-        elif query_params.sensor == "sensor_4":
-            pass
+        # comentado ya que el front no esta listo para la integracion
 
+        # if query_params.sensor == "sensor_1":
+
+        #     r = await HistorySensorQueries.get_history_sensor_1(
+        #         self, customer_id, query_params.skip, query_params.limit
+        #     )
+
+        # elif query_params.sensor == "sensor_2":
+        #     resp = await HistorySensorQueries.get_history_sensor_2(
+        #         self, customer_id, query_params.skip, query_params.limit
+        #     )
+
+        #     if resp != None:
+
+        #         for item in resp["customer_history"]:
+        #             t_start = datetime.strptime(
+        #                 item["hotspot_details"]["data"]["date"], "%Y-%m-%dT%H:%M:%S"
+        #             )
+        #             t_end = datetime.strptime(
+        #                 item["hotspot_details"]["data"]["maxDate"], "%Y-%m-%dT%H:%M:%S"
+        #             )
+        #             t_result = t_end - t_start
+
+        #             items.append(
+        #                 dict(
+        #                     date=item["hotspot_details"]["data"]["date"],
+        #                     property=item["site"][0]["name"],
+        #                     duration=self.time_duration_to_milliseconds(t_result),
+        #                 )
+        #             )
+
+        # elif query_params.sensor == "sensor_3":
+        #     items = data_s
+        # elif query_params.sensor == "sensor_4":
+        #     items = data_s
+        # if resp != None:
+        #     response = {
+        #         "sensor_data": items,
+        #         "total_items": resp["total_items"][0]["total"],
+        #         "total_show": len(items),
+        #     }
+        # else:
+        #     response = {
+        #         "sensor_data": [],
+        #         "total_items": 0,
+        #         "total_show": 0,
+        #     }
+
+        # *******data dummy*******
         data_s = [
             {"date": "25-10-2020 15:00", "property": "HPA", "duration": "30min"},
             {"date": "15-06-2020 16:50", "property": "H Barcelona", "duration": "1h"},
         ]
-
         response = {
             "sensor_data": data_s,
-            "total_items": total,
-            "total_show": len(data_s),
+            "total_items": 2,
+            "total_show": 2,
         }
-
-        return r
+        return response
 
     async def post_blacklist_update_customer(self, body: BlackListBody):
 

@@ -1,14 +1,18 @@
-import statistics
-from datetime import datetime, timedelta
 from typing import Any
 
-from starlette import status
-from ..schemas.response.customers_sensors import PlaybackHistory
-from src.customer.profile_sensors_endpoint.repository.cast_hotspot import CastHotSpotQueries
-
+from fastapi import status
 from fastapi.responses import JSONResponse
 
+from src.customer.profile_sensors_endpoint.repository.cast_hotspot import CastHotSpotQueries
+
 class HotspotService(CastHotSpotQueries):
+    '''
+    Service to get customer Hotspot usage statistics
+     - Number of Connections to hotspot
+     - Date of First Connection
+     - Date of Las Connection
+     
+    '''
     def __init__(self):
         super().__init__()
 
@@ -27,10 +31,11 @@ class HotspotService(CastHotSpotQueries):
                 last_connection = date2['data']['date']
 
             response = {
-                'hotspot_meta_response':{
+                'hotspot_response':{
                     'status_code':status.HTTP_200_OK,
                     'message': 'Ok'
                 },
+                'hotspot_customer_id': customer_id,
                 'hotspot_connections': count,
                 'hotspot_first_connection': first_connection,
                 'hotspot_last_connection': last_connection
@@ -38,7 +43,7 @@ class HotspotService(CastHotSpotQueries):
             return response
         except:
             response = {
-                'cast_meta_response':{
+                'hotspot_meta_response':{
                     'status_code':status.HTTP_404_NOT_FOUND,
                     'message': "Customer doesn't have interaction with this sensor"
                 }

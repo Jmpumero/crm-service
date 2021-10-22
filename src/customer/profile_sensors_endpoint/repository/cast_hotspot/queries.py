@@ -1,10 +1,10 @@
 
 from bson.son import SON
-from config.config import Settings
-
 
 from src.customer.repository import MongoQueries
 from src.customer.schemas.get import query_params
+
+from config.config import Settings
 
 
 global_settings = Settings()
@@ -56,18 +56,6 @@ class CastHotSpotQueries(MongoQueries):
 
         return count
 
-    # def get_connections(self, customer_id, sensor):
-    #     if sensor == 'sensor_1':
-    #         result = None
-    #     elif sensor == 'sensor_2':
-    #         result = self.cast_collection.find({'customer_id': customer_id}, cast_connections_proy)
-    #     elif sensor == 'sensor_3':
-    #         result = self.hotspot_collection.find({'customer_id': customer_id}, hotspot_connections_proy)
-    #     elif sensor == 'sensor_4':
-    #         result = None
-
-    #     return result
-
     def first_connection(self, customer_id, sensor):
         if sensor == 'sensor_1':
             result = None
@@ -115,8 +103,7 @@ class CastHotSpotQueries(MongoQueries):
             {
                 '$group': {
                     '_id': "$data._id",
-                    'start': { '$first': "$data.startDate" }
-,
+                    'start': { '$first': "$data.startDate" },
                     'end': { '$first': "$data.endDate" }
  
                 }

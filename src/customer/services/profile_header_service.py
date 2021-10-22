@@ -12,25 +12,29 @@ class ProfileHeaderService(MongoQueries):
 
     async def get_profile_header(self, customer_id: str) -> Any:
         customer = await self.customer.find_one({"_id": customer_id})
-        languages = customer.get("language") or []
 
         if not customer:
             return {}
 
+        languages = customer.get("language") or []
+
         data = {
             "_id": customer.get("_id", None),
             "name": customer.get("name", None),
+            "image": "https://picsum.photos/200/300",
+            "last_name": customer.get("last_name", None),
             "score": 0,
             "languages": [language.get("language", None) for language in languages],
             "country": customer.get("country", None),
             "membership": "?",
-            "gender": "NO BINARY KEK",
+            "gender": "M",
             "age": customer.get("age", None),
             "next_hotel_stay": "random hotel",
             "next_stay_date": "25/10/2021",
             "last_checkout_date": "21/04/2021",
             "last_stay_hotel": "super random hotel",
             "total_stays": 1,
+            "total_nights": 1,
             "days_since_last_stay": 15,
             "lifetime_expenses": 680.60,
             "total_lodging_expenses": 350.98,

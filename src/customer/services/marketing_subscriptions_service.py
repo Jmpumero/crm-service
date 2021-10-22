@@ -5,6 +5,9 @@ from ..schemas import CustomerMarketingSubscriptions
 
 
 class MarketingSubscriptionsService(MongoQueries):
+    def __init__(self):
+        super().__init__()
+
     async def get_customer_marketing_subscriptions(self, customer_id: str) -> Any:
         customer = await self.customer.find_one({"_id": customer_id})
 

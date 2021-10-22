@@ -1,4 +1,5 @@
 from typing import Any
+from datetime import datetime, timedelta
 from src.customer.schemas import get
 from src.customer.schemas.get import responses
 from src.customer.schemas.get.query_params import SegmenterQueryParams
@@ -12,9 +13,8 @@ from src.customer.schemas.get.responses.segmenter import AuthorsInSegments, Segm
 
 from .repository import MongoQueries
 import json
-from core import startup_result
 from .repository import MongoQueries
-
+from src.customer.repositories import HistorySensorQueries
 from .schemas import (
     SearchCustomersQueryParams,
     SearchCustomersResponse,
@@ -57,6 +57,7 @@ class Service(MongoQueries):
         customers = []
         cursor = None
         total_customer = await self.total_customer()
+        customer = None
 
         if query_params.query == "":
 
@@ -71,10 +72,13 @@ class Service(MongoQueries):
 
                 for customer in await cursor.to_list(length=None):
                     # print(customer)
-                    customers.append(SearchCustomers(**customer))
+
+                    customers.append(customer)
 
         else:
-            if query_params.column_name.replace(" ", ""):
+            # print("***********")
+            # print(query_params.query)
+            if query_params.column_name.replace(" ", "") and query_params.contain != "":
 
                 cursor = self.filter_search_customers(
                     query_params.contain,
@@ -85,29 +89,25 @@ class Service(MongoQueries):
                     query_params.order,
                     query_params.column_order,
                 )
-                if cursor:
+                if cursor != None:
+
                     for customer in await cursor.to_list(length=None):
 
                         # print(customer)
-                        customers.append(SearchCustomers(**customer))
+                        # customers.append(SearchCustomers(**customer))
+                        customers.append(customer)
 
             else:
                 print("Caso no valido error ")
 
-        # response = self.build_response(customers, total_customer)
-
-        return self.build_response_search(customers, total_customer)
-
-    def build_response_search(
-        self, list_items, total_customer
-    ) -> SearchCustomersResponse:
-
-        finalresponse = {
-            "customers": list_items,
-            "total_items": total_customer,
-            "total_show": len(list_items),
-        }
-        return SearchCustomersResponse(**finalresponse)
+        if customer != None:
+            # print(customer)
+            return SearchCustomersResponse(**customer)
+        else:
+            resp = {}
+            resp["items"] = []
+            resp["total_items"] = 0
+            return resp
 
     def get_customer_notes_comments(self, customer_id: str) -> CustomerNotesAndcomments:
 
@@ -144,7 +144,7 @@ class Service(MongoQueries):
             "another_contacts": [
                 {
                     "date": "22/02/2021",
-                    "souce": "PMS",
+                    "source": "PMS",
                     "data": "random data",
                     "property_name": "HPA",
                 },
@@ -200,86 +200,81 @@ class Service(MongoQueries):
 
         return self.build_blacklist_response(customers, total)
 
+    def time_duration_to_milliseconds(self, time_to_convert):
+        # function that convert a datatime.time to milliseconds integer
+        return round(time_to_convert.total_seconds() * 1000)
+
     async def get_history_sensor(
         self, customer_id, query_params: CustomerQueryParamsSensor
     ):
+        items = []
+        response = {}
+        resp = None
 
-        data_s = []
-        total = 2
-        if query_params.sensor == "sensor_1":
-            pass
-        elif query_params.sensor == "sensor_2":
-            pass
-        elif query_params.sensor == "sensor_3":
-            pass
-        elif query_params.sensor == "sensor_4":
-            pass
+        # comentado ya que el front no esta listo para la integracion
 
+        # if query_params.sensor == "sensor_1":
+
+        #     r = await HistorySensorQueries.get_history_sensor_1(
+        #         self, customer_id, query_params.skip, query_params.limit
+        #     )
+
+        # elif query_params.sensor == "sensor_2":
+        #     resp = await HistorySensorQueries.get_history_sensor_2(
+        #         self, customer_id, query_params.skip, query_params.limit
+        #     )
+
+        #     if resp != None:
+
+        #         for item in resp["customer_history"]:
+        #             t_start = datetime.strptime(
+        #                 item["hotspot_details"]["data"]["date"], "%Y-%m-%dT%H:%M:%S"
+        #             )
+        #             t_end = datetime.strptime(
+        #                 item["hotspot_details"]["data"]["maxDate"], "%Y-%m-%dT%H:%M:%S"
+        #             )
+        #             t_result = t_end - t_start
+
+        #             items.append(
+        #                 dict(
+        #                     date=item["hotspot_details"]["data"]["date"],
+        #                     property=item["site"][0]["name"],
+        #                     duration=self.time_duration_to_milliseconds(t_result),
+        #                 )
+        #             )
+
+        # elif query_params.sensor == "sensor_3":
+        #     items = data_s
+        # elif query_params.sensor == "sensor_4":
+        #     items = data_s
+        # if resp != None:
+        #     response = {
+        #         "sensor_data": items,
+        #         "total_items": resp["total_items"][0]["total"],
+        #         "total_show": len(items),
+        #     }
+        # else:
+        #     response = {
+        #         "sensor_data": [],
+        #         "total_items": 0,
+        #         "total_show": 0,
+        #     }
+
+        # *******data dummy*******
         data_s = [
             {"date": "25-10-2020 15:00", "property": "HPA", "duration": "30min"},
             {"date": "15-06-2020 16:50", "property": "H Barcelona", "duration": "1h"},
         ]
-
         response = {
             "sensor_data": data_s,
-            "total_items": total,
-            "total_show": len(data_s),
+            "total_items": 2,
+            "total_show": 2,
         }
-
         return response
 
     async def post_blacklist_update_customer(self, body: BlackListBody):
 
         return await self.update_customer_in_blacklist(body)
-
-    async def get_customer_sales_summary(self, customer_id):
-        customer_in_redis = await startup_result["redis_repository"].get(
-            str(customer_id)
-        )
-
-        if not customer_in_redis:
-            data = {
-                "total_revenue": [
-                    {"name": "upgrade_and_upselling", "quantity": 110},
-                    {"name": "food_and_beverage", "quantity": 150},
-                    {"name": "lodging", "quantity": 130},
-                ],
-                "frequent_visits": [
-                    {"name": "superior king", "quantity": 4},
-                    {"name": "king", "quantity": 2},
-                    {"name": "double", "quantity": 2},
-                ],
-                "most_contracted_services": [
-                    {"name": "extra key", "quantity": 118},
-                    {"name": "tablet rental", "quantity": 112},
-                    {"name": "spa access", "quantity": 220},
-                    {"name": "bottle of wine", "quantity": 80},
-                ],
-                "check_ins": [
-                    {"name": "complete", "quantity": 8},
-                    {"name": "no complete", "quantity": 2},
-                ],
-                "most_visited_pages": [
-                    {"name": "youtube", "quantity": 15},
-                    {"name": "twitter", "quantity": 7},
-                    {"name": "instagram", "quantity": 18},
-                    {"name": "google", "quantity": 44},
-                ],
-                "use_of_suite_applications": [],
-                "frequency_of_use_of_suite_applications": [
-                    {"name": "cast", "quantity": 7},
-                    {"name": "hostpod", "quantity": 11},
-                ],
-                "segment_where_it_is_located": [],
-            }
-
-            await startup_result["redis_repository"].set(
-                str(customer_id), json.dumps(data)
-            )
-
-            return data
-
-        return json.loads(customer_in_redis)
 
     async def post_create_customer(self, body: CreateCustomerBody):
 
@@ -337,7 +332,7 @@ class Service(MongoQueries):
         response = await self.delete_one_customer(customer_id)
 
         if response != None:
-            response = {"msg": " Success Customer Update ", "code": 200}
+            response = {"msg": " Success Customer deleted ", "code": 204}
         else:
             response = {
                 "msg": " Failed Customer Delete, Customer not found ",

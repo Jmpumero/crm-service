@@ -7,6 +7,7 @@ from pydantic.fields import Field
 class CustomerProfileHeaderResponse(BaseModel):
     id_: Optional[str] = Field(None, alias="_id")
     name: Optional[str]
+    last_name: Optional[str]
     score: Optional[int]
     languages: Optional[List[str]]
     country: Optional[str]
@@ -18,6 +19,7 @@ class CustomerProfileHeaderResponse(BaseModel):
     last_checkout_date: Optional[str]
     last_stay_hotel: Optional[str]
     total_stays: Optional[int]
+    total_nights: Optional[int]
     days_since_last_stay: Optional[str]
     lifetime_expenses: Optional[int]
     total_lodging_expenses: Optional[int]

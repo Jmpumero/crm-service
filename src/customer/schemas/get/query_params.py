@@ -11,8 +11,8 @@ class SearchCustomersQueryParams(BaseModel):
     skip: int = 0
     limit: int = 10
 
-    order: Optional[str] = ""
-    column_order: Optional[str] = ""
+    order: Optional[str] = "desc"
+    column_order: Optional[str] = "name"
 
 
 class BlacklistQueryParams(BaseModel):

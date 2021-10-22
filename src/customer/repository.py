@@ -667,8 +667,8 @@ class MongoQueries(ConnectionMongo):
     def search_phone_local(self, constrain, item_search, column, skip, limit):
         response = ""
 
-        print(column)
-        print(constrain)
+        # print(column + "hola")
+        # print(constrain)
 
         if constrain == "contain":
 
@@ -682,7 +682,7 @@ class MongoQueries(ConnectionMongo):
                                     "$match": {
                                         "phone": {
                                             "$elemMatch": {
-                                                f"{column}": {
+                                                "intl_format": {
                                                     "$regex": f".*{item_search.lower()}.*",
                                                     "$options": "i",
                                                 },
@@ -707,7 +707,7 @@ class MongoQueries(ConnectionMongo):
                                     "$match": {
                                         "phone": {
                                             "$elemMatch": {
-                                                f"{column}": {
+                                                "intl_format": {
                                                     "$regex": f".*{item_search.lower()}.*",
                                                     "$options": "i",
                                                 },
@@ -725,7 +725,7 @@ class MongoQueries(ConnectionMongo):
             )
 
         if constrain == "equal_to":
-
+            item_search = "+" + item_search
             return self.customer.aggregate(
                 [
                     {
@@ -736,7 +736,7 @@ class MongoQueries(ConnectionMongo):
                                     "$match": {
                                         "phone": {
                                             "$elemMatch": {
-                                                f"{column}": f"{item_search}",
+                                                "intl_format": f"{item_search}",
                                                 "isMain": True,
                                             }
                                         }
@@ -755,10 +755,12 @@ class MongoQueries(ConnectionMongo):
                             "total_items": [
                                 {"$match": {"customer_status": True}},
                                 {
-                                    "phone": {
-                                        "$elemMatch": {
-                                            f"{column}": f"{item_search}",
-                                            "isMain": True,
+                                    "$match": {
+                                        "phone": {
+                                            "$elemMatch": {
+                                                "intl_format": f"{item_search}",
+                                                "isMain": True,
+                                            }
                                         }
                                     }
                                 },
@@ -781,8 +783,8 @@ class MongoQueries(ConnectionMongo):
                                     "$match": {
                                         "phone": {
                                             "$elemMatch": {
-                                                f"{column}": {
-                                                    "$regex": f"\A{item_search}",
+                                                "intl_format": {
+                                                    "$regex": f"\A\+{item_search}",
                                                     "$options": "i",
                                                 },
                                                 "isMain": True,
@@ -803,13 +805,15 @@ class MongoQueries(ConnectionMongo):
                             "total_items": [
                                 {"$match": {"customer_status": True}},
                                 {
-                                    "phone": {
-                                        "$elemMatch": {
-                                            f"{column}": {
-                                                "$regex": f"\A{item_search}",
-                                                "$options": "i",
-                                            },
-                                            "isMain": True,
+                                    "$match": {
+                                        "phone": {
+                                            "$elemMatch": {
+                                                "intl_format": {
+                                                    "$regex": f"\A\+{item_search}",
+                                                    "$options": "i",
+                                                },
+                                                "isMain": True,
+                                            }
                                         }
                                     }
                                 },
@@ -855,13 +859,15 @@ class MongoQueries(ConnectionMongo):
                             "total_items": [
                                 {"$match": {"customer_status": True}},
                                 {
-                                    "phone": {
-                                        "$elemMatch": {
-                                            f"{column}": {
-                                                "$regex": rf"{item_search}\b",
-                                                "$options": "i",
-                                            },
-                                            "isMain": True,
+                                    "$match": {
+                                        "phone": {
+                                            "$elemMatch": {
+                                                f"{column}": {
+                                                    "$regex": rf"{item_search}\b",
+                                                    "$options": "i",
+                                                },
+                                                "isMain": True,
+                                            }
                                         }
                                     }
                                 },
@@ -876,7 +882,7 @@ class MongoQueries(ConnectionMongo):
 
     def search_phone_intl(self, constrain, item_search, column, skip, limit):
         response = ""
-
+        # print(f"\A{item_search}")
         if constrain == "contain":
             return (
                 self.customer.find(
@@ -916,32 +922,58 @@ class MongoQueries(ConnectionMongo):
                 .limit(limit)
             )
         if constrain == "starts_by":
-            return (
-                self.customer.find(
+            # print("ola k ase")
+            return self.customer.aggregate(
+                [
                     {
-                        "phone": {
-                            "$elemMatch": {
-                                f"{column}": {
-                                    "$regex": f"\A\+{item_search}",
-                                    "$options": "i",
+                        "$facet": {
+                            "items": [
+                                {"$match": {"customer_status": True}},
+                                {
+                                    "$match": {
+                                        "phone": {
+                                            "$elemMatch": {
+                                                "intl_format": {
+                                                    "$regex": f"\A{item_search}",
+                                                    "$options": "i",
+                                                },
+                                                "isMain": True,
+                                            }
+                                        }
+                                    }
                                 },
-                                "isMain": True,
-                            }
-                        },
-                        "customer_status": True,
-                    },
-                    search_projections,
-                )
-                .skip(skip)
-                .limit(limit)
+                                {"$project": search_projections},
+                                {"$skip": skip},
+                                {"$limit": limit},
+                            ],
+                            # "total_items": [
+                            #     {"$match": {"customer_status": True}},
+                            #     {
+                            #         "phone": {
+                            #             "$elemMatch": {
+                            #                 "intl_format": {
+                            #                     "$regex": f"\A{item_search}",
+                            #                     "$options": "i",
+                            #                 },
+                            #                 "isMain": True,
+                            #             }
+                            #         }
+                            #     },
+                            #     {"$project": search_projections},
+                            #     {"$count": "total"},
+                            # ],
+                        }
+                    }
+                ]
             )
+
         if constrain == "ends_by":
             return (
                 self.customer.find(
                     {
                         "phone": {
                             "$elemMatch": {
-                                f"{column}": {
+                                "phone.intl_format": {
                                     "$regex": rf"{item_search}\b",
                                     "$options": "i",
                                 },
@@ -959,8 +991,8 @@ class MongoQueries(ConnectionMongo):
         return response
 
     def filter_search_phone(self, constrain, item_search, column, skip, limit):
-        # print(item_search)
         if item_search.find("+") > -1:
+            # print(item_search + "hola")
 
             item = item_search.replace(" ", "")
             item = item_search.replace("-", "")
@@ -974,14 +1006,15 @@ class MongoQueries(ConnectionMongo):
     def filter_search_customers(
         self, constrain, item_search, column, skip, limit, order, column_order
     ):
-
+        # print(column)
         response = None
         if column == "email":
+
             response = self.search_customer_email(
                 constrain, item_search, column, skip, limit, order, column_order
             )
         elif column == "phone":
-            # print(column)
+
             response = self.filter_search_phone(
                 constrain, item_search, column, skip, limit
             )
@@ -1069,7 +1102,7 @@ class MongoQueries(ConnectionMongo):
         response = None
         customer = dict(data)
         today = datetime.utcnow()
-        today = datetime.strftime(today, "%Y-%m-%dT%H:%M:%S")
+        today = datetime.strftime(today, "%Y-%m-%dT%H:%M:%S.%f")
         customer["create_at"] = today
         customer["update_at"] = today
         customer = CreateCustomerBody(**customer)
@@ -1197,7 +1230,7 @@ class MongoQueries(ConnectionMongo):
     def build_query_update(self, data):
         query = {}
         today = datetime.utcnow()
-        today = datetime.strftime(today, "%Y-%m-%dT%H:%M:%S")
+        today = datetime.strftime(today, "%Y-%m-%dT%H:%M:%S.%f")
         if data.name != "" and data.name != None:
             query["name"] = data.name
         if data.last_name != "" and data.last_name != None:
@@ -1212,7 +1245,7 @@ class MongoQueries(ConnectionMongo):
                 query["phone"] = [i.dict() for i in data.phone]
 
         if data.address != "" and data.address != None:
-            query["address"] = data.address
+            query["address"] = [i.dict() for i in data.address]
         if data.postal_address != "" and data.postal_address != None:
             query["postal_address"] = data.postal_address
         if data.email != "" and data.email != None:
@@ -1231,9 +1264,9 @@ class MongoQueries(ConnectionMongo):
         if data.birthdate != "" and data.birthdate != None:
             query["birthdate"] = data.birthdate
 
-        if data.language != "" and data.language != None:
-            for i in data.language:
-                query["language"] = [i.dict() for i in data.language]
+        if data.languages != "" and data.languages != None:
+            for i in data.languages:
+                query["languages"] = [i.dict() for i in data.languages]
 
         if data.social_media != "" and data.social_media != None:
             for i in data.social_media:
@@ -1243,12 +1276,13 @@ class MongoQueries(ConnectionMongo):
             query["customer_avatar"] = data.customer_avatar
         if data.signature != "" and data.signature != None:
             query["name"] = data.signature
-        query["last_update"] = today
+        query["update_at"] = today
         return query
 
     async def update_customer_(self, data):
 
         query = self.build_query_update(data)
+        # print(query)
         resp = None
         if data.id != "" and data.id != None:
             resp = await self.customer.find_one_and_update(
@@ -1302,7 +1336,7 @@ class MongoQueries(ConnectionMongo):
         customer = await self.customer.find_one({"_id": customer_id})
 
         today = datetime.utcnow()
-        today = datetime.strftime(today, "%Y-%m-%dT%H:%M:%S")
+        today = datetime.strftime(today, "%Y-%m-%dT%H:%M:%S.%f")
 
         if customer:
             if customer["associated_sensors"]:
@@ -1331,7 +1365,7 @@ class MongoQueries(ConnectionMongo):
         await self.hard_delete_customer(id_parent_a)
         await self.hard_delete_customer(id_parent_b)
         today = datetime.utcnow()
-        today = datetime.strftime(today, "%Y-%m-%dT%H:%M:%S")
+        today = datetime.strftime(today, "%Y-%m-%dT%H:%M:%S.%f")
         customer["create_at"] = today
         customer["update_at"] = today
         customer = CreateCustomerBody(**customer)

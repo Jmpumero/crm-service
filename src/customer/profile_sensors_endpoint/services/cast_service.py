@@ -86,7 +86,7 @@ class CastService(CastHotSpotQueries):
                     'status_code':status.HTTP_200_OK,
                     'message': 'Ok'
                 },
-                'cast_customer_id': customer_id,
+                'id': customer_id,
                 'cast_connections': len(connection_time_list),
                 'cast_avg_connection_time': f"{round(statistics.mean(connection_time_list), 2)} hours",
                 'cast_visited_apps': playback_used_apps_list,
@@ -137,20 +137,20 @@ class CastService(CastHotSpotQueries):
                                                             duration= str(diff).split('.')[0],
                                                             device= playback_item['data']['deviceId']))
             response = {
-                'response':{
+                'playback_history_response':{
                     'status_code':status.HTTP_200_OK,
                     'message': 'Ok',
                 },
-                'customer_id': customer_id,
+                'id': customer_id,
                 'total_items': playback_count,
                 'showing': limit,
                 'skip':skip,
-                'playback_data': playback_history_list
+                'playback_history_data': playback_history_list
             }
             return response
         else:
             response = {
-                'cast_meta_response':{
+                'playback_history_response':{
                     'status_code':status.HTTP_404_NOT_FOUND,
                     'message': "Customer doesn't have interaction with this sensor"
                 }

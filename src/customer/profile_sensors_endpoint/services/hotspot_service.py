@@ -35,7 +35,7 @@ class HotspotService(CastHotSpotQueries):
                     'status_code':status.HTTP_200_OK,
                     'message': 'Ok'
                 },
-                'hotspot_customer_id': customer_id,
+                'id': customer_id,
                 'hotspot_connections': count,
                 'hotspot_first_connection': first_connection,
                 'hotspot_last_connection': last_connection
@@ -43,7 +43,7 @@ class HotspotService(CastHotSpotQueries):
             return response
         except:
             response = {
-                'hotspot_meta_response':{
+                'hotspot_response':{
                     'status_code':status.HTTP_404_NOT_FOUND,
                     'message': "Customer doesn't have interaction with this sensor"
                 }

@@ -28,7 +28,7 @@ sensor_router = APIRouter(
 
 
 #CAST ENDPOINT
-@sensor_router.get("/customers/search/profile/cast/{customer_id}", 
+@sensor_router.get("/customer/{customer_id}/cast", 
     response_model=CastResponse,
     response_model_exclude_unset=True,
     responses={status.HTTP_404_NOT_FOUND: {"model": CustomValidationError}},
@@ -57,7 +57,7 @@ async def get_cast(customer_id: str):
     return await cast_stats.get_cast_stats(customer_id, 'sensor_2')
 
 #CAST HISTORY ENDPOINT
-@sensor_router.get("/customers/search/profile/cast/history/{customer_id}", 
+@sensor_router.get("/customer/{customer_id}/cast-history", 
     response_model=PlaybackHistory,
     response_model_exclude_unset=True,
     responses={status.HTTP_404_NOT_FOUND: {"model": CustomValidationError}},
@@ -91,7 +91,7 @@ async def get_cast_history(customer_id: str,
     return await hotspot_stats.get_cast_history(customer_id, 'sensor_2', skip, limit)
 
 #HOTSPOT ENDPOINT
-@sensor_router.get("/customers/search/profile/hotspot/{customer_id}", 
+@sensor_router.get("/customer/{customer_id}/hotspot", 
     response_model=HotspotResponse,
     response_model_exclude_unset=True,
     responses={status.HTTP_404_NOT_FOUND: {"model": CustomValidationError}},

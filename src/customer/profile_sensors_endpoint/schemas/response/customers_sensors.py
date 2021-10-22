@@ -28,12 +28,12 @@ class HistoryData(BaseModel):
     device: Optional[str]
 
 class PlaybackHistory(BaseModel):
-    response: Response
-    customer_id: str
+    playback_history_response: Response
+    id: str
     total_items: int
     showing: int
     skip: Optional[int]
-    playback_data:Optional[List[HistoryData]]
+    playback_history_data:Optional[List[HistoryData]]
 
 class VisitedApps(BaseModel):
     app_name: str
@@ -41,7 +41,7 @@ class VisitedApps(BaseModel):
 
 class CastResponse(BaseModel):
     cast_response: Response
-    cast_customer_id: str
+    id: str
     cast_connections: Optional[int]
     cast_avg_connection_time: Optional[str]
     cast_visited_apps: Optional[List[VisitedApps]]
@@ -53,7 +53,7 @@ class CastResponse(BaseModel):
 
 class HotspotResponse(BaseModel):
     hotspot_response: Response
-    hotspot_customer_id: str
+    id: str
     hotspot_connections: Optional[int]
     #hotspot_used_devices: Optional[List[MostUsedDevice]]
     hotspot_first_connection: Optional[str]

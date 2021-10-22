@@ -1,9 +1,10 @@
 from __future__ import annotations
 from typing import List, Optional
-
 from aioredis.client import Redis
-from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
 from typing import Any, List
+
+from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
+
 from src.customer.schemas.post.bodys.blacklist import BlackListBody
 
 from config.config import Settings

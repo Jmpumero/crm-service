@@ -131,7 +131,7 @@ allowed_grant_types = [
 ]
 
 auth_scheme = OpenIDConnect(
-    url=f"{global_settings.keycloack_server_url}/realms/{global_settings.keycloack_realm_name}",
+    url=f"{global_settings.KEYCLOACK_SERVER_URL}/realms/{global_settings.KEYCLOACK_REALM_NAME}",
     scheme_name="Keycloak",
     allowed_grant_types=allowed_grant_types,
     audience="cast-master-api",

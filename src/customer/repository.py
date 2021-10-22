@@ -19,7 +19,7 @@ from src.customer.schemas.get.responses.segmenter import (
 )
 from core.connection.connection import ConnectionMongo
 
-# from src.customer.schemas.get.responses.cross_selling import CrossSellingResponse
+
 from src.customer.schemas.post.bodys.customer_crud import (
     CreateCustomerBody,
     MergeCustomerBody,
@@ -34,17 +34,14 @@ from src.customer.schemas.post.responses.blacklist import BlackListBodyResponse
 from fastapi.encoders import jsonable_encoder
 from src.customer.schemas.get.responses import blacklist, customers
 from src.customer.schemas.get import responses
-import pymongo
+
 from pymongo.errors import DuplicateKeyError, BulkWriteError
 from config.config import Settings
 from core.connection.connection import ConnectionMongo
 from typing import Any
-
-
 from fastapi import HTTPException
 from error_handlers.bad_gateway import BadGatewayException
 
-from src.customer.repositories import HistorySensorQueries
 
 global_settings = Settings()
 
@@ -113,8 +110,6 @@ blacklist_customer_projections = {
         ]
     },
 }
-
-# search_update_projections = {"blacklist_status": 0}
 
 
 class MongoQueries(ConnectionMongo):
@@ -667,9 +662,6 @@ class MongoQueries(ConnectionMongo):
     def search_phone_local(self, constrain, item_search, column, skip, limit):
         response = ""
 
-        # print(column + "hola")
-        # print(constrain)
-
         if constrain == "contain":
 
             return self.customer.aggregate(
@@ -1006,7 +998,7 @@ class MongoQueries(ConnectionMongo):
     def filter_search_customers(
         self, constrain, item_search, column, skip, limit, order, column_order
     ):
-        # print(column)
+
         response = None
         if column == "email":
 
@@ -1387,93 +1379,6 @@ class MongoQueries(ConnectionMongo):
                 "code": 400,
             }
         return resp
-
-    async def insert_one_cross_selling_product(self, data):
-
-        inserted_product = None
-        response = None
-
-        product = jsonable_encoder(data)
-
-        try:
-            inserted_product = await self.products.insert_one(product)
-        except:
-            response = {
-                "msg": " Failed inseting Product ",
-                "code": 400,
-            }
-
-        if inserted_product != None:
-
-            if inserted_product.acknowledged:
-                response = {
-                    "msg": " Success Product created ",
-                    "code": 200,
-                }
-            else:
-                response = {
-                    "msg": " Failed inseting Customer ",
-                    "code": 400,
-                }
-
-        return CrossSellingCreatedResponse(**response)
-
-    async def insert_many_cross_selling(self, data):
-
-        inserted_product = None
-        response = None
-        duplicate_items = []
-
-        array_cs = jsonable_encoder(data.news_cross_selling)
-
-        try:
-            inserted_product = await self.cross_selling.insert_many(array_cs)
-
-            if inserted_product.acknowledged:
-                response = {
-                    "msg": " Success Cross Selling created ",
-                    "code": 200,
-                }
-
-        except BulkWriteError as e:  # fallo al intetar escribir por llaves duplicadas
-
-            # print(e.details["writeErrors"])
-            duplicate_items.append(
-                e.details["writeErrors"][0]["op"]["principal_product"]["name"]
-            )
-            duplicate_items.append(
-                e.details["writeErrors"][0]["op"]["secondary_product"]["name"]
-            )
-
-            response = {
-                "msg": " Failed inserting Cross Selling, duplicate keys ",
-                "code": 406,
-                "details": duplicate_items,
-            }
-
-        except Exception as e:
-            response = {
-                "msg": " Failed inserting Cross Selling, desconocido ",
-                "code": 410,
-                "details": e.details["writeErrors"][0],
-            }
-
-        return response
-
-    async def get_all_cross_selling(self, data):
-
-        return (
-            self.cross_selling.find({})
-            .skip(data.skip)
-            .limit(data.limit)
-            .sort("principal_product", pymongo.ASCENDING)
-        )
-
-    async def get_all_products(self):
-        return self.products.find({}).sort("name", pymongo.ASCENDING)
-
-    def get_total_cross_selling(self):
-        return self.cross_selling.count_documents({})
 
     async def find_segments(self, params) -> Any:
         r = None
@@ -1914,24 +1819,3 @@ class MongoQueries(ConnectionMongo):
             final_response["authors"] = list_authors
 
         return final_response
-
-    async def facet_test(self) -> Any:
-
-        r = self.customer.aggregate(
-            [
-                {"$match": {"civil_status": "single"}},
-                # {"$match": {"email.isMain": True, "email.email": "t23@hotmal.com"}},
-                # {"$match": {"age": 77}},
-            ],
-            allowDiskUse=True,
-        )
-        resp = []
-        if r != None:
-            for item in await r.to_list(
-                length=None
-            ):  # por variar y provar ( mas eficiente)
-                resp.append(item)
-
-        # print(resp)
-
-        return resp

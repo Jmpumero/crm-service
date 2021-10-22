@@ -99,7 +99,10 @@ async def get_customers_(
 
 
 # enpoint que optiene el historial de un sensor del customer (para las tablas blacklist/crud)
-@customers_router.get("/customer/{customer_id}/history-sensor")
+@customers_router.get(
+    "/customers/{customer_id}/history-sensor",
+    response_model=Any,
+)
 @remove_422
 async def get_customer_sensor(
     customer_id: str,
@@ -176,7 +179,7 @@ async def get_customer_marketing_subscriptions(customer_id: str):
 
 
 @customers_router.put(
-    "/blacklist/update/customer", response_model=BlackListBodyResponse
+    "/blacklist/update/customers", response_model=BlackListBodyResponse
 )
 @remove_422
 async def update_customer_in_blacklist(body: BlackListBody):
@@ -198,7 +201,7 @@ async def get_customer_sales_summary(
 #### CRUD ####
 
 
-@customers_router.post("/customer/", response_model=CustomerCRUDResponse)
+@customers_router.post("/customers/", response_model=CustomerCRUDResponse)
 @remove_422
 async def created_customer_crud(body: CreateCustomerBody):
 
@@ -320,11 +323,3 @@ async def get_author_segments_list():
 
     service = Service()
     return await service.get_author_segments_list()
-
-
-@customers_router.get("/get/test")
-@remove_422
-async def get_test():
-
-    service = Service()
-    return await service.get_test()

@@ -39,8 +39,8 @@ def get_swagger_ui_html(
     <script src="{swagger_js_url}"></script>
     <!-- `SwaggerUIBundle` is now available on the page -->
     <script>
-    const clientId = '{Settings().keycloack_client_id}';
-    const clientSecret = '{Settings().keycloack_client_secrect_key}';
+    const clientId = '{Settings().KEYCLOACK_CLIENT_ID}';
+    const clientSecret = '{Settings().KEYCLOACK_CLIENT_SECRECT_KEY}';
     const ui = SwaggerUIBundle({{
         url: '{openapi_url}',
     """

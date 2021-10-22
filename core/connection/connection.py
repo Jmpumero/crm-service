@@ -17,11 +17,11 @@ load_dotenv()
 class ConnectionMongo:
     def __init__(self):
         self.client = motor.motor_asyncio.AsyncIOMotorClient(
-            global_settings.mongodb_url
+            global_settings.MONGODB_URL
         )
 
         log.info(
-            f"MONGODB: {global_settings.mongodb_url[global_settings.mongodb_url.find('@')+1:global_settings.mongodb_url.find('/', global_settings.mongodb_url.find('@'))]}"
+            f"MONGODB: {global_settings.MONGODB_URL[global_settings.MONGODB_URL.find('@')+1:global_settings.MONGODB_URL.find('/', global_settings.MONGODB_URL.find('@'))]}"
         )
 
         self.db = self.client.crm

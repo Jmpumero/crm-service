@@ -20,6 +20,8 @@ from http_exceptions import (
 )
 from utils.remove_422 import remove_422s
 from src import customers_router, customers_profile_router
+from src.customer.controller import customers_router
+from src.customer.profile_sensors_endpoint.controller import sensor_router
 
 
 global_settings: Settings = Settings()
@@ -40,6 +42,7 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+app.include_router(sensor_router)
 app.include_router(customers_router)
 app.include_router(customers_profile_router)
 app.include_router(get_openapi_router(app))

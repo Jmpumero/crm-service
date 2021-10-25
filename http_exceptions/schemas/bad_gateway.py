@@ -1,6 +1,5 @@
-from pydantic import BaseModel
+from .base_error import BaseError
 
 
-class BadGatewayError(BaseModel):
-    code: int
-    message: str
+class BadGatewayError(BaseError):
+    ...

@@ -1,16 +1,14 @@
-from typing import Any
-from traceback import print_exc
 import logging
 
 import pymongo
 from dotenv import load_dotenv
 import motor.motor_asyncio
 
-from error_handlers.bad_gateway import BadGatewayException
 from config.config import Settings
 
 global_settings = Settings()
 log = logging.getLogger("uvicorn")
+
 load_dotenv()
 
 

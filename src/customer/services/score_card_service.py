@@ -167,8 +167,8 @@ class ScoreCardService(MongoQueries):
     def __init__(self):
         super().__init__()
 
-    async def get_customer_score_card(self, customer_id: str):
-        customer = await self.customer.find_one(
+    async def get_customer_score_card(self, customer_id: str) -> Any:
+        customer: Any = await self.customer.find_one(
             {"_id": customer_id}, {"score": 1, "_id": 0}
         )
 
@@ -176,7 +176,7 @@ class ScoreCardService(MongoQueries):
 
     async def put_score_card(self, customer_id: str, data: Any):
         try:
-            result = await self.customer.update_one(
+            result: Any = await self.customer.update_one(
                 {"_id": customer_id}, {"$set": {"score": data.dict()}}
             )
 

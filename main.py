@@ -1,9 +1,11 @@
 from __future__ import annotations
 import logging
+from typing import List
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.exceptions import RequestValidationError
+
+# from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import Settings
@@ -13,20 +15,20 @@ from http_exceptions import (
     BadGatewayException,
     BadRequestException,
     UnauthorizedException,
-    BadRequestError as BadRequestSchema,
-    BadGatewayError as BadGatewaySchema,
+    NotFoundException,
+    base_handler,
 )
 from utils.remove_422 import remove_422s
 from src import customers_router, customers_profile_router
 
 
-global_settings = Settings()
+global_settings: Settings = Settings()
 
-app = FastAPI(
+app: FastAPI = FastAPI(
     docs_url=None, redoc_url=None, on_startup=[on_startup], on_shutdown=[on_shutdown]
 )
 
-origins = ["*"]
+origins: List[str] = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -42,10 +44,11 @@ app.include_router(customers_router)
 app.include_router(customers_profile_router)
 app.include_router(get_openapi_router(app))
 
-app.add_exception_handler(RequestValidationError, validation_error.handler)
-app.add_exception_handler(bad_gateway.BadGatewayException, bad_gateway.handler)
-app.add_exception_handler(bad_request.BadRequestException, bad_request.handler)
-app.add_exception_handler(unauthorized.UnauthorizedException, unauthorized.handler)
+# app.add_exception_handler(RequestValidationError, validation_error.handler)
+app.add_exception_handler(BadGatewayException, base_handler)
+app.add_exception_handler(BadRequestException, base_handler)
+app.add_exception_handler(UnauthorizedException, base_handler)
+app.add_exception_handler(NotFoundException, base_handler)
 
 logger = logging.getLogger("uvicorn")
 

@@ -4,6 +4,7 @@ from src.customer.repository import MongoQueries
 from ..schemas import (
     CustomerProfileHeaderResponse,
 )
+from http_exceptions import NotFoundException
 
 
 class ProfileHeaderService(MongoQueries):
@@ -11,10 +12,10 @@ class ProfileHeaderService(MongoQueries):
         super().__init__()
 
     async def get_profile_header(self, customer_id: str) -> Any:
-        customer = await self.customer.find_one({"_id": customer_id})
+        customer: Any = await self.customer.find_one({"_id": customer_id})
 
         if not customer:
-            return {}
+            raise NotFoundException()
 
         languages = customer.get("language") or []
 

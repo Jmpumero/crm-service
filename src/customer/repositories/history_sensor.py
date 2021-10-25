@@ -5,7 +5,7 @@ import pymongo
 from config.config import Settings
 from core.connection.connection import ConnectionMongo as DwConnection
 from dateutil.relativedelta import relativedelta
-from error_handlers.bad_gateway import BadGatewayException
+
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from pymongo.errors import BulkWriteError, DuplicateKeyError, OperationFailure
@@ -35,7 +35,6 @@ from typing import Any
 
 
 from fastapi import HTTPException
-from error_handlers.bad_gateway import BadGatewayException
 
 
 class HistorySensorQueries(DwConnection):

@@ -12,18 +12,19 @@ from ..services import (
     ProfileDetailService,
     MarketingSubscriptionsService,
 )
+from http_exceptions import NotFoundError
 from ..service import Service
 from utils.remove_422 import remove_422
 
 
-customers_profile_router = APIRouter(
+customers_profile_router: APIRouter = APIRouter(
     tags=["Customer Profile"], dependencies=[Depends(keycloack_guard)]
 )
 
 
 @customers_profile_router.get(
     "/customers/{customer_id}/profile-header",
-    responses={404: {"model": }}
+    responses={404: {"model": NotFoundError}},
     response_model=CustomerProfileHeaderResponse,
     response_model_exclude_none=True,
 )

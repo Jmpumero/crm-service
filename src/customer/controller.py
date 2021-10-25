@@ -56,9 +56,6 @@ from .schemas import (
     AuthorsInSegments,
 )
 from utils.remove_422 import remove_422
-from error_handlers.schemas.validation_error import CustomValidationError
-from error_handlers.schemas.bad_gateway import BadGatewayError
-from error_handlers.schemas.unauthorized import UnauthorizedError
 
 
 customers_router = APIRouter(

@@ -18,5 +18,5 @@ class Settings(BaseSettings):
     KEYCLOACK_CLIENT_SECRECT_KEY: str = os.getenv("KEYCLOACK_CLIENT_SECRECT_KEY", "")
     KEYCLOACK_REALM_NAME: str = os.getenv("KEYCLOACK_REALM_NAME", "")
 
-    class Config:
+    class Config(BaseSettings.Config):
         env_file = ".env"

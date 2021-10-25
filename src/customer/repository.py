@@ -114,6 +114,8 @@ blacklist_customer_projections = {
     },
 }
 
+
+
 # search_update_projections = {"blacklist_status": 0}
 
 

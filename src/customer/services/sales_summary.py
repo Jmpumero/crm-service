@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 from aioredis.client import Redis
 
@@ -9,13 +10,13 @@ class SalesSummary(MongoQueries):
     def __init__(self):
         super().__init__()
 
-    async def get_customer_sales_summary(self, customer_id, redis: Redis):
-        customer_in_redis = await redis.get(str(customer_id))
+    async def get_customer_sales_summary(self, customer_id: str, redis: Redis) -> Any:
+        customer_in_redis: str = await redis.get(str(customer_id))
 
         if customer_in_redis:
             return json.loads(customer_in_redis)
 
-        data = {
+        data: Any = {
             "total_revenue": [
                 {"name": "upgrade_and_upselling", "quantity": 110},
                 {"name": "food_and_beverage", "quantity": 150},
@@ -49,10 +50,10 @@ class SalesSummary(MongoQueries):
 
         return data
 
-    async def get_most_visited_pages(self, customer_id):
-        cursor = self.cast_collection.find({"customer_id": customer_id})
+    async def get_most_visited_pages(self, customer_id: str) -> Any:
+        cursor: Any = self.cast_collection.find({"customer_id": customer_id})
 
-        customers = await cursor.to_list(None)
+        customers: Any = await cursor.to_list(None)
 
         most_visited_pages = {}
 
@@ -66,7 +67,7 @@ class SalesSummary(MongoQueries):
                 + 1
             )
 
-        most_visited_pages = [
+        most_visited_pages: Any = [
             {"name": page[0], "quantity": page[1]}
             for page in sorted(
                 most_visited_pages.items(), key=lambda x: x[1], reverse=True

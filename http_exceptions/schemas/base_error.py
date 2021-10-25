@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
 
-class BadRequestError(BaseModel):
+class BaseError(BaseModel):
     code: int
     message: str

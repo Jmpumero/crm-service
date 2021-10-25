@@ -1,16 +1,18 @@
-from typing import Optional
-from aioredis import Redis
+# from typing import Optional
+# from aioredis import Redis
 
 
-class RedisRepository:
-    def __init__(self, redis: Redis):
-        self._redis = redis
+# class RedisRepository:
+#     def __init__(self, redis: Redis) -> None:
+#         self._redis = redis
 
-    async def set(self, key: str, value: str, expire: Optional[int] = None):
-        if expire:
-            return await self._redis.set(key, value, ex=expire)
+#     async def set(self, key: str, value: str, expire: Optional[int] = None) -> bool:
+#         result: bool = False
 
-        return await self._redis.set(key, value)
+#         if expire:
+#             return await self._redis.set(key, value, ex=expire)
 
-    async def get(self, key: str):
-        return await self._redis.get(key)
+#         return await self._redis.set(key, value)
+
+#     async def get(self, key: str):
+#         return await self._redis.get(key)

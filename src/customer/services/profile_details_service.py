@@ -1,6 +1,8 @@
 from typing import Any
+
 from src.customer.repository import MongoQueries
 from ..schemas import CustomerProfileDetailResponse
+from http_exceptions import NotFoundException
 
 
 class ProfileDetailService(MongoQueries):
@@ -8,10 +10,10 @@ class ProfileDetailService(MongoQueries):
         super().__init__()
 
     async def get_profile_details(self, customer_id: str) -> Any:
-        customer = await self.customer.find_one({"_id": customer_id})
+        customer: Any = await self.customer.find_one({"_id": customer_id})
 
         if not customer:
-            return {}
+            raise NotFoundException()
 
         customer_phones = customer.get("phone") or []
 
@@ -43,11 +45,11 @@ class ProfileDetailService(MongoQueries):
 
         return CustomerProfileDetailResponse(**data)
 
-    async def get_contact_modal_info(self, customer_id: str):
-        customer = await self.customer.find_one({"_id": customer_id})
+    async def get_contact_modal_info(self, customer_id: str) -> Any:
+        customer: Any = await self.customer.find_one({"_id": customer_id})
 
         if not customer:
-            return {}
+            raise NotFoundException()
 
         emails = customer.get("email")
         phones = customer.get("phone")

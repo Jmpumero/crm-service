@@ -4,14 +4,16 @@ from fastapi import APIRouter, status, Depends
 
 from core import keycloack_guard
 
-from error_handlers.schemas.bad_gateway import BadGatewayError
-from error_handlers.schemas.unauthorized import UnauthorizedError
-from error_handlers.schemas.validation_error import CustomValidationError
+from http_exceptions import BadGatewayError, UnauthorizedError, NotFoundError
 from utils.remove_422 import remove_422
 
 from ..services.cast_service import CastService
 from ..services.hotspot_service import HotspotService
-from ..schemas.response.customers_sensors import CastResponse, HotspotResponse, PlaybackHistory
+from ..schemas.response.customers_sensors import (
+    CastResponse,
+    HotspotResponse,
+    PlaybackHistory,
+)
 
 from config.config import Settings
 
@@ -27,11 +29,12 @@ sensor_router = APIRouter(
 )
 
 
-#CAST ENDPOINT
-@sensor_router.get("/customer/{customer_id}/cast", 
+# CAST ENDPOINT
+@sensor_router.get(
+    "/customer/{customer_id}/cast",
     response_model=CastResponse,
     response_model_exclude_unset=True,
-    responses={status.HTTP_404_NOT_FOUND: {"model": CustomValidationError}},
+    responses={status.HTTP_404_NOT_FOUND: {"model": NotFoundError}},
     status_code=status.HTTP_200_OK,
 )
 @remove_422
@@ -54,19 +57,23 @@ async def get_cast(customer_id: str):
     """
 
     cast_stats = CastService()
-    return await cast_stats.get_cast_stats(customer_id, 'sensor_2')
+    return await cast_stats.get_cast_stats(customer_id, "sensor_2")
 
-#CAST HISTORY ENDPOINT
-@sensor_router.get("/customer/{customer_id}/cast-history", 
+
+# CAST HISTORY ENDPOINT
+@sensor_router.get(
+    "/customer/{customer_id}/cast-history",
     response_model=PlaybackHistory,
     response_model_exclude_unset=True,
-    responses={status.HTTP_404_NOT_FOUND: {"model": CustomValidationError}},
+    responses={status.HTTP_404_NOT_FOUND: {"model": NotFoundError}},
     status_code=status.HTTP_200_OK,
 )
 @remove_422
-async def get_cast_history(customer_id: str, 
-                           skip: Optional[int] = 0, 
-                           limit: int = global_settings.pagination_limit):
+async def get_cast_history(
+    customer_id: str,
+    skip: Optional[int] = 0,
+    limit: int = 25,
+):
     """
     Get Cast Playback History from DW, given a Customer ID:\n
     **Input**:\n
@@ -88,13 +95,15 @@ async def get_cast_history(customer_id: str,
     """
 
     hotspot_stats = CastService()
-    return await hotspot_stats.get_cast_history(customer_id, 'sensor_2', skip, limit)
+    return await hotspot_stats.get_cast_history(customer_id, "sensor_2", skip, limit)
 
-#HOTSPOT ENDPOINT
-@sensor_router.get("/customer/{customer_id}/hotspot", 
+
+# HOTSPOT ENDPOINT
+@sensor_router.get(
+    "/customer/{customer_id}/hotspot",
     response_model=HotspotResponse,
     response_model_exclude_unset=True,
-    responses={status.HTTP_404_NOT_FOUND: {"model": CustomValidationError}},
+    responses={status.HTTP_404_NOT_FOUND: {"model": NotFoundError}},
     status_code=status.HTTP_200_OK,
 )
 @remove_422
@@ -112,4 +121,4 @@ async def get_hotspot(customer_id: str):
     """
 
     hotspot_stats = HotspotService()
-    return await hotspot_stats.get_hotspot_stats(customer_id, sensor='sensor_3')
+    return await hotspot_stats.get_hotspot_stats(customer_id, sensor="sensor_3")

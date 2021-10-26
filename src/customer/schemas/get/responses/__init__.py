@@ -16,4 +16,4 @@ from .customer_crud import (
 )
 from .cross_selling import Product, CrossSellingAndProductsResponse, CrossSelling
 
-from .segmenter import Segmenter, SegmenterResponse, SegmenterTable, AuthorsInSegments
+from .segmenter import Segmenter, SegmenterResponse

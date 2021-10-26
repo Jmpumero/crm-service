@@ -8,17 +8,17 @@ from src.customer.schemas.get import responses
 from src.customer.schemas.get.query_params import SegmenterQueryParams
 from src.customer.schemas.get.responses import customers, blacklist
 
-# from src.customer.schemas.get.responses import blacklist
+
 from src.customer.schemas.get.responses.customer_crud import (
     SearchMerge,
     SearchMergeResponse,
 )
-from src.customer.schemas.get.responses.segmenter import AuthorsInSegments, Segmenter
+from src.customer.schemas.get.responses.segmenter import Segmenter
 
 from .repository import MongoQueries
-
 from .repositories import HistorySensorQueries
 from .repositories import CrossSellingQueries
+from .repositories import SegmenterQueries
 
 from .schemas import (
     SearchCustomersQueryParams,
@@ -448,24 +448,3 @@ class Service(MongoQueries):
             "total_cross_selling_show": len(items_cross_selling),
         }
         return CrossSellingAndProductsResponse(**response)
-
-    async def get_segmenters(self, query_params: SegmenterQueryParams) -> Any:
-
-        segments = None
-
-        segments = await self.find_segments(query_params)
-        segments["global_total_clients"] = await self.total_customer()
-        segments["total_enable_clients"] = (
-            await self.total_customer()
-        ) - await self.total_customer_in_blacklist(True)
-        return segments
-
-    async def get_author_segments_list(self) -> AuthorsInSegments:
-        authors = await self.get_all_author_in_segments()
-
-        return authors
-
-    async def get_test(self) -> Any:
-
-        r = await self.facet_test()
-        return r

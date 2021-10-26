@@ -21,6 +21,7 @@ from .services import (
     ProfileDetailService,
     MarketingSubscriptionsService,
     SalesSummary,
+    SegmenterService,
 )
 from core import get_redis
 from .schemas import SearchCustomersQueryParams, PutScoreCard
@@ -61,7 +62,6 @@ from .schemas import (
     Segmenter,
     SegmenterResponse,
     SegmenterQueryParams,
-    AuthorsInSegments,
 )
 
 from utils.remove_422 import remove_422
@@ -307,19 +307,19 @@ async def post_customer_score_card(customer_id: str, score_card: PutScoreCard):
 
 
 #### Segmenter ####
-@customers_router.get("/segmenter", response_model=Any)
+@customers_router.get("/segments", response_model=Any)
 @remove_422
 async def get_segmenter_list(
     query_params: SegmenterQueryParams = Depends(SegmenterQueryParams),
 ):
 
-    service = Service()
+    service = SegmenterService()
     return await service.get_segmenters(query_params)
 
 
-@customers_router.get("/segmenter/authors", response_model=AuthorsInSegments)
-@remove_422
-async def get_author_segments_list():
+# @customers_router.get("/segmenter/authors", response_model=)
+# @remove_422
+# async def get_author_segments_list():
 
-    service = Service()
-    return await service.get_author_segments_list()
+#     service = Service()
+#     return await service.get_author_segments_list()

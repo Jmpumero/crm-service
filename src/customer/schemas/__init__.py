@@ -27,7 +27,6 @@ from .get import (
     Segmenter,
     SegmenterResponse,
     SegmenterQueryParams,
-    AuthorsInSegments,
 )
 
 from .post import (

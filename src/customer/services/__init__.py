@@ -3,3 +3,4 @@ from .profile_header_service import ProfileHeaderService
 from .profile_details_service import ProfileDetailService
 from .marketing_subscriptions_service import MarketingSubscriptionsService
 from .sales_summary import SalesSummary
+from .segmenter_service import SegmenterService

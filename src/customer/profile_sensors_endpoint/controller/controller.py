@@ -1,5 +1,6 @@
 from typing import Optional
 
+from fastapi import Query, Path
 from fastapi import APIRouter, status, Depends
 
 from core import keycloack_guard
@@ -11,7 +12,10 @@ from utils.remove_422 import remove_422
 
 from ..services.cast_service import CastService
 from ..services.hotspot_service import HotspotService
+from ..services.pms_service import PmsService
+
 from ..schemas.response.customers_sensors import CastResponse, HotspotResponse, PlaybackHistory
+from ..schemas.response.customers_sensors import PmsResponse, PmsHistory
 
 from config.config import Settings
 
@@ -35,7 +39,7 @@ sensor_router = APIRouter(
     status_code=status.HTTP_200_OK,
 )
 @remove_422
-async def get_cast(customer_id: str):
+async def get_cast(customer_id: str = Path(...)):
     """
     Get Customer Cast Usage Statistics\n
     **Input**:\n
@@ -64,9 +68,9 @@ async def get_cast(customer_id: str):
     status_code=status.HTTP_200_OK,
 )
 @remove_422
-async def get_cast_history(customer_id: str, 
+async def get_cast_history(customer_id: str = Path(...), 
                            skip: Optional[int] = 0, 
-                           limit: int = global_settings.pagination_limit):
+                           limit: int = Query(default=global_settings.pagination_limit)):
     """
     Get Cast Playback History from DW, given a Customer ID:\n
     **Input**:\n
@@ -98,7 +102,7 @@ async def get_cast_history(customer_id: str,
     status_code=status.HTTP_200_OK,
 )
 @remove_422
-async def get_hotspot(customer_id: str):
+async def get_hotspot(customer_id: str = Path(...)):
     """
     Get Customer Hotspot Usage Statistics:\n
     **Input**:\n
@@ -113,3 +117,48 @@ async def get_hotspot(customer_id: str):
 
     hotspot_stats = HotspotService()
     return await hotspot_stats.get_hotspot_stats(customer_id, sensor='sensor_3')
+
+
+#PMS ENDPOINT
+@sensor_router.get("/customer/{customer_id}/pms", 
+    response_model=PmsResponse,
+    response_model_exclude_unset=True,
+    responses={status.HTTP_404_NOT_FOUND: {"model": CustomValidationError}},
+    status_code=status.HTTP_200_OK,
+)
+@remove_422
+async def get_pms(customer_id: str = Path(...)):
+
+    """
+    Get Customer PMS Statistics:\n
+    **Input**:\n
+    
+    **Successful Response**:
+    
+    """
+
+    pms_stats = PmsService()
+    return await pms_stats.get_pms_stats(customer_id, sensor='sensor_1')
+
+
+#PMS BOOKING HISTORY ENDPOINT
+@sensor_router.get("/customer/{customer_id}/pms-booking-history", 
+    response_model=PmsHistory,
+    response_model_exclude_unset=True,
+    responses={status.HTTP_404_NOT_FOUND: {"model": CustomValidationError}},
+    status_code=status.HTTP_200_OK,
+)
+@remove_422
+async def get_pms_history(customer_id: str, 
+                          skip: Optional[int] = 0, 
+                          limit: int = Query(default=global_settings.pagination_limit)):
+    """
+    Get PMS Booking History from DW, given a Customer ID:\n
+    **Input**:\n
+    
+    **Successful Response**:
+    
+    """
+
+    pms_history = PmsService()
+    return await pms_history.get_pms_history(customer_id, 'sensor_1', skip, limit)

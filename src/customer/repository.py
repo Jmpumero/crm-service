@@ -1,14 +1,14 @@
-from datetime import datetime, timedelta
-from typing import Any, List
-from collections import OrderedDict
-import pymongo
-from config.config import Settings
-from core.connection.connection import ConnectionMongo as DwConnection
-from dateutil.relativedelta import relativedelta
-from error_handlers.bad_gateway import BadGatewayException
+from datetime import datetime
+from typing import Any
+
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
+import pymongo
 from pymongo.errors import BulkWriteError, DuplicateKeyError, OperationFailure
+from dateutil.relativedelta import relativedelta
+
+from config.config import Settings
+from core.connection.connection import ConnectionMongo as DwConnection
 from src.customer.schemas.get import query_params, responses
 from src.customer.schemas.get.responses import blacklist, customers, segmenter
 from src.customer.schemas.get.responses.segmenter import (
@@ -38,7 +38,6 @@ from config.config import Settings
 from core.connection.connection import ConnectionMongo
 from typing import Any
 from fastapi import HTTPException
-from error_handlers.bad_gateway import BadGatewayException
 
 
 global_settings = Settings()

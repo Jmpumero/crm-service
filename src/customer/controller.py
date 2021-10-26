@@ -1,18 +1,12 @@
 from __future__ import annotations
-from typing import List, Optional
-
 from aioredis.client import Redis
-from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
 from typing import Any, List
+
+from fastapi import APIRouter, Depends
+
+from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
 from src.customer.schemas.post.bodys.blacklist import BlackListBody
-
-from config.config import Settings
-
-from fastapi import APIRouter, Depends, Response
-
 from src.customer.schemas.post.bodys.blacklist import BlackListBody
-
-from config.config import Settings
 from core import keycloack_guard
 from .service import Service
 from .services import (
@@ -35,10 +29,8 @@ from .schemas import (
     CustomerLogBook,
     CustomerMarketingSubscriptions,
 )
-
 from .schemas import SearchCustomersQueryParams, BlacklistQueryParams
 from .schemas import BlackListBodyResponse
-
 from .schemas import (
     BlackListBodyResponse,
     SearchCustomersQueryParams,
@@ -63,19 +55,12 @@ from .schemas import (
     SegmenterResponse,
     SegmenterQueryParams,
 )
-
 from utils.remove_422 import remove_422
-from error_handlers.schemas.validation_error import CustomValidationError
-from error_handlers.schemas.bad_gateway import BadGatewayError
-from error_handlers.schemas.unauthorized import UnauthorizedError
 
-
-global_settings = Settings()
 
 customers_router = APIRouter(
     tags=["Customers"], dependencies=[Depends(keycloack_guard)]
 )
-# tags=["Customers"], dependencies=[Depends(keycloack_guard)]
 
 
 @customers_router.get("/customers/")
@@ -122,62 +107,10 @@ async def get_customer_notes_comments(customer_id: str):
     return service.get_customer_notes_comments(customer_id)
 
 
-@customers_router.get(
-    "/customers/{customer_id}/profile-header",
-    response_model=CustomerProfileHeaderResponse,
-    response_model_exclude_none=True,
-)
-@remove_422
-async def get_customer_profile_header(customer_id: str):
-    service = ProfileHeaderService()
-
-    return await service.get_profile_header(customer_id)
+##############################################################################
 
 
-@customers_router.get(
-    "/customers/{customer_id}/details",
-    response_model=CustomerProfileDetailResponse,
-    response_model_exclude_none=True,
-)
-@remove_422
-async def get_customer_profile_detail(customer_id: str):
-    service = ProfileDetailService()
-
-    return await service.get_profile_details(customer_id)
-
-
-@customers_router.get(
-    "/customers/{customer_id}/details/modal-info",
-)
-@remove_422
-async def get_contact_modal_info(customer_id: str):
-    service = ProfileDetailService()
-
-    return await service.get_contact_modal_info(customer_id)
-
-
-@customers_router.get(
-    "/customers/{customer_id}/logbook", response_model=CustomerLogBook
-)
-@remove_422
-async def get_customer_logbook(customer_id: str):
-    service = Service()
-
-    return service.get_customer_logbook(customer_id)
-
-
-@customers_router.get(
-    "/customers/{customer_id}/marketing-subscriptions",
-    response_model=CustomerMarketingSubscriptions,
-    response_model_exclude_none=True,
-)
-@remove_422
-async def get_customer_marketing_subscriptions(customer_id: str):
-    service = MarketingSubscriptionsService()
-
-    return await service.get_customer_marketing_subscriptions(customer_id)
-
-
+##############################################################################
 @customers_router.put(
     "/blacklist/update/customers", response_model=BlackListBodyResponse
 )

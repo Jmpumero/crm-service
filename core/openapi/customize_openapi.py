@@ -1,7 +1,7 @@
 import json
 from typing import Optional, Dict, Any
 
-from fastapi import APIRouter
+from fastapi import FastAPI, APIRouter
 from fastapi.openapi.docs import (
     get_redoc_html,
     get_swagger_ui_html,
@@ -39,8 +39,8 @@ def get_swagger_ui_html(
     <script src="{swagger_js_url}"></script>
     <!-- `SwaggerUIBundle` is now available on the page -->
     <script>
-    const clientId = '{Settings().keycloack_client_id}';
-    const clientSecret = '{Settings().keycloack_client_secrect_key}';
+    const clientId = '{Settings().KEYCLOACK_CLIENT_ID}';
+    const clientSecret = '{Settings().KEYCLOACK_CLIENT_SECRECT_KEY}';
     const ui = SwaggerUIBundle({{
         url: '{openapi_url}',
     """
@@ -75,28 +75,31 @@ def get_swagger_ui_html(
     return HTMLResponse(html)
 
 
-def get_openapi_router(app):
-    openapi_router = APIRouter(include_in_schema=False)
+def get_openapi_router(app: FastAPI):
+    openapi_router: APIRouter = APIRouter(include_in_schema=False)
+    openapi_url: Any = app.openapi_url
+    app_title: Any = app.title
+    swagger_ui_oauth2_redirect_url: Any = app.swagger_ui_oauth2_redirect_url
 
     @openapi_router.get("/docs", include_in_schema=False)
-    async def custom_swagger_ui_html():
+    async def custom_swagger_ui_html() -> HTMLResponse:
         return get_swagger_ui_html(
-            openapi_url=app.openapi_url,
-            title=app.title + " - Swagger UI",
-            oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
+            openapi_url=openapi_url,
+            title=app_title + " - Swagger UI",
+            oauth2_redirect_url=swagger_ui_oauth2_redirect_url,
             swagger_js_url="/static/swagger-ui-bundle.js",
             swagger_css_url="/static/swagger-ui.css",
         )
 
-    @openapi_router.get(app.swagger_ui_oauth2_redirect_url, include_in_schema=False)
+    @openapi_router.get(swagger_ui_oauth2_redirect_url, include_in_schema=False)
     async def swagger_ui_redirect():
         return get_swagger_ui_oauth2_redirect_html()
 
     @openapi_router.get("/redoc", include_in_schema=False)
     async def redoc_html():
         return get_redoc_html(
-            openapi_url=app.openapi_url,
-            title=app.title + " - ReDoc",
+            openapi_url=openapi_url,
+            title=app_title + " - ReDoc",
             redoc_js_url="/static/redoc.standalone.js",
         )
 

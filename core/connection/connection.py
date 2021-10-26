@@ -1,27 +1,25 @@
-from typing import Any
-from traceback import print_exc
 import logging
 
 import pymongo
 from dotenv import load_dotenv
 import motor.motor_asyncio
 
-from error_handlers.bad_gateway import BadGatewayException
 from config.config import Settings
 
 global_settings = Settings()
 log = logging.getLogger("uvicorn")
+
 load_dotenv()
 
 
 class ConnectionMongo:
     def __init__(self):
         self.client = motor.motor_asyncio.AsyncIOMotorClient(
-            global_settings.mongodb_url
+            global_settings.MONGODB_URL
         )
 
         log.info(
-            f"MONGODB: {global_settings.mongodb_url[global_settings.mongodb_url.find('@')+1:global_settings.mongodb_url.find('/', global_settings.mongodb_url.find('@'))]}"
+            f"MONGODB: {global_settings.MONGODB_URL[global_settings.MONGODB_URL.find('@')+1:global_settings.MONGODB_URL.find('/', global_settings.MONGODB_URL.find('@'))]}"
         )
 
         self.db = self.client.crm

@@ -1,6 +1,7 @@
 from typing import Any
 
 from src.customer.repository import MongoQueries
+from http_exceptions import NotFoundException
 from ..schemas import CustomerMarketingSubscriptions
 
 
@@ -9,10 +10,10 @@ class MarketingSubscriptionsService(MongoQueries):
         super().__init__()
 
     async def get_customer_marketing_subscriptions(self, customer_id: str) -> Any:
-        customer = await self.customer.find_one({"_id": customer_id})
+        customer: Any = await self.customer.find_one({"_id": customer_id})
 
         if not customer:
-            return {}
+            raise NotFoundException()
 
         emails = [
             {

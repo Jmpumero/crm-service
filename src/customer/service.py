@@ -60,7 +60,6 @@ class Service(MongoQueries):
         customer = None
 
         if query_params.query == "":
-
             if query_params.column_name:  # ultima validacion especial
                 cursor = self.find_all_customers(
                     query_params.skip,

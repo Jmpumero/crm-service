@@ -1,6 +1,6 @@
 import json
 from enum import Enum
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Set
 from urllib.request import urlopen
 
 from fastapi import Security
@@ -48,16 +48,16 @@ class OpenIDConnect(SecurityBase):
         self.jwt_decode_options = jwt_decode_options
         self.audience = audience
 
-        self.well_known = self.get_well_known(url)
-        self.jwks = self.get_jwks(self.well_known)
+        self.well_known: dict[str, str] = self.get_well_known(url)
+        self.jwks: dict[str, str] = self.get_jwks(self.well_known)
 
-        grant_types = set(self.well_known["grant_types_supported"])
-        grant_types = grant_types.intersection(allowed_grant_types)
+        grant_types: Set[str] = set(self.well_known["grant_types_supported"])
+        grant_types: Set[str] = grant_types.intersection(allowed_grant_types)
 
-        flows = OAuthFlowsModel()
+        flows: OAuthFlowsModel = OAuthFlowsModel()
 
-        authz_url = self.well_known["authorization_endpoint"]
-        token_url = self.well_known["token_endpoint"]
+        authz_url: str = self.well_known["authorization_endpoint"]
+        token_url: str = self.well_known["token_endpoint"]
 
         if GrantType.AUTHORIZATION_CODE in grant_types:
             flows.authorizationCode = OAuthFlowAuthorizationCode(
@@ -74,7 +74,7 @@ class OpenIDConnect(SecurityBase):
         if GrantType.IMPLICIT in grant_types:
             flows.implicit = OAuthFlowImplicit(authorizationUrl=authz_url)
 
-        self.model = OAuth2Model(flows=flows)
+        self.model: OAuth2Model = OAuth2Model(flows=flows)
 
     async def __call__(self, request: Request) -> Any:
         authorization: str = request.headers.get("Authorization")
@@ -91,20 +91,23 @@ class OpenIDConnect(SecurityBase):
             return None
 
         try:
-            return jwt.decode(
+            decode_token: Any = jwt.decode(
                 token,
                 self.jwks,
                 audience=self.audience,
                 options=self.jwt_decode_options,
             )
-        except JWTError as e:
+
+            return decode_token
+
+        except JWTError:
             raise HTTPException(
                 status_code=HTTP_401_UNAUTHORIZED,
                 detail="JWT validation failed",
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-    def get_well_known(self, issuer: str) -> dict:
+    def get_well_known(self, issuer: str) -> dict[str, str]:
         url = f"{issuer}/.well-known/openid-configuration"
 
         with urlopen(url) as response:
@@ -113,7 +116,7 @@ class OpenIDConnect(SecurityBase):
 
             return json.load(response)
 
-    def get_jwks(self, well_known: dict) -> dict:
+    def get_jwks(self, well_known: dict[str, str]) -> dict[str, str]:
         url = well_known["jwks_uri"]
 
         with urlopen(url) as response:
@@ -131,13 +134,13 @@ allowed_grant_types = [
 ]
 
 auth_scheme = OpenIDConnect(
-    url=f"{global_settings.keycloack_server_url}/realms/{global_settings.keycloack_realm_name}",
+    url=f"{global_settings.KEYCLOACK_SERVER_URL}/realms/{global_settings.KEYCLOACK_REALM_NAME}",
     scheme_name="Keycloak",
     allowed_grant_types=allowed_grant_types,
     audience="cast-master-api",
 )
 
 
-def keycloack_guard(claims: dict = Security(auth_scheme)):
+def keycloack_guard(claims: dict[str, str] = Security(auth_scheme)):
 
     return claims

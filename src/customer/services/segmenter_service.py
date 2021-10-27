@@ -52,10 +52,8 @@ class SegmenterService(MongoQueries):
             segments["total_shows"] = 0
             segments["items"] = []
             segments["authors"] = []
-            segments["global_total_clients"] = await self.total_customer()
-            segments["total_enable_clients"] = (
-                await self.total_customer()
-            ) - await self.total_customer_in_blacklist(True)
+            segments["global_total_clients"] = 0
+            segments["total_enable_clients"] = 0
             result = None
 
         return SegmenterResponse(**segments)

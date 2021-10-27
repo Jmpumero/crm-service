@@ -1,11 +1,20 @@
 from typing import List, Optional, Any
+from enum import Enum
 
 from pydantic import BaseModel
+
+
+class PmsHistoryListConstrains(Enum):
+    booking_code = "Booking"
+    booking_date = "Fecha"
+    booking_min_amt = "Monto min."
+    booking_max_amt = "Monto max."
 
 
 class Response(BaseModel):
     status_code: int
     message: str
+
 
 class DocumentID(BaseModel):
     documentType: str
@@ -29,22 +38,27 @@ class Languages(BaseModel):
     language: str
     isMain: bool
 
+
 class Addresses(BaseModel):
     address: str
     isMain: bool
+
 
 class MostVisitedApp(BaseModel):
     app_name: Optional[str]
     app_visits: Optional[int]
     app_avg_visit_time: Optional[str]
 
+
 class MostUsedDevice(BaseModel):
-    device_id : Optional[str]
-    
+    device_id: Optional[str]
+
+
 class LastPlayback(BaseModel):
     playback_title: Optional[str]
     playback_duration: Optional[str]
     playback_date: Optional[str]
+
 
 class HistoryData(BaseModel):
     date: Optional[str]
@@ -53,17 +67,20 @@ class HistoryData(BaseModel):
     duration: Optional[str]
     device: Optional[str]
 
+
 class PlaybackHistory(BaseModel):
     playback_history_response: Response
     id: str
     total_items: int
     showing: int
     skip: Optional[int]
-    playback_history_data:Optional[List[HistoryData]]
+    playback_history_data: Optional[List[HistoryData]]
+
 
 class VisitedApps(BaseModel):
     app_name: str
     visit_count: int
+
 
 class CastResponse(BaseModel):
     cast_response: Response
@@ -77,22 +94,25 @@ class CastResponse(BaseModel):
     cast_most_used_device: Optional[MostUsedDevice]
     cast_last_playback: Optional[LastPlayback]
 
+
 class HotspotResponse(BaseModel):
     hotspot_response: Response
     id: str
     hotspot_connections: Optional[int]
-    #hotspot_used_devices: Optional[List[MostUsedDevice]]
+    # hotspot_used_devices: Optional[List[MostUsedDevice]]
     hotspot_first_connection: Optional[str]
     hotspot_last_connection: Optional[str]
+
 
 class PmsStay(BaseModel):
     date: Optional[str]
     property: Optional[str]
-    duration: Optional[str]
+    duration: Optional[int]
     room_type: Optional[str]
     upgrade: Optional[int]
     upselling: Optional[int]
-    amount: Optional[float] 
+    amount: Optional[float]
+
 
 class PmsBooking(BaseModel):
     pms_book_code: Optional[str]
@@ -107,11 +127,12 @@ class PmsBooking(BaseModel):
     pms_book_property: Optional[str]
     pms_book_taxes: Optional[str]
 
+
 class PmsResponse(BaseModel):
     pms_response: Response
     pms_first_stay: Optional[PmsStay]
     pms_last_stay: Optional[PmsStay]
-    pms_avg_stay: Optional[str]
+    pms_avg_stay: Optional[int]
     pms_most_used_room_type: Optional[str]
     pms_total_income: Optional[float]
     pms_avg_pax: Optional[float]
@@ -123,19 +144,49 @@ class PmsResponse(BaseModel):
     pms_total_lodge_income: Optional[float]
 
 
+# class PmsHistoryData(BaseModel):
+#     name: Optional[str]
+#     last_name: Optional[str]
+#     nationality: Optional[str]
+#     phone: Optional[List[Phones]]
+#     address: Optional[List[Addresses]]
+#     email: Optional[List[Emails]]
+#     documentId: Optional[List[DocumentID]]
+#     civil_status: Optional[str]
+#     age: Optional[int]
+#     languages: Optional[List[Languages]]
+#     country: Optional[str] = None
+#     city: Optional[str]
+#     booking: Optional[PmsBooking]
+
+
+class PmsHistoryData(BaseModel):
+    name: Optional[str]
+    last_name: Optional[str]
+    nationality: Optional[str]
+    phone: Optional[str]
+    address: Optional[str]
+    email: Optional[str]
+    documentId: Optional[List[DocumentID]]
+    civil_status: Optional[str]
+    age: Optional[int]
+    languages: Optional[str]
+    country: Optional[str] = None
+    city: Optional[str]
+    # booking: Optional[PmsBooking]
+    booking: Optional[Any]
+
+
 class PmsHistory(BaseModel):
     pms_history_response: Response
-    pms_history_name: Optional[str]
-    pms_history_last_name: Optional[str]
-    pms_history_nationality: Optional[List[str]]
-    pms_history_phone: Optional[List[Phones]]
-    pms_history_address: Optional[List[Addresses]]
-    pms_history_email: Optional[List[Emails]]
-    pms_history_documentId: Optional[List[DocumentID]]
-    pms_history_civil_status: Optional[str]
-    pms_history_age: Optional[int]
-    pms_history_languages: Optional[List[Languages]]
-    pms_history_country: Optional[str] = None
-    pms_history_city: Optional[str]
-    pms_booking: Optional[PmsBooking]
+    id: str
+    total_items: int
+    showing: int
+    skip: int
+    # playback_history_data: Optional[List[PmsHistoryData]]
+    playback_history_data: Optional[List[Any]]
 
+
+class SensorsTab(BaseModel):
+    response: Response
+    sensors_list: List[str]

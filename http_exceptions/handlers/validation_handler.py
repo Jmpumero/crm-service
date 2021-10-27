@@ -1,14 +1,13 @@
 from typing import Dict, Any
 
 from fastapi import responses, exceptions
+from starlette.requests import Request
 
 
-async def handler(
-    request, exc: exceptions.RequestValidationError
+async def validation_handler(
+    request: Request, exc: exceptions.RequestValidationError
 ) -> responses.JSONResponse:
     error: Dict[str, Any] = exc.errors()[0]
-
-    print(error)
 
     if len(error["loc"]) < 2:
         return responses.JSONResponse(

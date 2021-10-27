@@ -1,0 +1,1 @@
+from .segment_details import segmenter_details_router

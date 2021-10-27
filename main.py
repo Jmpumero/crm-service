@@ -19,7 +19,7 @@ from http_exceptions import (
     base_handler,
 )
 from utils.remove_422 import remove_422s
-from src import customers_router, customers_profile_router
+from src import customers_router, customers_profile_router, segmenter_details_router
 from src.customer.controller import customers_router
 from src.customer.profile_sensors_endpoint.controller import sensor_router
 
@@ -45,6 +45,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(sensor_router)
 app.include_router(customers_router)
 app.include_router(customers_profile_router)
+app.include_router(segmenter_details_router)
 app.include_router(get_openapi_router(app))
 
 # app.add_exception_handler(RequestValidationError, validation_error.handler)

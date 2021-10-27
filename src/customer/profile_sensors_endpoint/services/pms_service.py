@@ -152,46 +152,88 @@ class PmsService(PmsQueries):
             return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=response)
 
     async def get_pms_history(self, customer_id, constrain, search, skip, limit):
-        pms_history_list = []
-        async for item in self.get_bookings_agg_customer(
-            customer_id, constrain, search, skip, limit
-        ):
-            pms_history_list.append(
-                PmsHistoryData(
-                    name=item["data"]["pguest"]["name"],
-                    last_name=item["data"]["pguest"]["lastname"],
-                    nationality=item["data"]["pguest"]["coreCountry"]["name"],
-                    phone=item["data"]["pguest"]["phone"],
-                    address=item["pms_customer"][0]["address"],
-                    email=item["data"]["pguest"]["email"],
-                    documentId=[
-                        {
-                            "documentType": "DNI",
-                            "documentNumber": item["data"]["pguest"]["dni"],
-                        },
-                        {
-                            "documentType": "Passport",
-                            "documentNumber": item["data"]["pguest"]["passport"],
-                        },
-                    ],
-                    civil_status=item["pms_customer"][0]["civil_status"],
-                    # languages=item["data"]["pguest"]["coreCountry"]["name"],
-                    country=item["data"]["pguest"]["coreCountry"]["name"],
-                    city=item["pms_customer"][0]["city"],
-                    booking=item["data"]["bBooks"],
-                )
+        try:
+            master_books_list = []
+            single_books_list = []
+            pms_history_list = []
+
+            master = self.get_bookings_agg_customer(
+                customer_id, constrain, search, skip, limit
             )
 
-        response = {
-            "pms_history_response": {
-                "status_code": status.HTTP_200_OK,
-                "message": "Ok",
-            },
-            "id": customer_id,
-            "total_items": 0,
-            "showing": limit,
-            "skip": skip,
-            "playback_history_data": pms_history_list,
-        }
+            async for book in master:
+                master_books_list.append(book)
 
-        return response
+            for master in master_books_list:
+                for book in master["data"]["bBooks"]:
+                    single_books_list.append(book)
+
+            for master in master_books_list:
+                pms_history_list.append(
+                    PmsHistoryData(
+                        code=master["data"]["code"],
+                        name=master["data"]["pguest"]["name"],
+                        last_name=master["data"]["pguest"]["lastname"],
+                        nationality=master["data"]["pguest"]["coreCountry"]["name"],
+                        phone=master["pms_customer"][0]["phone"][0]["phone"],
+                        address=master["pms_customer"][0]["address"],
+                        email=master["data"]["pguest"]["email"],
+                        documentId=[
+                            {
+                                "documentType": "DNI",
+                                "documentNumber": master["data"]["pguest"]["dni"],
+                            },
+                            {
+                                "documentType": "Passport",
+                                "documentNumber": master["data"]["pguest"]["passport"],
+                            },
+                        ],
+                        civil_status=master["pms_customer"][0]["civil_status"],
+                        languages=master["pms_customer"][0]["email"][0]["email"],
+                        country=master["data"]["pguest"]["coreCountry"]["name"],
+                        city=master["pms_customer"][0]["city"],
+                        booking={
+                            "pms_book_code": master["data"]["bBooks"][0]["code"],
+                            "pms_book_checkin": master["data"]["bBooks"][0]["checkin"],
+                            "pms_book_checkout": master["data"]["bBooks"][0][
+                                "checkout"
+                            ],
+                            "pms_book_cost": 0,
+                            "pms_book_room_type": "#PENDIENTE",
+                            "pms_book_rate_plat": "#PENDIENTE",
+                            "pms_book_currency": "#PENDIENTE",
+                            "pms_book_reseller": "#PENDIENTE",
+                            "pms_book_meal_plan": "#PENDIENTE",
+                            "pms_book_property": "#PENDIENTE",
+                            "pms_book_taxes": "#PENDIENTE",
+                        },
+                    )
+                )
+            response = {
+                "pms_history_response": {
+                    "status_code": status.HTTP_200_OK,
+                    "message": "Ok",
+                },
+                "id": customer_id,
+                "total_items": 0,
+                "showing": limit,
+                "skip": skip,
+                "booking_history_data": pms_history_list,
+            }
+
+            if len(pms_history_list) > 0:
+                return response
+            else:
+                response = {
+                    "code": status.HTTP_404_NOT_FOUND,
+                    "message": f"Not Found",
+                }
+                return JSONResponse(
+                    status_code=status.HTTP_404_NOT_FOUND, content=response
+                )
+        except Exception as err:
+            response = {
+                "code": status.HTTP_404_NOT_FOUND,
+                "message": f"Error: {err}",
+            }
+            return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=response)

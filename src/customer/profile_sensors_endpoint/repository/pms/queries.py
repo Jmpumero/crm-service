@@ -106,88 +106,13 @@ class PmsQueries(MongoQueries):
 
         return sale_channels
 
-    def get_bookings_history(self, customer_id, constrain, search, skip, limit):
-        if constrain == "Booking":
-            result = (
-                self.pms_collection.find(
-                    {
-                        {
-                            "$and": [
-                                {"customer_id": customer_id},
-                                {"data.bBooks.code": search},
-                            ]
-                        }
-                    }
-                )
-                .skip(skip)
-                .limit(limit)
-                .sort([("data.bBooks.code", 1)])
-            )
-        elif constrain == "Fecha":
-            result = (
-                self.pms_collection.find(
-                    {
-                        {
-                            "$and": [
-                                {"customer_id": customer_id},
-                                {"data.bBooks.checkin": search},
-                            ]
-                        }
-                    }
-                )
-                .skip(skip)
-                .limit(limit)
-                .sort([("data.bBooks.code", 1)])
-            )
-        elif constrain == "Monto min.":
-            result = (
-                self.pms_collection.find(
-                    {
-                        {
-                            "$and": [
-                                {"customer_id": customer_id},
-                                {"data.bBooks.netAmt": search},
-                            ]
-                        }
-                    }
-                )
-                .skip(skip)
-                .limit(limit)
-                .sort([("data.bBooks.code", 1)])
-            )
-        elif constrain == "Monto max.":
-            result = (
-                self.pms_collection.find(
-                    {
-                        {
-                            "$and": [
-                                {"customer_id": customer_id},
-                                {"data.bBooks.netAmt": search},
-                            ]
-                        }
-                    }
-                )
-                .skip(skip)
-                .limit(limit)
-                .sort([("data.bBooks.code", 1)])
-            )
-        else:
-            result = (
-                self.pms_collection.find({"customer_id": customer_id})
-                .skip(skip)
-                .limit(limit)
-                .sort([("data.checkin", 1)])
-            )
-
-        return result
-
     def get_bookings_agg_customer(self, customer_id, constrain, search, skip, limit):
         if constrain.value == "Booking":
             match_stage = {
                 "$match": {
                     "$and": [
                         {"customer_id": customer_id},
-                        {"data.bBooks.code": search},
+                        {"data.code": search},
                     ]
                 }
             }
@@ -196,7 +121,7 @@ class PmsQueries(MongoQueries):
                 "$match": {
                     "$and": [
                         {"customer_id": customer_id},
-                        {"data.bBooks.checkin": search},
+                        {"data.checkin": search},
                     ]
                 }
             }
@@ -205,7 +130,7 @@ class PmsQueries(MongoQueries):
                 "$match": {
                     "$and": [
                         {"customer_id": customer_id},
-                        {"data.bBooks.netAmt": {"$gte": search}},
+                        {"data.bBooks.netAmt": {"$gte": float(search)}},
                     ]
                 }
             }
@@ -214,7 +139,7 @@ class PmsQueries(MongoQueries):
                 "$match": {
                     "$and": [
                         {"customer_id": customer_id},
-                        {"data.bBooks.netAmt": {"$lte": search}},
+                        {"data.bBooks.netAmt": {"$lte": float(search)}},
                     ]
                 }
             }

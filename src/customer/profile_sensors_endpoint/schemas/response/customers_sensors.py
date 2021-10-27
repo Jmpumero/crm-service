@@ -161,6 +161,7 @@ class PmsResponse(BaseModel):
 
 
 class PmsHistoryData(BaseModel):
+    code: Optional[str]
     name: Optional[str]
     last_name: Optional[str]
     nationality: Optional[str]
@@ -173,8 +174,7 @@ class PmsHistoryData(BaseModel):
     languages: Optional[str]
     country: Optional[str] = None
     city: Optional[str]
-    # booking: Optional[PmsBooking]
-    booking: Optional[Any]
+    booking: Optional[PmsBooking]
 
 
 class PmsHistory(BaseModel):
@@ -183,8 +183,7 @@ class PmsHistory(BaseModel):
     total_items: int
     showing: int
     skip: int
-    # playback_history_data: Optional[List[PmsHistoryData]]
-    playback_history_data: Optional[List[Any]]
+    booking_history_data: Optional[List[PmsHistoryData]]
 
 
 class SensorsTab(BaseModel):

@@ -1,18 +1,27 @@
 from typing import Optional
 
+from fastapi import Query, Path
 from fastapi import APIRouter, status, Depends
 
 from core import keycloack_guard
 
 from http_exceptions import BadGatewayError, UnauthorizedError, NotFoundError
+
 from utils.remove_422 import remove_422
 
 from ..services.cast_service import CastService
 from ..services.hotspot_service import HotspotService
+from ..services.pms_service import PmsService
+from ..services.sensors_tab import SensorsTabService
+
 from ..schemas.response.customers_sensors import (
+    SensorsTab,
     CastResponse,
     HotspotResponse,
     PlaybackHistory,
+    PmsResponse,
+    PmsHistory,
+    PmsHistoryListConstrains,
 )
 
 from config.config import Settings
@@ -28,6 +37,23 @@ sensor_router = APIRouter(
     },
 )
 
+# SENSORS TAB ENDPOINT
+@sensor_router.get(
+    "/customer/{customer_id}/sensors",
+    response_model=SensorsTab,
+    response_model_exclude_unset=True,
+    responses={status.HTTP_404_NOT_FOUND: {"model": NotFoundError}},
+    status_code=status.HTTP_200_OK,
+)
+@remove_422
+async def get_sensors_tab(customer_id: str = Path(...)):
+    """
+    Get Customer Sensors list
+    """
+
+    sensors = SensorsTabService()
+    return await sensors.get_sensors_tab(customer_id)
+
 
 # CAST ENDPOINT
 @sensor_router.get(
@@ -38,7 +64,7 @@ sensor_router = APIRouter(
     status_code=status.HTTP_200_OK,
 )
 @remove_422
-async def get_cast(customer_id: str):
+async def get_cast(customer_id: str = Path(...)):
     """
     Get Customer Cast Usage Statistics\n
     **Input**:\n
@@ -70,9 +96,9 @@ async def get_cast(customer_id: str):
 )
 @remove_422
 async def get_cast_history(
-    customer_id: str,
-    skip: Optional[int] = 0,
-    limit: int = 25,
+    customer_id: str = Path(...),
+    skip: int = Query(default=0),
+    limit: int = Query(default=25),
 ):
     """
     Get Cast Playback History from DW, given a Customer ID:\n
@@ -107,7 +133,7 @@ async def get_cast_history(
     status_code=status.HTTP_200_OK,
 )
 @remove_422
-async def get_hotspot(customer_id: str):
+async def get_hotspot(customer_id: str = Path(...)):
     """
     Get Customer Hotspot Usage Statistics:\n
     **Input**:\n
@@ -122,3 +148,56 @@ async def get_hotspot(customer_id: str):
 
     hotspot_stats = HotspotService()
     return await hotspot_stats.get_hotspot_stats(customer_id, sensor="sensor_3")
+
+
+# PMS ENDPOINT
+@sensor_router.get(
+    "/customer/{customer_id}/pms",
+    response_model=PmsResponse,
+    response_model_exclude_unset=True,
+    responses={status.HTTP_404_NOT_FOUND: {"model": NotFoundError}},
+    status_code=status.HTTP_200_OK,
+)
+@remove_422
+async def get_pms(customer_id: str = Path(...)):
+
+    """
+    Get Customer PMS Statistics:\n
+    **Input**:\n
+
+    **Successful Response**:
+
+    """
+
+    pms_stats = PmsService()
+    return await pms_stats.get_pms_stats(customer_id, sensor="sensor_1")
+
+
+# PMS BOOKING HISTORY ENDPOINT
+@sensor_router.get(
+    "/customer/{customer_id}/pms-booking-history",
+    response_model=PmsHistory,
+    response_model_exclude_unset=True,
+    responses={status.HTTP_404_NOT_FOUND: {"model": NotFoundError}},
+    status_code=status.HTTP_200_OK,
+)
+@remove_422
+async def get_pms_history(
+    customer_id: str = Path(...),
+    constrain: Optional[PmsHistoryListConstrains] = Query(...),
+    search: Optional[str] = Query(...),
+    skip: int = Query(default=0),
+    limit: int = Query(default=25),
+):
+    """
+    Get PMS Booking History from DW, given a Customer ID:\n
+    **Input**:\n
+
+    **Successful Response**:
+
+    """
+
+    pms_history = PmsService()
+    return await pms_history.get_pms_history(
+        customer_id, constrain, search, skip, limit
+    )

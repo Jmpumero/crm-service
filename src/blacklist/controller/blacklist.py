@@ -31,35 +31,26 @@ from src.blacklist.schemas import (
 )
 from utils.remove_422 import remove_422
 
-customers_router = APIRouter(
+blacklist_router = APIRouter(
     tags=["Blacklist"], dependencies=[Depends(keycloack_guard)]
 )
 
 
-# async def get_pms_history(
-#     customer_id: str = Path(...),
-#     constrain: Optional[PmsHistoryListConstrains] = Query(...),
-#     search: Optional[str] = Query(...),
-#     skip: int = Query(default=0),
-#     limit: int = Query(default=25),
-# ):
-
-
-@customers_router.get("/blacklist/")
+@blacklist_router.get("/blacklist/")
 @remove_422
 async def get_customers_(
     query_params: BlacklistQueryParams = Depends(BlacklistQueryParams),
 ):
     service = BlacklistService()
-
+    # return print("hola controller")
     return await service.get_customers_blacklist(query_params)
 
 
-@customers_router.put(
-    "/blacklist/update/customers", response_model=BlackListBodyResponse
-)
-@remove_422
-async def update_customer_in_blacklist(body: BlackListBody):
+# @blacklist_router.put(
+#     "/blacklist/update/customer_id/2", response_model=BlackListBodyResponse
+# )
+# @remove_422
+# async def update_customer_in_blacklist(body: BlackListBody):
 
-    service = BlacklistService()
-    return await service.post_blacklist_update_customer(body)
+#     service = BlacklistService()
+#     return await service.post_blacklist_update_customer(body)

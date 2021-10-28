@@ -20,5 +20,5 @@ class StatusInBlacklist(Enum):
 
 
 class BlacklistQueryParams(GenericSearch):
-    status: StatusInBlacklist
-    query: str
+    status: str = "enable"
+    query: Optional[str]

@@ -1,7 +1,9 @@
 from typing import Any
 
+from pydantic.fields import T
+
 from src.customer.repository import MongoQueries
-from src.blacklist.repository import BlacklistQueries
+from src.blacklist.repositories import BlacklistQueries
 
 from src.blacklist.schemas import (
     BlacklistCustomersResponse,
@@ -15,41 +17,32 @@ class BlacklistService(MongoQueries):
         super().__init__()
         self.repository = BlacklistQueries()
 
-    def build_blacklist_response(self, list_items, total):
-
-        response = {
-            "customers": list_items,
-            "total_items": total,
-            "total_show": len(list_items),
-        }
-        return BlacklistCustomersResponse(**response)
-
-    async def get_customers_blacklist(
-        self, query_params: BlacklistQueryParams
-    ) -> BlacklistCustomersResponse:
-        response = None
-        customers = []
-        cursor = None
-        total = 0
-        if query_params.query.replace(" ", "") != "":
-
-            if query_params.query.lower() == "disable":
-                total = await self.total_customer_in_blacklist(True)
-
-            elif query_params.query.lower() == "enable":
-                total = await self.total_customer_in_blacklist(False)
-
-            else:
-                print("valor de query errado")
-
-            cursor = self.blacklist_search(
-                query_params.query, query_params.skip, query_params.limit
-            )
-
-            if cursor != None:
-                for customer in await cursor.to_list(length=None):
-                    customers.append(BlacklistCustomer(**customer))
+    def build_blacklist_response(self, items):
+        if len(items[0]["items"]) > 0:
+            response = {
+                "total_items": items[0]["total_items"][0]["total"],
+                "total_show": items[0]["total_show"][0]["total_show"],
+                "items": items[0]["items"],
+            }
         else:
-            print("el query no puede ser vacio")
+            response = {
+                "total_items": 0,
+                "total_show": 0,
+                "items": items[0]["items"],
+            }
+        return response
 
-        return self.build_blacklist_response(customers, total)
+    async def get_customers_blacklist(self, query_params: BlacklistQueryParams) -> Any:
+
+        cursor = None
+        items = None
+
+        cursor = self.repository.blacklist_search(query_params)
+        if cursor != None:
+            items = await cursor.to_list(length=None)
+
+        return self.build_blacklist_response(items)
+
+    # async def post_blacklist_update_customer(self, body: BlackListBody):
+
+    #     return await self.update_customer_in_blacklist(body)

@@ -47,7 +47,7 @@ class Addresses(BaseModel):
 class MostVisitedApp(BaseModel):
     app_name: Optional[str]
     app_visits: Optional[int]
-    app_avg_visit_time: Optional[str]
+    app_avg_visit_time: Optional[int]
 
 
 class MostUsedDevice(BaseModel):
@@ -56,7 +56,7 @@ class MostUsedDevice(BaseModel):
 
 class LastPlayback(BaseModel):
     playback_title: Optional[str]
-    playback_duration: Optional[str]
+    playback_duration: Optional[int]
     playback_date: Optional[str]
 
 
@@ -86,7 +86,7 @@ class CastResponse(BaseModel):
     cast_response: Response
     id: str
     cast_connections: Optional[int]
-    cast_avg_connection_time: Optional[str]
+    cast_avg_connection_time: Optional[int]
     cast_visited_apps: Optional[List[VisitedApps]]
     cast_most_visited_app: Optional[MostVisitedApp]
     cast_first_connection: Optional[str]
@@ -142,22 +142,6 @@ class PmsResponse(BaseModel):
     pms_cancelled_bookings: Optional[int]
     pms_preferred_sales_channel: Optional[str]
     pms_total_lodge_income: Optional[float]
-
-
-# class PmsHistoryData(BaseModel):
-#     name: Optional[str]
-#     last_name: Optional[str]
-#     nationality: Optional[str]
-#     phone: Optional[List[Phones]]
-#     address: Optional[List[Addresses]]
-#     email: Optional[List[Emails]]
-#     documentId: Optional[List[DocumentID]]
-#     civil_status: Optional[str]
-#     age: Optional[int]
-#     languages: Optional[List[Languages]]
-#     country: Optional[str] = None
-#     city: Optional[str]
-#     booking: Optional[PmsBooking]
 
 
 class PmsHistoryData(BaseModel):

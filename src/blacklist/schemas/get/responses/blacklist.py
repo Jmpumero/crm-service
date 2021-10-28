@@ -4,6 +4,12 @@ from typing_extensions import TypedDict
 
 from pydantic import BaseModel, Field
 from bson import ObjectId
+from enum import Enum
+
+
+class StatusInBlacklist(Enum):
+    status_enable = "enable"
+    status_disable = "disable"
 
 
 class DocumentID(BaseModel):
@@ -41,7 +47,7 @@ class BlacklistCustomer(BaseModel):
     age: Optional[int]
     email: Optional[List[Emails]] = ""
     phone: Optional[List[Phones]] = ""
-    address: Optional[List[Addresses]] = ""
+    address: Optional[List[Addresses]]
     documentId: Optional[List[DocumentID]]
     nationality: Optional[List[str]]
     civil_status: Optional[str]
@@ -52,9 +58,9 @@ class BlacklistCustomer(BaseModel):
     blacklist_enable_motive: List[str]
     blacklist_disable_motive: List[str]
     stenant: Optional[Any]
-    email_main: Optional[Emails] = ""
-    phone_main: Optional[Phones] = ""
-    address_main: Optional[Addresses] = ""
+    email_main: Optional[Emails]
+    phone_main: Optional[Phones]
+    address_main: Optional[Addresses]
 
     class Config:
         allow_population_by_field_name = True
@@ -62,7 +68,7 @@ class BlacklistCustomer(BaseModel):
         json_encoders = {ObjectId: str}
 
 
-class BlacklistCustomersResponse(BaseModel):
+class BlacklistResponse(BaseModel):
     total_items: int
     total_show: int
     items: List[BlacklistCustomer]

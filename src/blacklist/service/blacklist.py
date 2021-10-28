@@ -6,8 +6,7 @@ from src.customer.repository import MongoQueries
 from src.blacklist.repositories import BlacklistQueries
 
 from src.blacklist.schemas import (
-    BlacklistCustomersResponse,
-    BlacklistCustomer,
+    BlacklistResponse,
     BlacklistQueryParams,
 )
 
@@ -17,7 +16,7 @@ class BlacklistService(MongoQueries):
         super().__init__()
         self.repository = BlacklistQueries()
 
-    def build_blacklist_response(self, items):
+    def build_blacklist_response(self, items) -> BlacklistResponse:
         if len(items[0]["items"]) > 0:
             response = {
                 "total_items": items[0]["total_items"][0]["total"],
@@ -30,14 +29,18 @@ class BlacklistService(MongoQueries):
                 "total_show": 0,
                 "items": items[0]["items"],
             }
-        return response
+        return BlacklistResponse(**response)
 
-    async def get_customers_blacklist(self, query_params: BlacklistQueryParams) -> Any:
+    async def get_customers_blacklist(
+        self, query, skip, limit, column_sort, order_sort, status
+    ) -> BlacklistResponse:
 
         cursor = None
         items = None
 
-        cursor = self.repository.blacklist_search(query_params)
+        cursor = self.repository.blacklist_search(
+            query, skip, limit, column_sort, order_sort, status
+        )
         if cursor != None:
             items = await cursor.to_list(length=None)
 

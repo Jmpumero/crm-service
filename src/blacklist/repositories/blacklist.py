@@ -168,17 +168,17 @@ class BlacklistQueries(MongoQueries):
 
         return result
 
-    def blacklist_search(self, params):
+    def blacklist_search(self, query, skip, limit, column_sort, order_sort, status):
 
         cursor = None
 
         cursor = self.build_query(
-            params.query,
-            params.status,
-            params.skip,
-            params.limit,
-            params.column_sort,
-            params.order_sort,
+            query,
+            status,
+            skip,
+            limit,
+            column_sort,
+            order_sort,
         )
 
         return cursor

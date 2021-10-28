@@ -1,7 +1,4 @@
 from .query_params import (
     BlacklistQueryParams,
 )
-from .responses import (
-    BlacklistCustomersResponse,
-    BlacklistCustomer,
-)
+from .responses import BlacklistResponse, BlacklistCustomer, StatusInBlacklist

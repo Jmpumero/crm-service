@@ -1,7 +1,1 @@
-from .blacklist import (
-    BlacklistCustomer,
-    BlacklistCustomersResponse,
-)
-
-
-# from .segmenter import Segmenter, SegmenterResponse
+from .blacklist import BlacklistCustomer, BlacklistResponse, StatusInBlacklist

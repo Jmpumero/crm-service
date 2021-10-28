@@ -89,13 +89,13 @@ class CreateCustomerBody(BaseModel):
     profession: Optional[str] = ""
     total_childrens: Optional[int] = 0
 
-    class Config:  # valida si falta un campo/campo desconocido
-        extra = "forbid"
+    # class Config:  # valida si falta un campo/campo desconocido
 
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
+        extra = "forbid"
 
 
 class UpdateCustomerBody(BaseModel):

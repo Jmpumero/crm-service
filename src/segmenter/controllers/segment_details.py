@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 
 from core import keycloack_guard
+from ..services import SegmentDetailsService
 from ..schemas import CreateSegment
 from utils.remove_422 import remove_422
-from pprint import pprint
 
 
 segments_details_router: APIRouter = APIRouter(
@@ -19,6 +19,7 @@ async def get_segmenter_details(segmenter_id: str) -> str:
 
 @segments_details_router.post("/segments")
 @remove_422
-async def create_segment(body: CreateSegment) -> str:
-    pprint(body.dict())
-    return "it's works"
+async def create_segment(body: CreateSegment) -> dict[str, str]:
+    service: SegmentDetailsService = SegmentDetailsService()
+
+    return await service.create_segment(body)

@@ -1,7 +1,10 @@
 from typing import Dict, Any
+from logging import getLogger
 
 from fastapi import responses, exceptions
 from starlette.requests import Request
+
+logger = getLogger("uvicorn")
 
 
 async def validation_handler(
@@ -28,6 +31,9 @@ async def validation_handler(
         )
 
     if error["type"] == "value_error.missing":
+        logger.warn(
+            f'\u001b[33m {request.url.path} - missing value : {error["loc"][1]}'
+        )
         return responses.JSONResponse(
             status_code=400,
             content={

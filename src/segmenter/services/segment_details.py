@@ -1,8 +1,6 @@
 from typing import Any
 from bson import ObjectId
 
-from pymongo.errors import DuplicateKeyError
-
 from ..repositories import SegmenterDetailsRepo
 from ..schemas import CreateSegment
 
@@ -17,6 +15,13 @@ class SegmentDetailsService:
         )
 
         return {
-            "segmenter_id": new_segment.inserted_id,
+            "segment_id": new_segment.inserted_id,
             "name": segment.segment_name,
         }
+
+    async def update_segment(self, segment_id: str, segment: Any):
+        updated_segment = await self.segmenter_detail_repo.find_one_and_update(
+            segment_id, segment
+        )
+
+        return updated_segment

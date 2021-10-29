@@ -18,8 +18,8 @@ blacklist_projections = {
     "birthdate": 1,
     "associated_sensors": 1,
     "blacklist_status": 1,
-    "blacklist_enable_motive": 1,
-    "blacklist_disable_motive": 1,
+    "blacklist_last_enabled_motive": 1,
+    "blacklist_last_disabled_motive": 1,
     "customer_status": 1,
     "email_main": {
         "$arrayElemAt": [

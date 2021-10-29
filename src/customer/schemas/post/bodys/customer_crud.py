@@ -84,8 +84,8 @@ class CreateCustomerBody(BaseModel):
     country: Optional[str] = ""
     city: Optional[str]
     postalCode: Optional[str]
-    blacklist_enable_motive: Optional[List[str]] = []
-    blacklist_disable_motive: Optional[List[str]] = []
+    blacklist_last_enabled_motive: Optional[List[str]] = []
+    blacklist_last_disabled_motive: Optional[List[str]] = []
     create_at: str = ""  # format '%Y-%m-%dT%H:%M:%S', 2021-12-31T23:59:59
     update_at: str = ""  # format '%Y-%m-%dT%H:%M:%S'
     delete_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S'
@@ -123,8 +123,8 @@ class UpdateCustomerBody(BaseModel):
     customer_avatar: Optional[str]
     signature: Optional[str]
     update_at: Optional[str]
-    blacklist_enable_motive: Optional[List[str]] = []
-    blacklist_disable_motive: Optional[List[str]] = []
+    blacklist_last_enabled_motive: Optional[List[str]] = []
+    blacklist_last_disabled_motive: Optional[List[str]] = []
     postalCode: Optional[str]
     country: Optional[str]
     city: Optional[str]
@@ -166,8 +166,8 @@ class MergeCustomerBody(BaseModel):
     country: Optional[str] = None
     city: Optional[str]
     postalCode: Optional[str]
-    blacklist_enable_motive: Optional[List[str]] = []
-    blacklist_disable_motive: Optional[List[str]] = []
+    blacklist_last_enabled_motive: Optional[List[str]] = []
+    blacklist_last_disabled_motive: Optional[List[str]] = []
     create_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S', 2021-12-31T23:59:59
     update_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S'
     stenant: Optional[Any]

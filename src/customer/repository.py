@@ -85,8 +85,8 @@ blacklist_customer_projections = {
     "birthdate": 1,
     "associated_sensors": 1,
     "blacklist_status": 1,
-    "blacklist_enable_motive": 1,
-    "blacklist_disable_motive": 1,
+    "blacklist_last_enabled_motive": 1,
+    "blacklist_last_disabled_motive": 1,
     "customer_status": 1,
     "email_main": {
         "$arrayElemAt": [
@@ -1052,29 +1052,6 @@ class MongoQueries(ConnectionMongo):
             {"customer_status": True, "blacklist_status": type}
         )
         return total
-
-    # async def update_customer_in_blacklist(self, data) -> BlackListBodyResponse:
-    #     resp = None
-    #     if data.blacklist_status:
-    #         resp = await self.customer.find_one_and_update(
-    #             {"_id": data.id},
-    #             {
-    #                 "$set": {
-    #                     "blacklist_status": data.blacklist_status,
-    #                     "blacklist_enable_motive": data.motives,
-    #                 }
-    #             },
-    #         )
-    #     else:
-    #         resp = await self.customer.find_one_and_update(
-    #             {"_id": data.id},
-    #             {
-    #                 "$set": {
-    #                     "blacklist_status": data.blacklist_status,
-    #                     "blacklist_disable_motive": data.motives,
-    #                 }
-    #             },
-    #         )
 
     #     if resp != None:
     #         response = {"msg": " Success Customer Update ", "code": 200}

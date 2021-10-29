@@ -2,18 +2,21 @@ from __future__ import annotations
 from aioredis.client import Redis
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends
-from fastapi.param_functions import Query
+from fastapi import APIRouter, Depends, status
+from fastapi import Body, Query
 
+
+from http_exceptions import BadGatewayError, UnauthorizedError, NotFoundError
 from src.customer.schemas.post.bodys.blacklist import BlackListBody
 from src.customer.schemas.post.bodys.blacklist import BlackListBody
 from core import keycloack_guard
 from core import get_redis
 from src.blacklist.service import BlacklistService
 from src.blacklist.schemas import (
-    BlacklistQueryParams,
     BlacklistResponse,
     StatusInBlacklist,
+    BlackListUpdate,
+    BlacklistUpdateResponse,
 )
 from utils.remove_422 import remove_422
 
@@ -43,11 +46,15 @@ async def get_customers_(
     )
 
 
-# @blacklist_router.put(
-#     "/blacklist/update/customer_id/2", response_model=BlackListBodyResponse
-# )
-# @remove_422
-# async def update_customer_in_blacklist(body: BlackListBody):
+@blacklist_router.put(
+    "/blacklist/update/customer",
+    response_model=BlacklistUpdateResponse,
+    response_model_exclude_unset=True,
+    responses={status.HTTP_404_NOT_FOUND: {"model": NotFoundError}},
+    status_code=status.HTTP_200_OK,
+)
+@remove_422
+async def update_customer(body: BlackListUpdate = Body(...)):
 
-#     service = BlacklistService()
-#     return await service.post_blacklist_update_customer(body)
+    service = BlacklistService()
+    return await service.update_(body)

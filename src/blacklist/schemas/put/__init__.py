@@ -1,1 +1,1 @@
-from .score_card import PutScoreCard
+from .blacklist import BlackListUpdate, BlacklistUpdateResponse

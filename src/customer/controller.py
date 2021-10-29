@@ -111,14 +111,14 @@ async def get_customer_notes_comments(customer_id: str):
 
 
 ##############################################################################
-@customers_router.put(
-    "/blacklist/update/customers", response_model=BlackListBodyResponse
-)
-@remove_422
-async def update_customer_in_blacklist(body: BlackListBody):
+# @customers_router.put(
+#     "/blacklist/update/customers", response_model=BlackListBodyResponse
+# )
+# @remove_422
+# async def update_customer_in_blacklist(body: BlackListBody):
 
-    service = Service()
-    return await service.post_blacklist_update_customer(body)
+#     service = Service()
+#     return await service.post_blacklist_update_customer(body)
 
 
 @customers_router.get("/customers/{customer_id}/sales-summary")

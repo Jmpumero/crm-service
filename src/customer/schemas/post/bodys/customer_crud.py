@@ -54,6 +54,12 @@ class Addresses(BaseModel):
     isMain: bool
 
 
+class BlacklistLog(BaseModel):
+    date: str
+    motives: List[str]
+    type: str
+
+
 class CreateCustomerBody(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     name: str
@@ -88,7 +94,7 @@ class CreateCustomerBody(BaseModel):
     gender: Optional[str] = ""
     profession: Optional[str] = ""
     total_childrens: Optional[int] = 0
-
+    blacklist_log: Optional[List[BlacklistLog]]
     # class Config:  # valida si falta un campo/campo desconocido
 
     class Config:
@@ -126,11 +132,13 @@ class UpdateCustomerBody(BaseModel):
     gender: Optional[str]
     profession: Optional[str]
     total_childrens: Optional[int]
+    blacklist_log: Optional[BlacklistLog]
 
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
+        extra = "forbid"
 
 
 class MergeCustomerBody(BaseModel):
@@ -166,6 +174,7 @@ class MergeCustomerBody(BaseModel):
     gender: Optional[str]
     profession: Optional[str]
     total_childrens: Optional[int]
+    blacklist_log: Optional[BlacklistLog]
 
     class Config:  # valida si falta un campo/campo desconocido
         extra = "forbid"

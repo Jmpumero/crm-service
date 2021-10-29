@@ -1,4 +1,6 @@
-from typing import Any
+from logging import disable, log
+from typing import Any, Coroutine
+from datetime import datetime
 
 from src.customer.repository import MongoQueries
 
@@ -75,7 +77,6 @@ class BlacklistQueries(MongoQueries):
                                 "$options": "i",
                             }
                         },
-                        # {"blacklist_enable_motive": {"$in": ["/.*err.*/"]}},
                     ]
                 }
             }
@@ -94,7 +95,7 @@ class BlacklistQueries(MongoQueries):
 
         return result
 
-    def build_query(self, search, status, skip, limit, column, order_sort):
+    def build_get_query(self, search, status, skip, limit, column, order_sort):
 
         order = 1
         result = None
@@ -160,19 +161,11 @@ class BlacklistQueries(MongoQueries):
 
         return result
 
-    def search_(self, search, status, skip, limit, column_sort, order_sort):
-
-        result = None
-
-        result = self.build_query(search, status, skip, limit, column_sort, order_sort)
-
-        return result
-
     def blacklist_search(self, query, skip, limit, column_sort, order_sort, status):
 
         cursor = None
 
-        cursor = self.build_query(
+        cursor = self.build_get_query(
             query,
             status,
             skip,
@@ -189,66 +182,50 @@ class BlacklistQueries(MongoQueries):
         )
         return total
 
-    async def update_customer_in_blacklist(self, data):
-        resp = None
-        if data.blacklist_status:
-            resp = await self.customer.find_one_and_update(
-                {"_id": data.id},
-                {
-                    "$set": {
-                        "blacklist_status": data.blacklist_status,
-                        "blacklist_enable_motive": data.motives,
-                    }
-                },
-            )
-        else:
-            resp = await self.customer.find_one_and_update(
-                {"_id": data.id},
-                {
-                    "$set": {
-                        "blacklist_status": data.blacklist_status,
-                        "blacklist_disable_motive": data.motives,
-                    }
-                },
+    def build_query_update(self, blacklist_log, motives, status):
+
+        item = {}
+        type = "enable"
+        last_motives = "blacklist_last_enabled_motives"
+        query = {}
+
+        if status:
+            type = "disable"
+            last_motives = "blacklist_last_disabled_motives"
+
+        today = datetime.utcnow()
+        today = datetime.strftime(today, "%Y-%m-%dT%H:%M:%S.%f")
+        item["date"] = today
+        item["type"] = type
+        item["motives"] = motives
+        log = blacklist_log
+        log.append(item)
+
+        query["$set"] = {
+            "blacklist_status": status,
+            f"{last_motives}": motives,
+            "blacklist_log": log,
+        }
+
+        return query
+
+    async def update_customer(self, data):
+        result = None
+        response = None
+        array = []
+        log = []
+        item = {}
+
+        customer = await self.customer.find_one(data.id)
+        if customer != None:
+
+            query = self.build_query_update(
+                customer["blacklist_log"], data.motives, data.new_status
             )
 
-        if resp != None:
-            response = {"msg": " Success Customer Update ", "code": 200}
-        else:
-            response = {
-                "msg": " Failed Customer Update, Customer not found ",
-                "code": 400,
-            }
-        return response
-
-    async def update_customer_in_blacklist(self, data):
-        resp = None
-        if data.blacklist_status:
-            resp = await self.customer.find_one_and_update(
+            result = await self.customer.find_one_and_update(
                 {"_id": data.id},
-                {
-                    "$set": {
-                        "blacklist_status": data.blacklist_status,
-                        "blacklist_enable_motive": data.motives,
-                    }
-                },
-            )
-        else:
-            resp = await self.customer.find_one_and_update(
-                {"_id": data.id},
-                {
-                    "$set": {
-                        "blacklist_status": data.blacklist_status,
-                        "blacklist_disable_motive": data.motives,
-                    }
-                },
+                query,
             )
 
-        if resp != None:
-            response = {"msg": " Success Customer Update ", "code": 200}
-        else:
-            response = {
-                "msg": " Failed Customer Update, Customer not found ",
-                "code": 400,
-            }
-        return response
+        return result

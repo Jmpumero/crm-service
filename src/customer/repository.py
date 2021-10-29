@@ -1022,30 +1022,30 @@ class MongoQueries(ConnectionMongo):
 
         return response
 
-    def blacklist_search(self, type, skip, limit):
+    # def blacklist_search(self, type, skip, limit):
 
-        cursor = None
-        # print(type)
-        if type == "enable":
-            cursor = (
-                self.customer.find(
-                    {"blacklist_status": False, "customer_status": True},
-                    blacklist_customer_projections,
-                )
-                .skip(skip)
-                .limit(limit)
-            )
-        elif type == "disable":
-            cursor = (
-                self.customer.find(
-                    {"blacklist_status": True, "customer_status": True},
-                    blacklist_customer_projections,
-                )
-                .skip(skip)
-                .limit(limit)
-            )
+    #     cursor = None
+    #     # print(type)
+    #     if type == "enable":
+    #         cursor = (
+    #             self.customer.find(
+    #                 {"blacklist_status": False, "customer_status": True},
+    #                 blacklist_customer_projections,
+    #             )
+    #             .skip(skip)
+    #             .limit(limit)
+    #         )
+    #     elif type == "disable":
+    #         cursor = (
+    #             self.customer.find(
+    #                 {"blacklist_status": True, "customer_status": True},
+    #                 blacklist_customer_projections,
+    #             )
+    #             .skip(skip)
+    #             .limit(limit)
+    #         )
 
-        return cursor
+    #     return cursor
 
     def total_customer_in_blacklist(self, type):
         total = self.customer.count_documents(
@@ -1053,37 +1053,37 @@ class MongoQueries(ConnectionMongo):
         )
         return total
 
-    async def update_customer_in_blacklist(self, data) -> BlackListBodyResponse:
-        resp = None
-        if data.blacklist_status:
-            resp = await self.customer.find_one_and_update(
-                {"_id": data.id},
-                {
-                    "$set": {
-                        "blacklist_status": data.blacklist_status,
-                        "blacklist_enable_motive": data.motives,
-                    }
-                },
-            )
-        else:
-            resp = await self.customer.find_one_and_update(
-                {"_id": data.id},
-                {
-                    "$set": {
-                        "blacklist_status": data.blacklist_status,
-                        "blacklist_disable_motive": data.motives,
-                    }
-                },
-            )
+    # async def update_customer_in_blacklist(self, data) -> BlackListBodyResponse:
+    #     resp = None
+    #     if data.blacklist_status:
+    #         resp = await self.customer.find_one_and_update(
+    #             {"_id": data.id},
+    #             {
+    #                 "$set": {
+    #                     "blacklist_status": data.blacklist_status,
+    #                     "blacklist_enable_motive": data.motives,
+    #                 }
+    #             },
+    #         )
+    #     else:
+    #         resp = await self.customer.find_one_and_update(
+    #             {"_id": data.id},
+    #             {
+    #                 "$set": {
+    #                     "blacklist_status": data.blacklist_status,
+    #                     "blacklist_disable_motive": data.motives,
+    #                 }
+    #             },
+    #         )
 
-        if resp != None:
-            response = {"msg": " Success Customer Update ", "code": 200}
-        else:
-            response = {
-                "msg": " Failed Customer Update, Customer not found ",
-                "code": 400,
-            }
-        return BlackListBodyResponse(**response)
+    #     if resp != None:
+    #         response = {"msg": " Success Customer Update ", "code": 200}
+    #     else:
+    #         response = {
+    #             "msg": " Failed Customer Update, Customer not found ",
+    #             "code": 400,
+    #         }
+    #     return BlackListBodyResponse(**response)
 
     async def insert_one_customer(self, data):
 

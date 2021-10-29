@@ -6,7 +6,6 @@ from .get import (
 )
 
 from .post import (
-    BlackListBody,
     BlackListBodyResponse,
 )
-from .put import PutScoreCard
+from .put import BlackListUpdate, BlacklistUpdateResponse

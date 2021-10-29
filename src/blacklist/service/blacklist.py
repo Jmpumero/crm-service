@@ -1,13 +1,17 @@
 from typing import Any
-
 from pydantic.fields import T
+
+
+from fastapi import status
+from fastapi.responses import JSONResponse
 
 from src.customer.repository import MongoQueries
 from src.blacklist.repositories import BlacklistQueries
 
 from src.blacklist.schemas import (
     BlacklistResponse,
-    BlacklistQueryParams,
+    BlackListUpdate,
+    BlacklistUpdateResponse,
 )
 
 
@@ -46,6 +50,19 @@ class BlacklistService(MongoQueries):
 
         return self.build_blacklist_response(items)
 
-    # async def post_blacklist_update_customer(self, body: BlackListBody):
+    async def update_(self, body) -> BlacklistUpdateResponse:
+        resp = await self.repository.update_customer(body)
+        # print(resp)
+        if resp != None:
 
-    #     return await self.update_customer_in_blacklist(body)
+            response = {
+                "code": 200,
+                "message": f"Customer Update successfully ",
+            }
+        else:
+            response = {
+                "code": status.HTTP_404_NOT_FOUND,
+                "message": f"Customer don't Found",
+            }
+            return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=response)
+        return response

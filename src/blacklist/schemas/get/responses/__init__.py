@@ -1,1 +1,5 @@
-from .blacklist import BlacklistCustomer, BlacklistResponse, StatusInBlacklist
+from .blacklist import (
+    BlacklistCustomer,
+    BlacklistResponse,
+    StatusInBlacklist,
+)

@@ -7,10 +7,10 @@ from fastapi import status
 from fastapi.responses import JSONResponse
 
 from ..schemas.response.customers_sensors import (
-    PmsBooking,
+    PmsBook,
     PmsResponse,
     PmsHistory,
-    PmsHistoryData,
+    PmsHistoryGuest,
 )
 from src.customer.profile_sensors_endpoint.repository.sensors_tab import (
     SensorsTabQueries,

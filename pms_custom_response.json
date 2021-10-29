@@ -1,0 +1,154 @@
+{
+    "id": 1,
+    "code": "SMTP Car synthesizing",
+    "rates": "JHipster is a development platform to generate, develop and deploy Spring Boot + Angular / React / Vue Web applications and Spring microservices.",
+    "created_at": "%Y-%m-%dT%H:%M:%S.%fZ string - CREAR *******************************************",
+    "checkin": "2021-04-21",
+    "checkout": "2021-04-21",
+    "sPropertyId": 1,
+    "sPropertyName": "string - CREAR ****************************************",
+    "coreBookTypeId": 1,
+    "coreCurrencyId": 1,
+    "coreCurrencyNAme": "string - CREAR ****************************************",
+    "sPaymentTermId": 1,
+    "sSalesChannelId": 1,
+    "sSalesChannelName": "string - CREAR ************************************",
+    "reseller": {
+        "id": 1,
+        "name": "Reseller PMS",
+        "code": "synthesize synthesize"
+    },
+    "booker": {
+        "id": 1,
+        "name": "AI Germany",
+        "lastName": "Gorgeous",
+        "gender": "Ranch ",
+        "dni": "Refined Rubber Soap",
+        "passport": "Towels",
+        "country": "Venezuela",
+        "phone": "916-662-1101 x1467",
+        "email": "Arne85@gmail.com",
+        "city": "North Jarredstad",
+        "address1": "JHipster is a development platform to generate, develop and deploy Spring Boot + Angular / React / Vue Web applications and Spring microservices.",
+        "address2": "JHipster is a development platform to generate, develop and deploy Spring Boot + Angular / React / Vue Web applications and Spring microservices."
+    },
+    "books": [
+        {
+            "id": 1,
+            "code": "Ford",
+            "checkin": "2021-04-22",
+            "checkout": "2021-04-22",
+            "nights": "int - CREAR *********************************************",
+            "riRoomId": 1,
+            "riRoomNumber": "Swiss Franc Product Branding",
+            "riRoomTypeName": "100",
+            "riRatePlanId": 1,
+            "riRatePlanName": "string - CREAR **********************************",
+            "riExperienceId": null,
+            "riMealPlanId": null,
+            "riMealPlanName": "string - CREAR ***********************************",
+            "riCancellationPolicyId": null,
+            "coreBookStatusId": 1,
+            "coreBookStatusName": "string - CREAR *******************************",
+            "coreCurrencyName": "string - CREAR *******************************",
+            "coreTaxesName": "string - CREAR *******************************",
+            "adults": 11992,
+            "children": 23567,
+            "babies": 31211,
+            "maxAdults": 5,
+            "maxChildren": 2,
+            "acceptChildren": false,
+            "ratePlan": "HTTP--",
+            "guests": [
+                {
+                    "id": 1,
+                    "name": "AI Germany",
+                    "lastName": "Gorgeous",
+                    "gender": "Ranch ",
+                    "dni": "Refined Rubber Soap",
+                    "passport": "Towels",
+                    "country": "Venezuela",
+                    "phone": "916-662-1101 x1467",
+                    "email": "Arne85@gmail.com",
+                    "birthdate": "2021-04-09",
+                    "nationality": "string - CREAR *******************************",
+                    "civil_status": "string - CREAR *******************************",
+                    "languages": "string - CREAR *******************************",
+                    "company": " ?? string - CREAR *******************************",
+                    "city": null,
+                    "address1": null,
+                    "address2": null,
+                    "isMain": true,
+                    "bBookPGuestId": 1,
+                    "bandCode": "Reverse-engineered capacitor b",
+                    "checkinAt": "2021-04-23 10:04:40.0",
+                    "checkoutAt": "2021-04-23 05:48:19.0"
+                }
+            ]
+        }
+    ],
+    "payments": [
+        {
+            "id": 1,
+            "paymentTypeId": 1,
+            "folioId": 1,
+            "bankId": null,
+            "cardNumber": "Cambridgeshire synergize ",
+            "reference": "Fort Path distributed",
+            "amount": 77331
+        }
+    ],
+    "folios": [
+        {
+            "id": 1,
+            "name": "override indexing",
+            "isMaster": false,
+            "guestId": 1,
+            "billTo": "AI Germany",
+            "paymentTerm": "payment plum override",
+            "amount": 15471,
+            "hasAssociatedPayments": true,
+            "hasAssociatedInvoices": false,
+            "folioLines": [
+                {
+                    "id": 1,
+                    "roomId": 1,
+                    "folioId": 1,
+                    "forecastId": 1,
+                    "bookCode": "Ford",
+                    "description": "Ball workforce mint green",
+                    "qty": 54331,
+                    "amount": 15471,
+                    "createdAt": "23-04-2021"
+                }
+            ]
+        }
+    ],
+    "forecasts": [
+        {
+            "id": 1,
+            "date": "2021-04-23",
+            "ceco": "@todo",
+            "charge": "NONE",
+            "amount": 82333,
+            "taxPercentage": null,
+            "currency": "ANG",
+            "upsellingId": null,
+            "roomTypeId": null,
+            "mealPlanId": null,
+            "cancellationPolicyId": null,
+            "experienceId": null,
+            "ratePlan": "-"
+        }
+    ],
+    "billing": [
+        {
+            "id": 1,
+            "number": "Ergonomic Fresh Tuna",
+            "billingTo": null,
+            "affectedFolio": "override indexing",
+            "currency": "ANG",
+            "amount": null
+        }
+    ]
+}

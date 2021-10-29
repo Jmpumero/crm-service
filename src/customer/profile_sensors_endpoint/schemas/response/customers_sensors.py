@@ -70,7 +70,6 @@ class HistoryData(BaseModel):
 
 class PlaybackHistory(BaseModel):
     playback_history_response: Response
-    id: str
     total_items: int
     showing: int
     skip: Optional[int]
@@ -84,7 +83,6 @@ class VisitedApps(BaseModel):
 
 class CastResponse(BaseModel):
     cast_response: Response
-    id: str
     cast_connections: Optional[int]
     cast_avg_connection_time: Optional[int]
     cast_visited_apps: Optional[List[VisitedApps]]
@@ -97,7 +95,6 @@ class CastResponse(BaseModel):
 
 class HotspotResponse(BaseModel):
     hotspot_response: Response
-    id: str
     hotspot_connections: Optional[int]
     # hotspot_used_devices: Optional[List[MostUsedDevice]]
     hotspot_first_connection: Optional[str]
@@ -114,18 +111,18 @@ class PmsStay(BaseModel):
     amount: Optional[float]
 
 
-class PmsBooking(BaseModel):
-    pms_book_code: Optional[str]
-    pms_book_checkin: Optional[str]
-    pms_book_checkout: Optional[str]
-    pms_book_cost: Optional[float]
-    pms_book_room_type: Optional[str]
-    pms_book_rate_plat: Optional[str]
-    pms_book_currency: Optional[str]
-    pms_book_reseller: Optional[str]
-    pms_book_meal_plan: Optional[str]
-    pms_book_property: Optional[str]
-    pms_book_taxes: Optional[str]
+class PmsBook(BaseModel):
+    code: Optional[str]
+    checkin: Optional[str]
+    checkout: Optional[str]
+    cost: Optional[float]
+    room_type: Optional[str]
+    rate_plan: Optional[str]
+    currency: Optional[str]
+    reseller: Optional[str]
+    meal_plan: Optional[str]
+    property: Optional[str]
+    taxes: Optional[str]
 
 
 class PmsResponse(BaseModel):
@@ -144,8 +141,8 @@ class PmsResponse(BaseModel):
     pms_total_lodge_income: Optional[float]
 
 
-class PmsHistoryData(BaseModel):
-    code: Optional[str]
+class PmsHistoryGuest(BaseModel):
+    type_: Optional[str]
     name: Optional[str]
     last_name: Optional[str]
     nationality: Optional[str]
@@ -158,16 +155,17 @@ class PmsHistoryData(BaseModel):
     languages: Optional[str]
     country: Optional[str] = None
     city: Optional[str]
-    booking: Optional[PmsBooking]
+    booking: Optional[PmsBook]
 
 
 class PmsHistory(BaseModel):
     pms_history_response: Response
-    id: str
     total_items: int
     showing: int
     skip: int
-    booking_history_data: Optional[List[PmsHistoryData]]
+    guest_data: Optional[List[PmsHistoryGuest]]
+    companion_data: Optional[List[PmsHistoryGuest]]
+    booking_data: Optional[List[PmsBook]]
 
 
 class SensorsTab(BaseModel):

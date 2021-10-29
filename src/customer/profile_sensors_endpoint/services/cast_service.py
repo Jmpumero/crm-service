@@ -107,7 +107,6 @@ class CastService(CastHotSpotQueries):
 
             response = {
                 "cast_response": {"status_code": status.HTTP_200_OK, "message": "Ok"},
-                "id": customer_id,
                 "cast_connections": len(connection_time_list),
                 "cast_avg_connection_time": int(statistics.mean(connection_time_list)),
                 "cast_visited_apps": playback_used_apps_list,
@@ -134,7 +133,7 @@ class CastService(CastHotSpotQueries):
             response = {
                 "cast_meta_response": {
                     "status_code": status.HTTP_404_NOT_FOUND,
-                    "message": f"Customer doesn't have interaction with this sensor: {err}",
+                    "message": f"Customer doesn't have interaction with this sensor or has corrupted data: {err}",
                 }
             }
             return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=response)
@@ -180,7 +179,6 @@ class CastService(CastHotSpotQueries):
                     "status_code": status.HTTP_200_OK,
                     "message": "Ok",
                 },
-                "id": customer_id,
                 "total_items": playback_count,
                 "showing": limit,
                 "skip": skip,

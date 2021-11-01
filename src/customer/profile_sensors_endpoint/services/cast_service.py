@@ -63,7 +63,7 @@ class CastService(CastHotSpotQueries):
                     conn1["end"], "%Y-%m-%dT%H:%M:%S.%f"
                 )
                 diff = connection_endDate - connection_startDate
-                connection_time_list.append(diff / timedelta(hours=1))
+                connection_time_list.append(diff / timedelta(milliseconds=1))
 
             async for app in most_used_app:
                 playback_used_apps_list.append(
@@ -93,41 +93,47 @@ class CastService(CastHotSpotQueries):
                 "%Y-%m-%dT%H:%M:%S.%f",
             )
 
-            playback_elapsed_time = round(
-                (last_playback_endDate - last_playback_startDate) / timedelta(hours=1),
-                2,
+            playback_elapsed_time = int(
+                (last_playback_endDate - last_playback_startDate)
+                / timedelta(milliseconds=1)
             )
+
+            if "metadata" in last_playback["data"]["playback_pair"]:
+                playback_title = last_playback["data"]["playback_pair"]["metadata"][
+                    "title"
+                ]
+            else:
+                playback_title = "Not Specified"
 
             response = {
                 "cast_response": {"status_code": status.HTTP_200_OK, "message": "Ok"},
-                "id": customer_id,
                 "cast_connections": len(connection_time_list),
-                "cast_avg_connection_time": f"{round(statistics.mean(connection_time_list), 2)} hours",
+                "cast_avg_connection_time": int(statistics.mean(connection_time_list)),
                 "cast_visited_apps": playback_used_apps_list,
                 "cast_most_visited_app": {
                     "app_name": playback_most_used_app_list[0]["_id"],
                     "app_visits": playback_most_used_app_list[0]["count"],
-                    "app_avg_visit_time": f"{round(playback_most_used_app_list[0]['average'], 2)} hours",
+                    "app_avg_visit_time": int(
+                        playback_most_used_app_list[0]["average"]
+                    ),
                 },
                 "cast_first_connection": first_connection,
                 "cast_last_connection": last_connection,
                 "cast_most_used_device": {"device_id": most_used_device_list[0]["_id"]},
                 "cast_last_playback": {
-                    "playback_title": last_playback["data"]["playback_pair"][
-                        "metadata"
-                    ]["title"],
-                    "playback_duration": f"{playback_elapsed_time} hours",
+                    "playback_title": playback_title,
+                    "playback_duration": playback_elapsed_time,
                     "playback_date": last_playback["data"]["playback_pair"][
                         "startDate"
                     ],
                 },
             }
             return response
-        except:
+        except Exception as err:
             response = {
                 "cast_meta_response": {
                     "status_code": status.HTTP_404_NOT_FOUND,
-                    "message": f"Customer doesn't have interaction with this sensor",
+                    "message": f"Customer doesn't have interaction with this sensor or has corrupted data: {err}",
                 }
             }
             return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=response)
@@ -173,7 +179,6 @@ class CastService(CastHotSpotQueries):
                     "status_code": status.HTTP_200_OK,
                     "message": "Ok",
                 },
-                "id": customer_id,
                 "total_items": playback_count,
                 "showing": limit,
                 "skip": skip,

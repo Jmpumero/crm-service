@@ -29,7 +29,7 @@ class PmsQueries(MongoQueries):
             {"$match": {"customer_id": customer_id}},
             {
                 "$group": {
-                    "_id": "$data.bBooks.riRoomType.name",
+                    "_id": "$data.books.riRoomTypeName",
                     "count": {"$sum": 1},
                 }
             },
@@ -39,49 +39,39 @@ class PmsQueries(MongoQueries):
 
         return most_used
 
-    def get_avg_anticipation(self, customer_id):
-        pipeline = [
-            {"$match": {"customer_id": customer_id}},
-            {
-                "$group": {
-                    "_id": "$customer_id",
-                    "count": {"$sum": 1},
-                    "average": {
-                        "$avg": {
-                            "$divide": [
-                                {
-                                    "$subtract": [
-                                        {
-                                            "$dateFromString": {
-                                                "dateString": "$data.checkin",
-                                                "format": "%Y-%m-%d",
-                                            }
-                                        },
-                                        {
-                                            "$dateFromString": {
-                                                "dateString": "$data.createdAt",
-                                            }
-                                        },
-                                    ]
-                                },
-                                3600000,
+    def get_avg_pax(self, customer_id):
+        match_stage = {"$match": {"customer_id": customer_id}}
+
+        group_stage = {
+            "$group": {
+                "_id": "$data.books",
+                "count": {"$sum": 1},
+                "average": {
+                    "$avg": {
+                        {
+                            "$add": [
+                                "$data.books.adults",
+                                "$data.books.children",
+                                "$data.books.babies",
                             ]
                         }
-                    },
+                    }
                 },
             },
-            {"$sort": SON([("count", -1), ("_id", -1), ("average", -1)])},
-        ]
-        most_used = self.pms_collection.aggregate(pipeline)
+        }
 
-        return most_used
+        sort_stage = {"$sort": SON([("count", -1), ("_id", -1), ("average", -1)])}
+        pipeline = [match_stage, group_stage, sort_stage]
+        pax_avg = self.pms_collection.aggregate(pipeline)
+
+        return pax_avg
 
     def get_cancellations(self, customer_id):
         pipeline = [
             {"$match": {"customer_id": customer_id}},
             {
                 "$group": {
-                    "_id": "$data.bBooks.coreBookStatus.code",
+                    "_id": "$data.books.coreBookStatusName",
                     "count": {"$sum": 1},
                 },
             },
@@ -96,7 +86,7 @@ class PmsQueries(MongoQueries):
             {"$match": {"customer_id": customer_id}},
             {
                 "$group": {
-                    "_id": "$data.ssaleChannel.name",
+                    "_id": "$data.sSalesChannelName",
                     "count": {"$sum": 1},
                 },
             },
@@ -112,10 +102,16 @@ class PmsQueries(MongoQueries):
                 "$match": {
                     "$and": [
                         {"customer_id": customer_id},
-                        {"data.code": search},
+                        {
+                            "$or": [
+                                {"data.code": {"$regex": search.lower()}},
+                                {"data.code": {"$regex": search.upper()}},
+                            ]
+                        },
                     ]
                 }
             }
+
         elif constrain.value == "Fecha":
             match_stage = {
                 "$match": {
@@ -126,23 +122,27 @@ class PmsQueries(MongoQueries):
                 }
             }
         elif constrain.value == "Monto min.":
-            match_stage = {
-                "$match": {
-                    "$and": [
-                        {"customer_id": customer_id},
-                        {"data.bBooks.netAmt": {"$gte": float(search)}},
-                    ]
-                }
-            }
+            pass
         elif constrain.value == "Monto max.":
-            match_stage = {
-                "$match": {
-                    "$and": [
-                        {"customer_id": customer_id},
-                        {"data.bBooks.netAmt": {"$lte": float(search)}},
-                    ]
-                }
-            }
+            pass
+        # elif constrain.value == "Monto min.":
+        #     match_stage = {
+        #         "$match": {
+        #             "$and": [
+        #                 {"customer_id": customer_id},
+        #                 {"data.bBooks.netAmt": {"$gte": float(search)}},
+        #             ]
+        #         }
+        #     }
+        # elif constrain.value == "Monto max.":
+        #     match_stage = {
+        #         "$match": {
+        #             "$and": [
+        #                 {"customer_id": customer_id},
+        #                 {"data.bBooks.netAmt": {"$lte": float(search)}},
+        #             ]
+        #         }
+        #     }
 
         lookup_customer_stage = {
             "$lookup": {

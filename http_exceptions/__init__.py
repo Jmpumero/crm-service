@@ -11,4 +11,5 @@ from .schemas import (
     UnauthorizedError,
     NotFoundError,
 )
+from .handlers import validation_handler
 from .base import base_handler

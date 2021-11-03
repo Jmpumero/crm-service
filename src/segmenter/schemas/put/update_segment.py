@@ -30,9 +30,9 @@ class AppliedFilters(BaseModel):
 class UpdatedSegment(BaseModel):
     segment_id: str
     name: str
-    author_name: str
+    author: str
     date_range: DateRange
-    datetime_range: DateRange
+    datetime_range: Optional[DateRange]
     group_by: str
     time: Optional[str]
     applied_filters: Optional[list[AppliedFilters]]

@@ -1,13 +1,14 @@
 from typing import Any
 from bson import ObjectId
 
-from ..repositories import SegmenterDetailsRepo
+from ..repositories import SegmenterDetailsRepo, DemographyRepo
 from ..schemas import CreateSegment
 
 
 class SegmentDetailsService:
     def __init__(self):
         self.segmenter_detail_repo = SegmenterDetailsRepo()
+        self.test = DemographyRepo()
 
     async def create_segment(self, segment: CreateSegment):
         new_segment: Any = await self.segmenter_detail_repo.create_segment(
@@ -25,3 +26,11 @@ class SegmentDetailsService:
         )
 
         return updated_segment
+
+    async def test_segments(self, data):
+        print(data)
+        print(data["register_date"]["date_range"]["from_"])
+        date = {"from_": 3654256987, "to": 1578962454123}
+        t = ""
+        t = await self.test.date_range_query(data)
+        return t

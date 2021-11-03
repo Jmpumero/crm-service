@@ -56,4 +56,4 @@ class SegmenterService(MongoQueries):
             segments["total_enable_clients"] = 0
             result = None
 
-        return SegmenterResponse(**segments)
+        return segments

@@ -1022,45 +1022,11 @@ class MongoQueries(ConnectionMongo):
 
         return response
 
-    # def blacklist_search(self, type, skip, limit):
-
-    #     cursor = None
-    #     # print(type)
-    #     if type == "enable":
-    #         cursor = (
-    #             self.customer.find(
-    #                 {"blacklist_status": False, "customer_status": True},
-    #                 blacklist_customer_projections,
-    #             )
-    #             .skip(skip)
-    #             .limit(limit)
-    #         )
-    #     elif type == "disable":
-    #         cursor = (
-    #             self.customer.find(
-    #                 {"blacklist_status": True, "customer_status": True},
-    #                 blacklist_customer_projections,
-    #             )
-    #             .skip(skip)
-    #             .limit(limit)
-    #         )
-
-    #     return cursor
-
     def total_customer_in_blacklist(self, type):
         total = self.customer.count_documents(
             {"customer_status": True, "blacklist_status": type}
         )
         return total
-
-    #     if resp != None:
-    #         response = {"msg": " Success Customer Update ", "code": 200}
-    #     else:
-    #         response = {
-    #             "msg": " Failed Customer Update, Customer not found ",
-    #             "code": 400,
-    #         }
-    #     return BlackListBodyResponse(**response)
 
     async def insert_one_customer(self, data):
 
@@ -1101,23 +1067,40 @@ class MongoQueries(ConnectionMongo):
     def find_all_customers_in_crud_view(
         self, skip, limit, column_sort, order, special_query
     ):
-
+        order_sort = 1
         if column_sort:
             if order.lower() == "desc":
-
-                customers = (
-                    self.customer.find(special_query)
-                    .skip(skip)
-                    .limit(limit)
-                    .sort(column_sort, pymongo.DESCENDING)
+                order_sort = -1
+                customers = self.customer.aggregate(
+                    [
+                        {"$match": {"customer_status": True}},
+                        {"$project": blacklist_customer_projections},
+                        {"$skip": skip},
+                        {"$limit": limit},
+                        {
+                            "$sort": {
+                                f"{column_sort}": order_sort,
+                                "_id": 1,
+                            }
+                        },
+                    ]
                 )
+
             else:
 
-                customers = (
-                    self.customer.find(special_query)
-                    .skip(skip)
-                    .limit(limit)
-                    .sort(column_sort, pymongo.ASCENDING)
+                customers = self.customer.aggregate(
+                    [
+                        {"$match": {"customer_status": True}},
+                        {"$project": blacklist_customer_projections},
+                        {"$skip": skip},
+                        {"$limit": limit},
+                        {
+                            "$sort": {
+                                f"{column_sort}": order_sort,
+                                "_id": 1,
+                            }
+                        },
+                    ]
                 )
 
         return customers

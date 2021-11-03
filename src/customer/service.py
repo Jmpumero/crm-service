@@ -325,14 +325,14 @@ class Service(MongoQueries):
 
         for customer in await cursor.to_list(length=None):
             # print(customer)
-            customers.append(SearchUpdate(**customer))
+            customers.append(customer)
 
         response = {
             "customers": customers,
             "total_items": total_customer,
             "total_show": len(customers),
         }
-        return SearchUpdateResponse(**response)
+        return response
 
     async def update_customer(self, body) -> CustomerCRUDResponse:
         response = None

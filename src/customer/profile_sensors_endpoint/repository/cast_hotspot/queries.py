@@ -163,6 +163,7 @@ class CastHotSpotQueries(MongoQueries):
                     },
                 }
             },
+            {"$limit": 5},
             {"$sort": SON([("count", -1), ("_id", -1)])},
         ]
         most_used = self.cast_collection.aggregate(pipeline)
@@ -172,9 +173,19 @@ class CastHotSpotQueries(MongoQueries):
     def group_by_most_used_device(self, customer_id):
         pipeline = [
             {"$match": {"customer_id": customer_id}},
-            {"$group": {"_id": "$data.deviceId", "count": {"$sum": 1}}},
+            {"$group": {"_id": "$data.device_pair.vendor", "count": {"$sum": 1}}},
             {"$sort": SON([("count", -1), ("_id", -1)])},
         ]
         most_used = self.cast_collection.aggregate(pipeline)
+
+        return most_used
+
+    def used_devices(self, customer_id):
+        pipeline = [
+            {"$match": {"customer_id": customer_id}},
+            {"$group": {"_id": "$data.register_device.vendor", "count": {"$sum": 1}}},
+            {"$sort": SON([("count", -1), ("_id", -1)])},
+        ]
+        most_used = self.hotspot_collection.aggregate(pipeline)
 
         return most_used

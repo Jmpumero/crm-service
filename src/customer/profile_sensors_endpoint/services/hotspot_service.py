@@ -21,12 +21,19 @@ class HotspotService(CastHotSpotQueries):
         super().__init__()
 
     async def get_hotspot_stats(self, customer_id: str, sensor: str) -> Any:
+        vendors_list = []
         try:
             count = await self.count__documents(customer_id, sensor)
 
             oldest_connection = self.first_connection(customer_id, sensor)
 
             newest_connection = self.last_connection(customer_id, sensor)
+
+            most_used_device = self.used_devices(customer_id)
+
+            async for device in most_used_device:
+                for item in device["_id"]:
+                    vendors_list.append(item)
 
             async for date in oldest_connection:
                 first_connection = date["data"]["date"]
@@ -40,15 +47,16 @@ class HotspotService(CastHotSpotQueries):
                     "message": "Ok",
                 },
                 "hotspot_connections": count,
+                "hotspot_used_devices": vendors_list,
                 "hotspot_first_connection": first_connection,
                 "hotspot_last_connection": last_connection,
             }
             return response
-        except:
+        except Exception as err:
             response = {
                 "hotspot_response": {
                     "status_code": status.HTTP_404_NOT_FOUND,
-                    "message": "Customer doesn't have interaction with this sensor",
+                    "message": f"Customer doesn't have interaction with this sensor: {err}",
                 }
             }
             return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=response)

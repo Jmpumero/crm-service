@@ -28,9 +28,9 @@ class SegmentDetailsService:
         return updated_segment
 
     async def test_segments(self, data):
-        print(data)
-        print(data["register_date"]["date_range"]["from_"])
+
         date = {"from_": 3654256987, "to": 1578962454123}
         t = ""
-        t = await self.test.date_range_query(data)
+        t = await self.test.test_beta_query(data)
+
         return t

@@ -1,5 +1,5 @@
-from typing import Any
-from datetime import datetime
+from typing import Any, Type
+from datetime import date, datetime
 
 from fastapi.param_functions import Query
 
@@ -23,7 +23,7 @@ class DemographyRepo(ConnectionMongo):
             "documentId": 1,
             "civil_status": 1,
             "age": 1,
-            "birthdate": 1,
+            "birthdate": {"$dateFromString": {"dateString": "$birthdate"}},
             "language": 1,
             "signature": 1,
             "social_media": 1,
@@ -78,58 +78,119 @@ class DemographyRepo(ConnectionMongo):
 
         return query
 
-    def build_basic_query_create_at(self, status, operator, date):
+    def build_basic_query_(self, status, column, operator, date):
 
         if status:
-            query = {"$match": {"create_at": {f"{operator}": date}}}
+            query = {"$match": {f"{column}": {f"{operator}": date}}}
         else:
-            query = {"$match": {"$nor": [{"create_at": {f"{operator}": date}}]}}
+            query = {"$match": {"$nor": [{f"{column}": {f"{operator}": date}}]}}
         return query
 
-    def builder_data_range(self, status, condition, date=None, from_=None, to_=None):
+    def builder_date_range(
+        self, status, column, condition, date=None, from_=None, to_=None
+    ):
         if condition == "Between":
             if status:
-                query = {"$match": {"create_at": {"$gte": from_, "$lt": to_}}}
+                query = {"$match": {f"{column}": {"$gte": from_, "$lt": to_}}}
             else:
                 query = {
-                    "$match": {"$nor": [{"create_at": {"$gte": from_, "$lt": to_}}]}
+                    "$match": {"$nor": [{f"{column}": {"$gte": from_, "$lt": to_}}]}
                 }
         elif condition == "Equal to":
-            print(date)
-            query = self.build_basic_query_create_at(status, "$eq", date)
+            query = self.build_basic_query_(status, column, "$eq", date)
         elif condition == "Less to":
-            query = self.build_basic_query_create_at(status, "$lt", date)
+            query = self.build_basic_query_(status, column, "$lt", date)
+        elif condition == "Less than or equal to":
+            query = self.build_basic_query_(status, column, "$lte", date)
+        elif condition == "Greater than":
+            query = self.build_basic_query_(status, column, "$gt", date)
+        elif condition == "Greater than or equal to":
+            query = self.build_basic_query_(status, column, "$gte", date)
+        elif condition == "Null":
+            query = self.build_basic_query_(status, column, "$eq", "")
+        elif condition == "No null":
+            query = self.build_basic_query_(status, column, "$eq", "")
+            if status:
+                query = {"$match": {f"{column}": {"$not": {"$eq": ""}}}}
+            else:
+                query = {"$match": {f"{column}": {"$eq": ""}}}
+        elif condition == "Different to":
+            if status:
+                query = {"$match": {f"{column}": {"$not": {"$eq": date}}}}
+            else:
+                query = {"$match": {f"{column}": {"$eq": date}}}
+        return query
 
+    def builder_age_range(self, status, from_=None, to_=None):
+        if status:
+            query = {"$match": {"age": {"$gte": from_, "$lt": to_}}}
+        else:
+            query = {"$match": {"$nor": [{"age": {"$gte": from_, "$lt": to_}}]}}
         return query
 
     async def test_alfa_query(self, match):
 
-        return self.customer.aggregate([match, {"$limit": 2}])
+        return self.customer.aggregate([match, {"$limit": 20}])
 
-    async def test_beta_query(self, data, from_, to_):
+    async def test_beta_query(self, data):
 
-        return self.customer.aggregate(
+        result = self.customer.aggregate(
             [
+                {"$match": {"birthdate": {"$not": {"$eq": ""}}}},
                 self.builder_date_query_project(),
-                self.builder_data_range(
-                    True,
-                    data["register_date"]["condition"],
-                    self.milliseconds_to_date(data["register_date"]["date"]),
-                    from_,
-                    to_,
-                ),
-                {"$limit": 5},
+                # self.builder_date_range(
+                #     True,
+                #     data["register_date"]["condition"],
+                #     self.milliseconds_to_date(data["register_date"]["date"]),
+                #     from_,
+                #     to_,
+                # ),
+                {"$limit": 10},
             ]
         )
+        r = await result.to_list(length=None)
 
-    async def date_range_query(self, data):
+        return r
+        #### date range classic
+        # return self.customer.aggregate(
+        #     [
+        #         self.builder_date_query_project(),
+        #         self.builder_date_range(
+        #             True,
+        #             data["register_date"]["condition"],
+        #             self.milliseconds_to_date(data["register_date"]["date"]),
+        #             from_,
+        #             to_,
+        #         ),
+        #         {"$limit": 10},
+        #     ]
+        # )
+
+        # ####age range
+        # return self.customer.aggregate(
+        #     [
+        #         self.builder_age_range(True, from_, to_),
+        #         {"$limit": 10},
+        #     ]
+        # )
+
+    async def date_range_test(self, data):
 
         from_ = self.milliseconds_to_date(data["register_date"]["date_range"]["from_"])
         to_ = self.milliseconds_to_date(data["register_date"]["date_range"]["to"])
-        print(from_)
-        print(to_)
 
         result = await self.test_beta_query(data, from_, to_)
+        r = await result.to_list(length=None)
+
+        return r
+
+    async def age_range_test(self, data):
+        print(data["age_range"]["from_"])
+        print(data["age_range"]["to"])
+
+        result = await self.test_beta_query(
+            data, data["age_range"]["from_"], data["age_range"]["to"]
+        )
         r = await result.to_list(length=None)
 
         return r

@@ -88,6 +88,7 @@ blacklist_customer_projections = {
     "blacklist_last_enabled_motive": 1,
     "blacklist_last_disabled_motive": 1,
     "customer_status": 1,
+    "customer_avatar": 1,
     "email_main": {
         "$arrayElemAt": [
             "$email",

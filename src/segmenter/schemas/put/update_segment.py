@@ -8,6 +8,11 @@ class DateRange(BaseModel):
     to: str
 
 
+class IntNumericRange(BaseModel):
+    from_: int = Field(..., alias="from")
+    to: int
+
+
 class DateWithConditions(BaseModel):
     date: Optional[str]
     condition: str
@@ -18,7 +23,7 @@ class AppliedFilters(BaseModel):
     filter_name: str
     gender: Optional[str]
     civil_status: Optional[str]
-    age_range: Optional[DateRange]
+    age_range: Optional[IntNumericRange]
     profession: Optional[str]
     childrens: Optional[int]
     nationality: Optional[str]

@@ -295,7 +295,7 @@ class Service(MongoQueries):
 
     async def get_all_customer_with_blacklist(
         self, query_params: SearchCrudQueryParams
-    ) -> SearchUpdateResponse:
+    ) -> Any:
         customers = []
         special_query = {}
         special_query["customer_status"] = True

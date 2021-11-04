@@ -105,7 +105,7 @@ class CreateCustomerBody(BaseModel):
 
 
 class UpdateCustomerBody(BaseModel):
-    id: str = Field(default_factory=PyObjectId, alias="_id")
+    id: str = Field(..., alias="_id")
     name: Optional[str]
     last_name: Optional[str]
     full_name: Optional[str]

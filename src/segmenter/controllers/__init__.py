@@ -1,1 +1,1 @@
-from .segment_details import segmenter_details_router
+from .segment_details import segments_details_router

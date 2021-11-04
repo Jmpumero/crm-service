@@ -4,8 +4,7 @@ from typing import List
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-
-# from fastapi.exceptions import RequestValidationError
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import Settings
@@ -17,9 +16,10 @@ from http_exceptions import (
     UnauthorizedException,
     NotFoundException,
     base_handler,
+    validation_handler,
 )
 from utils.remove_422 import remove_422s
-from src import customers_router, customers_profile_router, segmenter_details_router
+from src import customers_router, customers_profile_router, segments_details_router
 from src.customer.controller import customers_router
 from src.customer.profile_sensors_endpoint.controller import sensor_router
 
@@ -45,10 +45,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(sensor_router)
 app.include_router(customers_router)
 app.include_router(customers_profile_router)
-app.include_router(segmenter_details_router)
+app.include_router(segments_details_router)
 app.include_router(get_openapi_router(app))
 
-# app.add_exception_handler(RequestValidationError, validation_error.handler)
+app.add_exception_handler(RequestValidationError, validation_handler)
 app.add_exception_handler(BadGatewayException, base_handler)
 app.add_exception_handler(BadRequestException, base_handler)
 app.add_exception_handler(UnauthorizedException, base_handler)

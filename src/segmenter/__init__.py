@@ -1,1 +1,1 @@
-from .controllers import segmenter_details_router
+from .controllers import segments_details_router

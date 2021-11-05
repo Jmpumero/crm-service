@@ -90,7 +90,9 @@ class DemographyRepo(ConnectionMongo):
         self, status, column, condition, date=None, from_=None, to_=None
     ):
         if condition == "Between":
+
             if status:
+
                 query = {"$match": {f"{column}": {"$gte": from_, "$lt": to_}}}
             else:
                 query = {
@@ -128,39 +130,52 @@ class DemographyRepo(ConnectionMongo):
             query = {"$match": {"$nor": [{"age": {"$gte": from_, "$lt": to_}}]}}
         return query
 
+    def builder_language(self, type, array_languages):
+
+        query = {}
+        if type == "all":
+            query = {"$match": {"languages": {"$all": array_languages}}}
+        elif type == "":
+            query = {"$match": {"languages": {"$in": array_languages}}}
+
+        return query
+
     async def test_alfa_query(self, match):
 
         return self.customer.aggregate([match, {"$limit": 20}])
 
     async def test_beta_query(self, data):
-        print(
-            self.milliseconds_to_date(
-                data["register_date"]["birth_date"]["date_range"]["from_"]
-            )
-        )
-        # print(data["birth_date"])
-        # print(data["birth_date"]["date_range"]["from_"])
+        result = None
+        print(data["languages"])
+        l = data["languages"]
+        v = self.builder_language("all", l)
         result = self.customer.aggregate(
-            [
-                {"$match": {"birthdate": {"$not": {"$eq": ""}}}},
-                self.builder_date_query_project(),
-                self.builder_date_range(
-                    True,
-                    "birthdate",
-                    "Equal to",
-                    self.milliseconds_to_date(
-                        data["register_date"]["birth_date"]["date_range"]["from_"],
-                    ),
-                    self.milliseconds_to_date(
-                        data["register_date"]["birth_date"]["date_range"]["to"]
-                    ),
-                ),
-                {"$limit": 10},
-            ]
+            [{"$match": {"languages": {"$all": ["ce", "ab"]}}}]
         )
-        r = await result.to_list(length=None)
 
-        return r
+        # example date range
+        # result = self.customer.aggregate(
+        #     [
+        #         {"$match": {"birthdate": {"$not": {"$eq": ""}}}},
+        #         self.builder_date_query_project(),
+        #         self.builder_date_range(
+        #             True,
+        #             "birthdate",
+        #             data["register_date"]["birth_date"]["condition"],
+        #             date=self.milliseconds_to_date(
+        #                 data["register_date"]["birth_date"]["date"]
+        #             ),
+        #             from_=self.milliseconds_to_date(
+        #                 data["register_date"]["birth_date"]["date_range"]["from_"],
+        #             ),
+        #             to_=self.milliseconds_to_date(
+        #                 data["register_date"]["birth_date"]["date_range"]["to"]
+        #             ),
+        #         ),
+        #         {"$limit": 10},
+        #     ]
+        # )
+
         #### date range classic
         # return self.customer.aggregate(
         #     [
@@ -183,6 +198,11 @@ class DemographyRepo(ConnectionMongo):
         #         {"$limit": 10},
         #     ]
         # )
+        r = None
+        if result != None:
+            r = await result.to_list(length=None)
+
+        return r
 
     async def date_range_test(self, data):
 

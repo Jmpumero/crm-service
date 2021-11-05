@@ -73,16 +73,6 @@ async def get_customers(
     return await service.get_customers(query_params)
 
 
-# @customers_router.get("/blacklist/")
-# @remove_422
-# async def get_customers_(
-#     query_params: BlacklistQueryParams = Depends(BlacklistQueryParams),
-# ):
-#     service = Service()
-
-#     return await service.get_customers_blacklist(query_params)
-
-
 # enpoint que optiene el historial de un sensor del customer (para las tablas blacklist/crud)
 @customers_router.get(
     "/customers/{customer_id}/history-sensor",
@@ -111,14 +101,6 @@ async def get_customer_notes_comments(customer_id: str):
 
 
 ##############################################################################
-# @customers_router.put(
-#     "/blacklist/update/customers", response_model=BlackListBodyResponse
-# )
-# @remove_422
-# async def update_customer_in_blacklist(body: BlackListBody):
-
-#     service = Service()
-#     return await service.post_blacklist_update_customer(body)
 
 
 @customers_router.get("/customers/{customer_id}/sales-summary")

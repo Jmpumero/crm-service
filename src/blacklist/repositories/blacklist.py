@@ -14,6 +14,7 @@ blacklist_projections = {
     "documentId": 1,
     "nationality": 1,
     "civil_status": 1,
+    "customer_avatar": 1,
     "languages": 1,
     "birthdate": 1,
     "associated_sensors": 1,

@@ -1,7 +1,7 @@
 from .get import (
     BlacklistQueryParams,
     BlacklistResponse,
-    BlacklistCustomer,
+    CustomerBlacklist,
     StatusInBlacklist,
 )
 

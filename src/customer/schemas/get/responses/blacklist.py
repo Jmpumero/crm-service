@@ -40,7 +40,7 @@ class BlacklistLog(BaseModel):
     type: str
 
 
-class BlacklistCustomer(BaseModel):
+class CustomerBlacklist(BaseModel):
     id: str = Field(..., alias="_id")
     name: Optional[str]
     last_name: Optional[str]
@@ -70,6 +70,6 @@ class BlacklistCustomer(BaseModel):
 
 
 class BlacklistCustomersResponse(BaseModel):
-    customers: List[BlacklistCustomer]
+    customers: List[CustomerBlacklist]
     total_items: int
     total_show: int

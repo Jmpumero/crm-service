@@ -16,7 +16,7 @@ from .responses import (
     CustomerNotesAndcomments,
     NotesAndCommentsResponse,
     BlacklistCustomersResponse,
-    BlacklistCustomer,
+    CustomerBlacklist,
     SensorHistoryResponse,
     SearchUpdateResponse,
     SearchUpdate,

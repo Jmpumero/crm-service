@@ -133,18 +133,28 @@ class DemographyRepo(ConnectionMongo):
         return self.customer.aggregate([match, {"$limit": 20}])
 
     async def test_beta_query(self, data):
-
+        print(
+            self.milliseconds_to_date(
+                data["register_date"]["birth_date"]["date_range"]["from_"]
+            )
+        )
+        # print(data["birth_date"])
+        # print(data["birth_date"]["date_range"]["from_"])
         result = self.customer.aggregate(
             [
                 {"$match": {"birthdate": {"$not": {"$eq": ""}}}},
                 self.builder_date_query_project(),
-                # self.builder_date_range(
-                #     True,
-                #     data["register_date"]["condition"],
-                #     self.milliseconds_to_date(data["register_date"]["date"]),
-                #     from_,
-                #     to_,
-                # ),
+                self.builder_date_range(
+                    True,
+                    "birthdate",
+                    "Equal to",
+                    self.milliseconds_to_date(
+                        data["register_date"]["birth_date"]["date_range"]["from_"],
+                    ),
+                    self.milliseconds_to_date(
+                        data["register_date"]["birth_date"]["date_range"]["to"]
+                    ),
+                ),
                 {"$limit": 10},
             ]
         )

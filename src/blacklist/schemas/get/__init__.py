@@ -3,6 +3,6 @@ from .query_params import (
 )
 from .responses import (
     BlacklistResponse,
-    BlacklistCustomer,
+    CustomerBlacklist,
     StatusInBlacklist,
 )

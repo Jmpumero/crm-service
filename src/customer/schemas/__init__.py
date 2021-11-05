@@ -12,7 +12,7 @@ from .get import (
     CustomerNotesAndcomments,
     NotesAndCommentsResponse,
     BlacklistCustomersResponse,
-    BlacklistCustomer,
+    CustomerBlacklist,
     SensorHistoryResponse,
     SearchCrudQueryParams,
     SearchUpdate,

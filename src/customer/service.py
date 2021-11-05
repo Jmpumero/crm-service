@@ -27,7 +27,7 @@ from .schemas import (
     CustomerNotesAndcomments,
     NotesAndCommentsResponse,
     BlacklistCustomersResponse,
-    BlacklistCustomer,
+    CustomerBlacklist,
     BlacklistQueryParams,
     CustomerQueryParamsSensor,
     BlackListBody,
@@ -197,7 +197,7 @@ class Service(MongoQueries):
 
             if cursor != None:
                 for customer in await cursor.to_list(length=None):
-                    customers.append(BlacklistCustomer(**customer))
+                    customers.append(CustomerBlacklist(**customer))
         else:
             print("el query no puede ser vacio")
 

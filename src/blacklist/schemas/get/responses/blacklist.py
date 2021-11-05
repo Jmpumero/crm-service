@@ -46,7 +46,7 @@ class BlacklistLog(BaseModel):
     type: str
 
 
-class BlacklistCustomer(BaseModel):
+class CustomerBlacklist(BaseModel):
     id: str = Field(..., alias="_id")
     name: Optional[str]
     last_name: Optional[str]
@@ -68,6 +68,7 @@ class BlacklistCustomer(BaseModel):
     phone_main: Optional[Phones]
     address_main: Optional[Addresses]
     blacklist_log: Optional[List[BlacklistLog]]
+    customer_avatar: Optional[str]
 
     class Config:
         allow_population_by_field_name = True
@@ -78,4 +79,4 @@ class BlacklistCustomer(BaseModel):
 class BlacklistResponse(BaseModel):
     total_items: int
     total_show: int
-    items: List[BlacklistCustomer]
+    items: List[CustomerBlacklist]

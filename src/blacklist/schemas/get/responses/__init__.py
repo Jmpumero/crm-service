@@ -1,5 +1,5 @@
 from .blacklist import (
-    BlacklistCustomer,
+    CustomerBlacklist,
     BlacklistResponse,
     StatusInBlacklist,
 )

@@ -29,7 +29,7 @@ class PmsQueries(MongoQueries):
             {"$match": {"customer_id": customer_id}},
             {
                 "$group": {
-                    "_id": "$data.books.riRoomTypeName",
+                    "_id": "$data.bBooks.riRoomType.name",
                     "count": {"$sum": 1},
                 }
             },
@@ -71,7 +71,7 @@ class PmsQueries(MongoQueries):
             {"$match": {"customer_id": customer_id}},
             {
                 "$group": {
-                    "_id": "$data.books.coreBookStatusName",
+                    "_id": "$data.bBooks.coreBookStatus.code",
                     "count": {"$sum": 1},
                 },
             },
@@ -86,7 +86,7 @@ class PmsQueries(MongoQueries):
             {"$match": {"customer_id": customer_id}},
             {
                 "$group": {
-                    "_id": "$data.sSalesChannelName",
+                    "_id": "$data.ssaleChannel.name",
                     "count": {"$sum": 1},
                 },
             },
@@ -122,27 +122,23 @@ class PmsQueries(MongoQueries):
                 }
             }
         elif constrain.value == "Monto min.":
-            pass
+            match_stage = {
+                "$match": {
+                    "$and": [
+                        {"customer_id": customer_id},
+                        {"data.bBooks.netAmt": {"$gte": float(search)}},
+                    ]
+                }
+            }
         elif constrain.value == "Monto max.":
-            pass
-        # elif constrain.value == "Monto min.":
-        #     match_stage = {
-        #         "$match": {
-        #             "$and": [
-        #                 {"customer_id": customer_id},
-        #                 {"data.bBooks.netAmt": {"$gte": float(search)}},
-        #             ]
-        #         }
-        #     }
-        # elif constrain.value == "Monto max.":
-        #     match_stage = {
-        #         "$match": {
-        #             "$and": [
-        #                 {"customer_id": customer_id},
-        #                 {"data.bBooks.netAmt": {"$lte": float(search)}},
-        #             ]
-        #         }
-        #     }
+            match_stage = {
+                "$match": {
+                    "$and": [
+                        {"customer_id": customer_id},
+                        {"data.bBooks.netAmt": {"$lte": float(search)}},
+                    ]
+                }
+            }
 
         lookup_customer_stage = {
             "$lookup": {

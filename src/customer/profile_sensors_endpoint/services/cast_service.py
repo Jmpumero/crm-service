@@ -72,7 +72,12 @@ class CastService(CastHotSpotQueries):
                 playback_most_used_app_list.append(app)
 
             async for device in most_used_device:
-                most_used_device_list.append(device)
+                if len(device["_id"]) > 0:
+                    most_used_device_list.append(device)
+                else:
+                    most_used_device_list.append(
+                        {"_id": "Not Specified", "count": device["count"]}
+                    )
 
             async for date in oldest_connection:
                 first_connection = date["data"]["startDate"]

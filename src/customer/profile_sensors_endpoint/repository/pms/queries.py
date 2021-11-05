@@ -19,9 +19,21 @@ class PmsQueries(MongoQueries):
         return count
 
     def get_all_customer_stays(self, customer_id):
-        result = self.pms_collection.find({"customer_id": customer_id}).sort(
-            [("data.checkin", 1)]
-        )
+        match_stage = {
+            "$match": {
+                "customer_id": customer_id,
+            }
+        }
+        add_date_field_stage = {
+            "$addFields": {
+                "checkin_date": {"$dateFromString": {"dateString": "$data.checkin"}}
+            }
+        }
+        sort_stage = {"$sort": {"checkin_date": 1}}
+
+        pipeline = [match_stage, add_date_field_stage, sort_stage]
+        result = self.pms_collection.aggregate(pipeline)
+
         return result
 
     def group_by_most_used_roomType(self, customer_id):

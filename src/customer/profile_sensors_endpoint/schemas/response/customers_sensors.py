@@ -51,8 +51,8 @@ class MostVisitedApp(BaseModel):
 
 
 class MostUsedDevice(BaseModel):
-    device_id: Optional[str]
     device_vendor: Optional[str]
+    device_count: Optional[int]
 
 
 class LastPlayback(BaseModel):
@@ -97,7 +97,7 @@ class CastResponse(BaseModel):
 class HotspotResponse(BaseModel):
     hotspot_response: Response
     hotspot_connections: Optional[int]
-    hotspot_used_devices: Optional[Any]
+    hotspot_used_devices: Optional[List[MostUsedDevice]]
     hotspot_first_connection: Optional[str]
     hotspot_last_connection: Optional[str]
 

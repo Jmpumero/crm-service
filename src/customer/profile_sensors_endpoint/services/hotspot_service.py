@@ -32,8 +32,9 @@ class HotspotService(CastHotSpotQueries):
             most_used_device = self.used_devices(customer_id)
 
             async for device in most_used_device:
-                for item in device["_id"]:
-                    vendors_list.append(item)
+                vendors_list.append(
+                    {"device_vendor": device["_id"][0], "device_count": device["count"]}
+                )
 
             async for date in oldest_connection:
                 first_connection = date["data"]["date"]

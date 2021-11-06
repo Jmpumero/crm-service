@@ -6,7 +6,8 @@ from fastapi.responses import JSONResponse
 
 from ..schemas.response.customers_sensors import (
     PmsBook,
-    PmsHistoryGuest,
+    PmsHistoryPrimaryGuest,
+    PmsHistorySecondaryGuest,
 )
 from src.customer.profile_sensors_endpoint.repository.pms import PmsQueries
 
@@ -52,7 +53,7 @@ class PmsService(PmsQueries):
                 reservation["data"]["checkin"], "%Y-%m-%d"
             )
             anticipation_time = (
-                master_reservation_creation_date - master_reservation_checkin_date
+                master_reservation_checkin_date - master_reservation_creation_date
             ) / timedelta(milliseconds=1)
             anticipation_list.append(anticipation_time)
 
@@ -207,7 +208,7 @@ class PmsService(PmsQueries):
             "pms_consolidate_nights": int(
                 functools.reduce(lambda a, b: a + b, nights_list)
             ),
-            "pms_avg_anticipation": -int(statistics.mean(anticipation_list)),
+            "pms_avg_anticipation": int(statistics.mean(anticipation_list)),
             "pms_cancelled_bookings": cancellation_list[0]["count"]
             if len(cancellation_list) > 0
             else 0,
@@ -217,10 +218,10 @@ class PmsService(PmsQueries):
         }
 
         return response
-        # except Exception as err:
+        # except Exception:
         #     response = {
         #         "code": status.HTTP_404_NOT_FOUND,
-        #         "message": f"Customer doesn't have interaction with this sensor: {err}",
+        #         "message": f"Customer doesn't have interaction with this sensor",
         #     }
         #     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=response)
 
@@ -239,63 +240,148 @@ class PmsService(PmsQueries):
             master_books_list.append(book)
 
         for master in master_books_list:
-            for book in master["data"]["bBooks"]:
+            if master["entity"] == "pms_booker":
+                for book in master["data"]["bBooks"]:
+                    pms_books_history_list.append(
+                        PmsBook(
+                            code=book["code"],
+                            checkin=book["checkin"],
+                            checkout=book["checkout"],
+                            room_type=book["riRoomType"]["name"],
+                            rate_plan=book["riRatePlan"]["name"],
+                            reseller=master["data"]["preseller"]["name"],
+                            meal_plan=book["riMealPlan"]["name"],
+                            property=master["data"]["sproperty"]["name"],
+                        )
+                    )
+                    for guest in book["bBookPGuests"]:
+                        if (guest["isMain"]) and (
+                            guest["pguest"]["email"]
+                            == master["data"]["pguest"]["email"]
+                        ):
+                            pms_guests_history_list.append(
+                                PmsHistoryPrimaryGuest(
+                                    book_code=book["code"],
+                                    name=master["data"]["pguest"]["name"],
+                                    last_name=master["data"]["pguest"]["lastname"],
+                                    nationality=master["data"]["pguest"]["coreCountry"][
+                                        "name"
+                                    ],
+                                    phone=master["data"]["pguest"]["phone"],
+                                    # address=master["data"]["pms_customer"]["address"],
+                                    email=master["data"]["pguest"]["email"],
+                                    documentId=[
+                                        {
+                                            "documentType": "DNI",
+                                            "documentNumber": master["data"]["pguest"][
+                                                "dni"
+                                            ],
+                                        },
+                                        {
+                                            "documentType": "Passport",
+                                            "documentNumber": master["data"]["pguest"][
+                                                "passport"
+                                            ],
+                                        },
+                                    ],
+                                    # civil_status=master["data"]["pms_customer"][
+                                    #     "civil_ststus"
+                                    # ],
+                                    age=(
+                                        datetime.today()
+                                        - datetime.strptime(
+                                            master["data"]["pguest"]["birthdate"],
+                                            "%Y-%m-%d",
+                                        )
+                                    )
+                                    / timedelta(days=365.2425),
+                                    country=master["data"]["pguest"]["coreCountry"][
+                                        "name"
+                                    ],
+                                    # city=master["data"]["pms_customer"]["city"],
+                                )
+                            )
+                        else:
+                            pms_companions_history_list.append(
+                                PmsHistorySecondaryGuest(
+                                    book_code=book["code"],
+                                    name=guest["pguest"]["name"],
+                                    last_name=guest["pguest"]["lastname"],
+                                    documentId=[
+                                        {
+                                            "documentType": "DNI",
+                                            "documentNumber": guest["pguest"]["dni"],
+                                        },
+                                        {
+                                            "documentType": "Passport",
+                                            "documentNumber": guest["pguest"][
+                                                "passport"
+                                            ],
+                                        },
+                                    ],
+                                    age=(
+                                        datetime.utcnow()
+                                        - datetime.strptime(
+                                            guest["pguest"]["birthdate"], "%Y-%m-%d"
+                                        )
+                                    )
+                                    / timedelta(days=365.2425),
+                                )
+                            )
+            elif master["entity"] == "pms_pri_guest":
                 pms_books_history_list.append(
                     PmsBook(
-                        code=book["code"],
-                        checkin=book["checkin"],
-                        checkout=book["checkout"],
-                        room_type=book["riRoomType"]["name"],
-                        rate_plan=book["riRatePlan"]["name"],
-                        reseller=master["data"]["preseller"]["name"],
-                        meal_plan=book["riMealPlan"]["name"],
-                        property=master["data"]["sproperty"]["name"],
+                        code=master["data"]["code"],
+                        checkin=master["data"]["checkin"],
+                        checkout=master["data"]["checkout"],
+                        room_type=master["data"]["riRoomType"]["name"],
+                        rate_plan=master["data"]["riRatePlan"]["name"],
+                        meal_plan=master["data"]["riMealPlan"]["name"],
+                        property=master["data"]["riRatePlan"]["sproperty"]["name"],
                     )
                 )
-                for guest in book["bBookPGuests"]:
+                for guest in master["data"]["bBookPGuests"]:
                     if guest["isMain"]:
                         pms_guests_history_list.append(
-                            PmsHistoryGuest(
-                                name=master["data"]["pguest"]["name"],
-                                last_name=master["data"]["pguest"]["lastname"],
+                            PmsHistoryPrimaryGuest(
+                                book_code=master["data"]["code"],
+                                name=guest["pguest"]["name"],
+                                last_name=guest["pguest"]["lastname"],
                                 nationality="PENDIENTE",
-                                phone=master["data"]["pguest"]["phone"],
+                                phone=guest["pguest"]["phone"],
                                 # address=master["data"]["pms_customer"]["address"],
-                                email=master["data"]["pguest"]["email"],
+                                email=guest["pguest"]["email"],
                                 documentId=[
                                     {
                                         "documentType": "DNI",
-                                        "documentNumber": master["data"]["pguest"][
-                                            "dni"
-                                        ],
+                                        "documentNumber": guest["pguest"]["dni"],
                                     },
                                     {
                                         "documentType": "Passport",
-                                        "documentNumber": master["data"]["pguest"][
-                                            "passport"
-                                        ],
+                                        "documentNumber": guest["pguest"]["passport"],
                                     },
                                 ],
-                                # civil_status=master["data"]["pms_customer"][
+                                # civil_status=guest["pms_customer"][
                                 #     "civil_ststus"
                                 # ],
                                 age=(
                                     datetime.today()
                                     - datetime.strptime(
-                                        master["data"]["pguest"]["birthdate"],
+                                        guest["pguest"]["birthdate"],
                                         "%Y-%m-%d",
                                     )
                                 )
                                 / timedelta(days=365.2425),
                                 language="PENDIENTE",
-                                country=master["data"]["pguest"]["coreCountry"]["name"],
+                                country=guest["pguest"]["coreCountry"]["name"],
                                 # city=master["data"]["pms_customer"]["city"],
                             )
                         )
 
                     else:
                         pms_companions_history_list.append(
-                            PmsHistoryGuest(
+                            PmsHistorySecondaryGuest(
+                                book_code=book["code"],
                                 name=guest["pguest"]["name"],
                                 last_name=guest["pguest"]["lastname"],
                                 documentId=[

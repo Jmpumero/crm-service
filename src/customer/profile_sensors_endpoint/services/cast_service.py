@@ -134,11 +134,11 @@ class CastService(CastHotSpotQueries):
                 },
             }
             return response
-        except Exception as err:
+        except Exception:
             response = {
                 "cast_meta_response": {
                     "status_code": status.HTTP_404_NOT_FOUND,
-                    "message": f"Customer doesn't have interaction with this sensor or has corrupted data: {err}",
+                    "message": f"Customer doesn't have interaction with this sensor",
                 }
             }
             return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=response)

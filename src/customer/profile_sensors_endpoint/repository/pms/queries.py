@@ -36,17 +36,25 @@ class PmsQueries(MongoQueries):
 
         return result
 
-    def group_by_most_used_roomType(self, customer_id):
-        pipeline = [
-            {"$match": {"customer_id": customer_id}},
-            {
+    def group_by_most_used_roomType(self, customer_id, customer_type):
+        match_stage = {"$match": {"customer_id": customer_id}}
+
+        if customer_type == "pms_booker":
+            group_stage = {
                 "$group": {
                     "_id": "$data.bBooks.riRoomType.name",
                     "count": {"$sum": 1},
                 }
-            },
-            {"$sort": SON([("count", -1), ("_id", -1)])},
-        ]
+            }
+        elif customer_type == "pms_pri_guest":
+            group_stage = {
+                "$group": {
+                    "_id": "$data.riRoomType.name",
+                    "count": {"$sum": 1},
+                }
+            }
+        sort_stage = {"$sort": SON([("count", -1), ("_id", -1)])}
+        pipeline = [match_stage, group_stage, sort_stage]
         most_used = self.pms_collection.aggregate(pipeline)
 
         return most_used
@@ -78,32 +86,38 @@ class PmsQueries(MongoQueries):
 
         return pax_avg
 
-    def get_cancellations(self, customer_id):
-        pipeline = [
-            {"$match": {"customer_id": customer_id}},
-            {
+    def get_cancellations(self, customer_id, customer_type):
+        match_stage = {"$match": {"customer_id": customer_id}}
+        if customer_type == "pms_booker":
+            group_stage = {
                 "$group": {
                     "_id": "$data.bBooks.coreBookStatus.code",
                     "count": {"$sum": 1},
                 },
-            },
-            {"$sort": SON([("count", -1), ("_id", -1)])},
-        ]
+            }
+        elif customer_type == "pms_pri_guest":
+            group_stage = {
+                "$group": {
+                    "_id": "$data.coreBookStatus.code",
+                    "count": {"$sum": 1},
+                },
+            }
+        sort_stage = {"$sort": SON([("count", -1), ("_id", -1)])}
+        pipeline = [match_stage, group_stage, sort_stage]
         cancellations = self.pms_collection.aggregate(pipeline)
 
         return cancellations
 
     def get_preferred_sale_channel(self, customer_id):
-        pipeline = [
-            {"$match": {"customer_id": customer_id}},
-            {
-                "$group": {
-                    "_id": "$data.ssaleChannel.name",
-                    "count": {"$sum": 1},
-                },
+        match_stage = {"$match": {"customer_id": customer_id}}
+        group_stage = {
+            "$group": {
+                "_id": "$data.ssaleChannel.name",
+                "count": {"$sum": 1},
             },
-            {"$sort": SON([("count", -1), ("_id", -1)])},
-        ]
+        }
+        sort_stage = {"$sort": SON([("count", -1), ("_id", -1)])}
+        pipeline = [match_stage, group_stage, sort_stage]
         sale_channels = self.pms_collection.aggregate(pipeline)
 
         return sale_channels

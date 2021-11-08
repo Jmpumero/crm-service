@@ -187,12 +187,12 @@ class BlacklistQueries(MongoQueries):
 
         item = {}
         type = "enable"
-        last_motives = "blacklist_last_enabled_motives"
+        last_motives = "blacklist_last_enabled_motive"
         query = {}
 
         if status:
             type = "disable"
-            last_motives = "blacklist_last_disabled_motives"
+            last_motives = "blacklist_last_disabled_motive"
 
         today = datetime.utcnow()
         today = datetime.strftime(today, "%Y-%m-%dT%H:%M:%S.%f")
@@ -200,6 +200,9 @@ class BlacklistQueries(MongoQueries):
         item["type"] = type
         item["motives"] = motives
         log = blacklist_log
+        if blacklist_log == None:
+            log = []
+
         log.append(item)
 
         query["$set"] = {
@@ -212,10 +215,6 @@ class BlacklistQueries(MongoQueries):
 
     async def update_customer(self, data):
         result = None
-        response = None
-        array = []
-        log = []
-        item = {}
 
         customer = await self.customer.find_one(data.id)
         if customer != None:
@@ -223,7 +222,7 @@ class BlacklistQueries(MongoQueries):
             query = self.build_query_update(
                 customer["blacklist_log"], data.motives, data.new_status
             )
-
+            # query_last_motive=
             result = await self.customer.find_one_and_update(
                 {"_id": data.id},
                 query,

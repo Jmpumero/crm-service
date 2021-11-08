@@ -52,7 +52,7 @@ class BlacklistService(MongoQueries):
 
     async def update_(self, body) -> BlacklistUpdateResponse:
         resp = await self.repository.update_customer(body)
-        # print(resp)
+
         if resp != None:
 
             response = {

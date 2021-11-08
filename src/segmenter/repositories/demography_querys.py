@@ -45,9 +45,6 @@ class DemographyRepo(ConnectionMongo):
             "update_at": {"$dateFromString": {"dateString": "$update_at"}},
         }
 
-    async def generic_query(self):
-        ...
-
     def milliseconds_to_string(self, date):
 
         ms = date
@@ -135,7 +132,7 @@ class DemographyRepo(ConnectionMongo):
         query = {}
         if type == "all":
             query = {"$match": {"languages": {"$all": array_languages}}}
-        elif type == "":
+        elif type == "in":
             query = {"$match": {"languages": {"$in": array_languages}}}
 
         return query
@@ -146,12 +143,18 @@ class DemographyRepo(ConnectionMongo):
 
     async def test_beta_query(self, data):
         result = None
-        print(data["languages"])
+        match = {}
+        match["$match"] = {}
+        match["$match"]["languages"] = {"$in": ["ce", "ab"]}
+
         l = data["languages"]
         v = self.builder_language("all", l)
-        result = self.customer.aggregate(
-            [{"$match": {"languages": {"$all": ["ce", "ab"]}}}]
-        )
+
+        result = self.customer.aggregate([v])
+        #
+        # result = await self.customer.update_many(
+        #     {}, {"$rename": {"language": "languages"}}
+        # )
 
         # example date range
         # result = self.customer.aggregate(
@@ -215,8 +218,6 @@ class DemographyRepo(ConnectionMongo):
         return r
 
     async def age_range_test(self, data):
-        print(data["age_range"]["from_"])
-        print(data["age_range"]["to"])
 
         result = await self.test_beta_query(
             data, data["age_range"]["from_"], data["age_range"]["to"]

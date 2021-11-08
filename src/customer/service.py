@@ -74,13 +74,11 @@ class Service(MongoQueries):
                 )
 
                 for customer in await cursor.to_list(length=None):
-                    # print(customer)
 
                     customers.append(customer)
 
         else:
-            # print("***********")
-            # print(query_params.query)
+
             if query_params.column_name.replace(" ", "") and query_params.contain != "":
 
                 cursor = self.filter_search_customers(
@@ -96,7 +94,6 @@ class Service(MongoQueries):
 
                     for customer in await cursor.to_list(length=None):
 
-                        # print(customer)
                         # customers.append(SearchCustomers(**customer))
                         customers.append(customer)
 
@@ -104,7 +101,7 @@ class Service(MongoQueries):
                 print("Caso no valido error ")
 
         if customer != None:
-            # print(customer)
+
             return SearchCustomersResponse(**customer)
         else:
             resp = {}
@@ -324,7 +321,7 @@ class Service(MongoQueries):
             )
 
         for customer in await cursor.to_list(length=None):
-            # print(customer)
+
             customers.append(customer)
 
         response = {

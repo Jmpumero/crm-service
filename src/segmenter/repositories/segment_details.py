@@ -25,3 +25,6 @@ class SegmenterDetailsRepo(ConnectionMongo):
         )
 
         return segment
+
+    async def find_one_segment(self, id):
+        return await self.segments.find_one({"_id": id})

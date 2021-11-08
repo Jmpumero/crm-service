@@ -18,8 +18,9 @@ class SegmenterService(MongoQueries):
             authors = await authors.to_list(length=None)
 
             list_authors = []
-
+            # print(authors)
             for x in range(len(authors)):
+                # print(authors[x])
                 list_authors.append(authors[x]["author"])
 
         except Exception as e:
@@ -47,7 +48,7 @@ class SegmenterService(MongoQueries):
                 ) - await self.total_customer_in_blacklist(True)
 
         except Exception as e:
-            print(e)
+            # print(e)
             segments["total_items"] = 0
             segments["total_shows"] = 0
             segments["items"] = []

@@ -128,7 +128,7 @@ class MongoQueries(ConnectionMongo):
 
         if column_order == "email":
             if order.lower() == "desc":
-                # print(order)
+
                 customers = self.customer.aggregate(
                     [
                         {
@@ -181,7 +181,7 @@ class MongoQueries(ConnectionMongo):
 
         elif column_order:
             if order.lower() == "desc":
-                # print(order)
+
                 customers = self.customer.aggregate(
                     [
                         {
@@ -207,7 +207,7 @@ class MongoQueries(ConnectionMongo):
                     ]
                 )
             else:
-                # print(order)
+
                 customers = self.customer.aggregate(
                     [
                         {
@@ -263,9 +263,7 @@ class MongoQueries(ConnectionMongo):
     def search_customer_name(
         self, constrain, item_search, column, skip, limit, order_sort, column_order
     ):
-        # print(column_order)
-        # print(column)
-        # print(constrain)
+
         order = 1
         if order_sort == "desc":
             order = -1
@@ -434,9 +432,6 @@ class MongoQueries(ConnectionMongo):
     def search_customer_email(
         self, constrain, item_search, column, skip, limit, sort_order, column_order
     ):
-
-        # print(column_order)
-        # print(column)
 
         if column_order == "email":
             column_order = column_order + ".email"
@@ -872,7 +867,7 @@ class MongoQueries(ConnectionMongo):
 
     def search_phone_intl(self, constrain, item_search, column, skip, limit):
         response = ""
-        # print(f"\A{item_search}")
+
         if constrain == "contain":
             return (
                 self.customer.find(
@@ -912,7 +907,7 @@ class MongoQueries(ConnectionMongo):
                 .limit(limit)
             )
         if constrain == "starts_by":
-            # print("ola k ase")
+
             return self.customer.aggregate(
                 [
                     {
@@ -982,7 +977,6 @@ class MongoQueries(ConnectionMongo):
 
     def filter_search_phone(self, constrain, item_search, column, skip, limit):
         if item_search.find("+") > -1:
-            # print(item_search + "hola")
 
             item = item_search.replace(" ", "")
             item = item_search.replace("-", "")
@@ -1232,7 +1226,7 @@ class MongoQueries(ConnectionMongo):
     async def update_customer_(self, data):
 
         query = self.build_query_update(data)
-        # print(query)
+
         resp = None
         if data.id != "" and data.id != None:
             resp = await self.customer.find_one_and_update(

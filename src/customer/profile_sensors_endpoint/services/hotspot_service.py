@@ -53,11 +53,11 @@ class HotspotService(CastHotSpotQueries):
                 "hotspot_last_connection": last_connection,
             }
             return response
-        except Exception as err:
+        except Exception:
             response = {
                 "hotspot_response": {
                     "status_code": status.HTTP_404_NOT_FOUND,
-                    "message": f"Customer doesn't have interaction with this sensor: {err}",
+                    "message": f"Customer doesn't have interaction with this sensor",
                 }
             }
             return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=response)

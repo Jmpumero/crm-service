@@ -1,17 +1,8 @@
-import statistics
-import functools
-from datetime import datetime, timedelta
 from typing import Any, Optional
 
 from fastapi import status
 from fastapi.responses import JSONResponse
 
-from ..schemas.response.customers_sensors import (
-    PmsBook,
-    PmsResponse,
-    PmsHistory,
-    PmsHistoryGuest,
-)
 from src.customer.profile_sensors_endpoint.repository.sensors_tab import (
     SensorsTabQueries,
 )

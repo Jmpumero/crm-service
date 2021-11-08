@@ -110,6 +110,8 @@ class CastService(CastHotSpotQueries):
             else:
                 playback_title = "Not Specified"
 
+            print(most_used_device_list)
+
             response = {
                 "cast_response": {"status_code": status.HTTP_200_OK, "message": "Ok"},
                 "cast_connections": len(connection_time_list),
@@ -124,7 +126,10 @@ class CastService(CastHotSpotQueries):
                 },
                 "cast_first_connection": first_connection,
                 "cast_last_connection": last_connection,
-                "cast_most_used_device": {"device_id": most_used_device_list[0]["_id"]},
+                "cast_most_used_device": {
+                    "device_vendor": most_used_device_list[0]["_id"],
+                    "device_count": most_used_device_list[0]["count"],
+                },
                 "cast_last_playback": {
                     "playback_title": playback_title,
                     "playback_duration": playback_elapsed_time,
@@ -134,11 +139,11 @@ class CastService(CastHotSpotQueries):
                 },
             }
             return response
-        except Exception as err:
+        except Exception:
             response = {
                 "cast_meta_response": {
                     "status_code": status.HTTP_404_NOT_FOUND,
-                    "message": f"Customer doesn't have interaction with this sensor or has corrupted data: {err}",
+                    "message": f"Customer doesn't have interaction with this sensor",
                 }
             }
             return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=response)

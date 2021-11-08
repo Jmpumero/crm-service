@@ -142,8 +142,16 @@ class PmsResponse(BaseModel):
     pms_total_lodge_income: Optional[float]
 
 
-class PmsHistoryGuest(BaseModel):
-    type_: Optional[str]
+class PmsHistorySecondaryGuest(BaseModel):
+    book_code: Optional[str]
+    name: Optional[str]
+    last_name: Optional[str]
+    documentId: Optional[List[DocumentID]]
+    age: Optional[int]
+
+
+class PmsHistoryPrimaryGuest(BaseModel):
+    book_code: Optional[str]
     name: Optional[str]
     last_name: Optional[str]
     nationality: Optional[str]
@@ -157,6 +165,7 @@ class PmsHistoryGuest(BaseModel):
     country: Optional[str] = None
     city: Optional[str]
     booking: Optional[PmsBook]
+    companion_data: Optional[List[PmsHistorySecondaryGuest]]
 
 
 class PmsHistory(BaseModel):
@@ -164,8 +173,8 @@ class PmsHistory(BaseModel):
     total_items: int
     showing: int
     skip: int
-    guest_data: Optional[List[PmsHistoryGuest]]
-    companion_data: Optional[List[PmsHistoryGuest]]
+    guest_data: Optional[List[PmsHistoryPrimaryGuest]]
+    companion_data: Optional[List[PmsHistorySecondaryGuest]]
     booking_data: Optional[List[PmsBook]]
 
 

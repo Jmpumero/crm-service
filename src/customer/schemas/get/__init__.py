@@ -16,7 +16,7 @@ from .responses import (
     CustomerNotesAndcomments,
     NotesAndCommentsResponse,
     BlacklistCustomersResponse,
-    BlacklistCustomer,
+    CustomerBlacklist,
     SensorHistoryResponse,
     SearchUpdateResponse,
     SearchUpdate,
@@ -28,6 +28,4 @@ from .responses import (
     CrossSelling,
     SegmenterResponse,
     Segmenter,
-    SegmenterTable,
-    AuthorsInSegments,
 )

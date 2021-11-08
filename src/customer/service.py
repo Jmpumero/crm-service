@@ -1,30 +1,33 @@
 from typing import Any
 from datetime import datetime, timedelta
+from fastapi.datastructures import Default
+from pymongo.errors import BulkWriteError
+
 from src.customer.schemas import get
 from src.customer.schemas.get import responses
 from src.customer.schemas.get.query_params import SegmenterQueryParams
-from src.customer.schemas.get.responses import customers
-from src.customer.schemas.get.responses import blacklist
+from src.customer.schemas.get.responses import customers, blacklist
+
+
 from src.customer.schemas.get.responses.customer_crud import (
     SearchMerge,
     SearchMergeResponse,
 )
-from src.customer.schemas.get.responses.segmenter import AuthorsInSegments, Segmenter
+from src.customer.schemas.get.responses.segmenter import Segmenter
 
 from .repository import MongoQueries
-import json
-from .repository import MongoQueries
-from src.customer.repositories import HistorySensorQueries
+from .repositories import HistorySensorQueries
+from .repositories import CrossSellingQueries
+from .repositories import SegmenterQueries
+
 from .schemas import (
     SearchCustomersQueryParams,
     SearchCustomersResponse,
     CustomerLogBook,
-    SearchCustomers,
     CustomerNotesAndcomments,
     NotesAndCommentsResponse,
     BlacklistCustomersResponse,
-    SensorHistoryResponse,
-    BlacklistCustomer,
+    CustomerBlacklist,
     BlacklistQueryParams,
     CustomerQueryParamsSensor,
     BlackListBody,
@@ -33,15 +36,16 @@ from .schemas import (
     SearchUpdate,
     SearchCrudQueryParams,
     CustomerCRUDResponse,
-    SensorHistoryResponse,
-    UpdateCustomerBody,
-    BlackListBodyResponse,
     CrossSelling,
-    CrossSellingQueryParams,
     NewCrossSelling,
     Product,
     CrossSellingCreatedResponse,
     CrossSellingAndProductsResponse,
+    SensorHistoryResponse,
+    SearchCustomers,
+    UpdateCustomerBody,
+    BlackListBodyResponse,
+    CrossSellingQueryParams,
     Segmenter,
 )
 
@@ -70,13 +74,11 @@ class Service(MongoQueries):
                 )
 
                 for customer in await cursor.to_list(length=None):
-                    # print(customer)
 
                     customers.append(customer)
 
         else:
-            # print("***********")
-            # print(query_params.query)
+
             if query_params.column_name.replace(" ", "") and query_params.contain != "":
 
                 cursor = self.filter_search_customers(
@@ -92,7 +94,6 @@ class Service(MongoQueries):
 
                     for customer in await cursor.to_list(length=None):
 
-                        # print(customer)
                         # customers.append(SearchCustomers(**customer))
                         customers.append(customer)
 
@@ -100,7 +101,7 @@ class Service(MongoQueries):
                 print("Caso no valido error ")
 
         if customer != None:
-            # print(customer)
+
             return SearchCustomersResponse(**customer)
         else:
             resp = {}
@@ -193,82 +194,92 @@ class Service(MongoQueries):
 
             if cursor != None:
                 for customer in await cursor.to_list(length=None):
-                    customers.append(BlacklistCustomer(**customer))
+                    customers.append(CustomerBlacklist(**customer))
         else:
             print("el query no puede ser vacio")
 
         return self.build_blacklist_response(customers, total)
 
     def time_duration_to_milliseconds(self, time_to_convert):
-        # function that convert a datatime.time to milliseconds integer
+        # function convert a datatime.time to milliseconds integer
         return round(time_to_convert.total_seconds() * 1000)
+
+    def sensor_2_processed_items(self, data):
+        items = []
+        if data != None:
+            for item in data:
+                t_start = datetime.strptime(
+                    item["hotspot_details"]["data"]["date"], "%Y-%m-%dT%H:%M:%S"
+                )
+                t_end = datetime.strptime(
+                    item["hotspot_details"]["data"]["maxDate"], "%Y-%m-%dT%H:%M:%S"
+                )
+                t_result = t_end - t_start
+
+                items.append(
+                    dict(
+                        date=item["hotspot_details"]["data"]["date"],
+                        property=item["site"][0]["name"],
+                        duration=self.time_duration_to_milliseconds(t_result),
+                    )
+                )
+        return items
+
+    def response_history_sensor_building(self, array_items, total_items):
+
+        response = {}
+
+        if len(array_items) > 0:
+            response = {
+                "items": array_items,
+                "total_items": total_items,
+                "total_show": len(array_items),
+            }
+        else:
+            response = {
+                "items": [],
+                "total_items": 0,
+                "total_show": 0,
+            }
+
+        return response
 
     async def get_history_sensor(
         self, customer_id, query_params: CustomerQueryParamsSensor
     ):
-        items = []
-        response = {}
-        resp = None
 
-        # comentado ya que el front no esta listo para la integracion
+        if query_params.sensor == "sensor_1":
 
-        # if query_params.sensor == "sensor_1":
+            data = await HistorySensorQueries.get_history_sensor_1(
+                self, customer_id, query_params.skip, query_params.limit
+            )
+            response = self.response_history_sensor_building(
+                data[0]["customer_history"],
+                data[0]["total_items"][0]["total"]
+                if len(data[0]["total_items"]) > 0
+                else data[0]["total_items"],
+            )
 
-        #     r = await HistorySensorQueries.get_history_sensor_1(
-        #         self, customer_id, query_params.skip, query_params.limit
-        #     )
+        elif query_params.sensor == "sensor_2":
+            data = await HistorySensorQueries.get_history_sensor_2(
+                self, customer_id, query_params.skip, query_params.limit
+            )
 
-        # elif query_params.sensor == "sensor_2":
-        #     resp = await HistorySensorQueries.get_history_sensor_2(
-        #         self, customer_id, query_params.skip, query_params.limit
-        #     )
+            items = self.sensor_2_processed_items(data[0]["customer_history"])
+            response = self.response_history_sensor_building(
+                items,
+                data[0]["total_items"][0]["total"]
+                if len(data[0]["total_items"]) > 0
+                else data[0]["total_items"],
+            )
 
-        #     if resp != None:
+        elif query_params.sensor == "sensor_3":
+            items = []
+        elif query_params.sensor == "sensor_4":
+            items = []
+        else:
+            response = self.response_history_sensor_building([], [])
 
-        #         for item in resp["customer_history"]:
-        #             t_start = datetime.strptime(
-        #                 item["hotspot_details"]["data"]["date"], "%Y-%m-%dT%H:%M:%S"
-        #             )
-        #             t_end = datetime.strptime(
-        #                 item["hotspot_details"]["data"]["maxDate"], "%Y-%m-%dT%H:%M:%S"
-        #             )
-        #             t_result = t_end - t_start
-
-        #             items.append(
-        #                 dict(
-        #                     date=item["hotspot_details"]["data"]["date"],
-        #                     property=item["site"][0]["name"],
-        #                     duration=self.time_duration_to_milliseconds(t_result),
-        #                 )
-        #             )
-
-        # elif query_params.sensor == "sensor_3":
-        #     items = data_s
-        # elif query_params.sensor == "sensor_4":
-        #     items = data_s
-        # if resp != None:
-        #     response = {
-        #         "sensor_data": items,
-        #         "total_items": resp["total_items"][0]["total"],
-        #         "total_show": len(items),
-        #     }
-        # else:
-        #     response = {
-        #         "sensor_data": [],
-        #         "total_items": 0,
-        #         "total_show": 0,
-        #     }
-
-        # *******data dummy*******
-        data_s = [
-            {"date": "25-10-2020 15:00", "property": "HPA", "duration": "30min"},
-            {"date": "15-06-2020 16:50", "property": "H Barcelona", "duration": "1h"},
-        ]
-        response = {
-            "sensor_data": data_s,
-            "total_items": 2,
-            "total_show": 2,
-        }
         return response
 
     async def post_blacklist_update_customer(self, body: BlackListBody):
@@ -281,7 +292,7 @@ class Service(MongoQueries):
 
     async def get_all_customer_with_blacklist(
         self, query_params: SearchCrudQueryParams
-    ) -> SearchUpdateResponse:
+    ) -> Any:
         customers = []
         special_query = {}
         special_query["customer_status"] = True
@@ -310,15 +321,15 @@ class Service(MongoQueries):
             )
 
         for customer in await cursor.to_list(length=None):
-            # print(customer)
-            customers.append(SearchUpdate(**customer))
+
+            customers.append(customer)
 
         response = {
             "customers": customers,
             "total_items": total_customer,
             "total_show": len(customers),
         }
-        return SearchUpdateResponse(**response)
+        return response
 
     async def update_customer(self, body) -> CustomerCRUDResponse:
         response = None
@@ -348,13 +359,62 @@ class Service(MongoQueries):
         self, body: Product
     ) -> CrossSellingCreatedResponse:
 
-        return await self.insert_one_cross_selling_product(body)
+        response = None
+        result = await CrossSellingQueries.insert_one_cross_selling_product(self, body)
+        if result != None:
+            response = {
+                "msg": " Success Product created ",
+                "code": 200,
+            }
+        else:
+            response = {
+                "msg": " Failed inserting Product",
+                "code": 406,
+                "details": "el nombre no puede estar vacio",
+            }
+
+        return response
 
     async def post_create_cross_selling(
         self, body: NewCrossSelling
     ) -> CrossSellingCreatedResponse:
+        result = None
+        response = None
+        duplicate_items = []
 
-        return await self.insert_many_cross_selling(body)
+        try:
+            result = await CrossSellingQueries.insert_many_cross_selling(self, body)
+            if result.acknowledged:
+                response = {
+                    "msg": " Success Cross Selling created ",
+                    "code": 200,
+                }
+
+        except BulkWriteError as e:  # fallo al intetar escribir por llaves duplicadas
+
+            duplicate_items.append(
+                e.details["writeErrors"][0]["op"]["principal_product"]["name"]
+            )
+            duplicate_items.append(
+                e.details["writeErrors"][0]["op"]["secondary_product"]["name"]
+            )
+
+            response = {
+                "msg": " Failed inserting Cross Selling, duplicate keys ",
+                "code": 406,
+                "details": duplicate_items,
+            }
+
+        except Exception as e:
+            response = {
+                "msg": " Failed inserting Cross Selling, desconocido ",
+                "code": 410,
+                "details": e.details["writeErrors"][0],
+            }
+
+        # result = await CrossSellingQueries.insert_many_cross_selling(self, body)
+        return response
+        # return await self.insert_many_cross_selling(body)
 
     async def get_product_and_cross_selling_items(
         self,
@@ -365,9 +425,11 @@ class Service(MongoQueries):
         items_cross_selling = []
         items_product = []
 
-        cursor_cross_selling = await self.get_all_cross_selling(query_params)
-        cursor_products = await self.get_all_products()
-        total_cross_selling = await self.get_total_cross_selling()
+        cursor_cross_selling = await CrossSellingQueries.get_all_cross_selling(
+            self, query_params
+        )
+        cursor_products = await CrossSellingQueries.get_all_products(self)
+        total_cross_selling = await CrossSellingQueries.get_total_cross_selling(self)
 
         for item in await cursor_cross_selling.to_list(length=None):
             items_cross_selling.append(CrossSelling(**item))
@@ -382,24 +444,3 @@ class Service(MongoQueries):
             "total_cross_selling_show": len(items_cross_selling),
         }
         return CrossSellingAndProductsResponse(**response)
-
-    async def get_segmenters(self, query_params: SegmenterQueryParams) -> Any:
-
-        segments = None
-
-        segments = await self.find_segments(query_params)
-        segments["global_total_clients"] = await self.total_customer()
-        segments["total_enable_clients"] = (
-            await self.total_customer()
-        ) - await self.total_customer_in_blacklist(True)
-        return segments
-
-    async def get_author_segments_list(self) -> AuthorsInSegments:
-        authors = await self.get_all_author_in_segments()
-
-        return authors
-
-    async def get_test(self) -> Any:
-
-        r = await self.facet_test()
-        return r

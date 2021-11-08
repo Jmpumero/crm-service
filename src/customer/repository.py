@@ -12,14 +12,12 @@ from core.connection.connection import ConnectionMongo as DwConnection
 from src.customer.schemas.get import query_params, responses
 from src.customer.schemas.get.responses import blacklist, customers, segmenter
 from src.customer.schemas.get.responses.segmenter import (
-    AuthorsInSegments,
     Segmenter,
     SegmenterResponse,
-    SegmenterTable,
 )
 from core.connection.connection import ConnectionMongo
 
-# from src.customer.schemas.get.responses.cross_selling import CrossSellingResponse
+
 from src.customer.schemas.post.bodys.customer_crud import (
     CreateCustomerBody,
     MergeCustomerBody,
@@ -34,16 +32,13 @@ from src.customer.schemas.post.responses.blacklist import BlackListBodyResponse
 from fastapi.encoders import jsonable_encoder
 from src.customer.schemas.get.responses import blacklist, customers
 from src.customer.schemas.get import responses
+
 from pymongo.errors import DuplicateKeyError, BulkWriteError
 from config.config import Settings
 from core.connection.connection import ConnectionMongo
 from typing import Any
-
-
 from fastapi import HTTPException
 
-
-from src.customer.repositories import HistorySensorQueries
 
 global_settings = Settings()
 
@@ -90,9 +85,10 @@ blacklist_customer_projections = {
     "birthdate": 1,
     "associated_sensors": 1,
     "blacklist_status": 1,
-    "blacklist_enable_motive": 1,
-    "blacklist_disable_motive": 1,
+    "blacklist_last_enabled_motive": 1,
+    "blacklist_last_disabled_motive": 1,
     "customer_status": 1,
+    "customer_avatar": 1,
     "email_main": {
         "$arrayElemAt": [
             "$email",
@@ -114,10 +110,6 @@ blacklist_customer_projections = {
 }
 
 
-
-# search_update_projections = {"blacklist_status": 0}
-
-
 class MongoQueries(ConnectionMongo):
     def __init__(self):
         super().__init__()
@@ -136,7 +128,7 @@ class MongoQueries(ConnectionMongo):
 
         if column_order == "email":
             if order.lower() == "desc":
-                # print(order)
+
                 customers = self.customer.aggregate(
                     [
                         {
@@ -189,7 +181,7 @@ class MongoQueries(ConnectionMongo):
 
         elif column_order:
             if order.lower() == "desc":
-                # print(order)
+
                 customers = self.customer.aggregate(
                     [
                         {
@@ -215,7 +207,7 @@ class MongoQueries(ConnectionMongo):
                     ]
                 )
             else:
-                # print(order)
+
                 customers = self.customer.aggregate(
                     [
                         {
@@ -271,9 +263,7 @@ class MongoQueries(ConnectionMongo):
     def search_customer_name(
         self, constrain, item_search, column, skip, limit, order_sort, column_order
     ):
-        # print(column_order)
-        # print(column)
-        # print(constrain)
+
         order = 1
         if order_sort == "desc":
             order = -1
@@ -442,9 +432,6 @@ class MongoQueries(ConnectionMongo):
     def search_customer_email(
         self, constrain, item_search, column, skip, limit, sort_order, column_order
     ):
-
-        # print(column_order)
-        # print(column)
 
         if column_order == "email":
             column_order = column_order + ".email"
@@ -668,9 +655,6 @@ class MongoQueries(ConnectionMongo):
     def search_phone_local(self, constrain, item_search, column, skip, limit):
         response = ""
 
-        # print(column + "hola")
-        # print(constrain)
-
         if constrain == "contain":
 
             return self.customer.aggregate(
@@ -883,7 +867,7 @@ class MongoQueries(ConnectionMongo):
 
     def search_phone_intl(self, constrain, item_search, column, skip, limit):
         response = ""
-        # print(f"\A{item_search}")
+
         if constrain == "contain":
             return (
                 self.customer.find(
@@ -923,7 +907,7 @@ class MongoQueries(ConnectionMongo):
                 .limit(limit)
             )
         if constrain == "starts_by":
-            # print("ola k ase")
+
             return self.customer.aggregate(
                 [
                     {
@@ -993,7 +977,6 @@ class MongoQueries(ConnectionMongo):
 
     def filter_search_phone(self, constrain, item_search, column, skip, limit):
         if item_search.find("+") > -1:
-            # print(item_search + "hola")
 
             item = item_search.replace(" ", "")
             item = item_search.replace("-", "")
@@ -1007,7 +990,7 @@ class MongoQueries(ConnectionMongo):
     def filter_search_customers(
         self, constrain, item_search, column, skip, limit, order, column_order
     ):
-        # print(column)
+
         response = None
         if column == "email":
 
@@ -1034,68 +1017,11 @@ class MongoQueries(ConnectionMongo):
 
         return response
 
-    def blacklist_search(self, type, skip, limit):
-
-        cursor = None
-        # print(type)
-        if type == "enable":
-            cursor = (
-                self.customer.find(
-                    {"blacklist_status": False, "customer_status": True},
-                    blacklist_customer_projections,
-                )
-                .skip(skip)
-                .limit(limit)
-            )
-        elif type == "disable":
-            cursor = (
-                self.customer.find(
-                    {"blacklist_status": True, "customer_status": True},
-                    blacklist_customer_projections,
-                )
-                .skip(skip)
-                .limit(limit)
-            )
-
-        return cursor
-
     def total_customer_in_blacklist(self, type):
         total = self.customer.count_documents(
             {"customer_status": True, "blacklist_status": type}
         )
         return total
-
-    async def update_customer_in_blacklist(self, data) -> BlackListBodyResponse:
-        resp = None
-        if data.blacklist_status:
-            resp = await self.customer.find_one_and_update(
-                {"_id": data.id},
-                {
-                    "$set": {
-                        "blacklist_status": data.blacklist_status,
-                        "blacklist_enable_motive": data.motives,
-                    }
-                },
-            )
-        else:
-            resp = await self.customer.find_one_and_update(
-                {"_id": data.id},
-                {
-                    "$set": {
-                        "blacklist_status": data.blacklist_status,
-                        "blacklist_disable_motive": data.motives,
-                    }
-                },
-            )
-
-        if resp != None:
-            response = {"msg": " Success Customer Update ", "code": 200}
-        else:
-            response = {
-                "msg": " Failed Customer Update, Customer not found ",
-                "code": 400,
-            }
-        return BlackListBodyResponse(**response)
 
     async def insert_one_customer(self, data):
 
@@ -1136,23 +1062,40 @@ class MongoQueries(ConnectionMongo):
     def find_all_customers_in_crud_view(
         self, skip, limit, column_sort, order, special_query
     ):
-
+        order_sort = 1
         if column_sort:
             if order.lower() == "desc":
-
-                customers = (
-                    self.customer.find(special_query)
-                    .skip(skip)
-                    .limit(limit)
-                    .sort(column_sort, pymongo.DESCENDING)
+                order_sort = -1
+                customers = self.customer.aggregate(
+                    [
+                        {"$match": {"customer_status": True}},
+                        {"$project": blacklist_customer_projections},
+                        {"$skip": skip},
+                        {"$limit": limit},
+                        {
+                            "$sort": {
+                                f"{column_sort}": order_sort,
+                                "_id": 1,
+                            }
+                        },
+                    ]
                 )
+
             else:
 
-                customers = (
-                    self.customer.find(special_query)
-                    .skip(skip)
-                    .limit(limit)
-                    .sort(column_sort, pymongo.ASCENDING)
+                customers = self.customer.aggregate(
+                    [
+                        {"$match": {"customer_status": True}},
+                        {"$project": blacklist_customer_projections},
+                        {"$skip": skip},
+                        {"$limit": limit},
+                        {
+                            "$sort": {
+                                f"{column_sort}": order_sort,
+                                "_id": 1,
+                            }
+                        },
+                    ]
                 )
 
         return customers
@@ -1283,7 +1226,7 @@ class MongoQueries(ConnectionMongo):
     async def update_customer_(self, data):
 
         query = self.build_query_update(data)
-        # print(query)
+
         resp = None
         if data.id != "" and data.id != None:
             resp = await self.customer.find_one_and_update(
@@ -1387,552 +1330,4 @@ class MongoQueries(ConnectionMongo):
                 "msg": " Failed Customers Merge ",
                 "code": 400,
             }
-        return resp
-
-    async def insert_one_cross_selling_product(self, data):
-
-        inserted_product = None
-        response = None
-
-        product = jsonable_encoder(data)
-
-        try:
-            inserted_product = await self.products.insert_one(product)
-        except:
-            response = {
-                "msg": " Failed inseting Product ",
-                "code": 400,
-            }
-
-        if inserted_product != None:
-
-            if inserted_product.acknowledged:
-                response = {
-                    "msg": " Success Product created ",
-                    "code": 200,
-                }
-            else:
-                response = {
-                    "msg": " Failed inseting Customer ",
-                    "code": 400,
-                }
-
-        return CrossSellingCreatedResponse(**response)
-
-    async def insert_many_cross_selling(self, data):
-
-        inserted_product = None
-        response = None
-        duplicate_items = []
-
-        array_cs = jsonable_encoder(data.news_cross_selling)
-
-        try:
-            inserted_product = await self.cross_selling.insert_many(array_cs)
-
-            if inserted_product.acknowledged:
-                response = {
-                    "msg": " Success Cross Selling created ",
-                    "code": 200,
-                }
-
-        except BulkWriteError as e:  # fallo al intetar escribir por llaves duplicadas
-
-            # print(e.details["writeErrors"])
-            duplicate_items.append(
-                e.details["writeErrors"][0]["op"]["principal_product"]["name"]
-            )
-            duplicate_items.append(
-                e.details["writeErrors"][0]["op"]["secondary_product"]["name"]
-            )
-
-            response = {
-                "msg": " Failed inserting Cross Selling, duplicate keys ",
-                "code": 406,
-                "details": duplicate_items,
-            }
-
-        except Exception as e:
-            response = {
-                "msg": " Failed inserting Cross Selling, desconocido ",
-                "code": 410,
-                "details": e.details["writeErrors"][0],
-            }
-
-        return response
-
-    async def get_all_cross_selling(self, data):
-
-        return (
-            self.cross_selling.find({})
-            .skip(data.skip)
-            .limit(data.limit)
-            .sort("principal_product", pymongo.ASCENDING)
-        )
-
-    async def get_all_products(self):
-        return self.products.find({}).sort("name", pymongo.ASCENDING)
-
-    def get_total_cross_selling(self):
-        return self.cross_selling.count_documents({})
-
-    async def find_segments(self, params) -> Any:
-        r = None
-        order = 1
-        column_target = "name"
-
-        if params.order_sort == "desc":
-            order = -1
-        if params.column_sort.lower() == "":
-            column_target = "name"
-        elif params.column_sort.lower() == "author":
-            column_target = "author_details.name"
-        elif params.column_sort.lower() == "ultima actualizacion":
-            column_target = "update_at"
-        elif params.column_sort.lower() == "estado":
-            column_target = "status"
-        elif params.column_sort.lower() == "fecha de creacion":
-            column_target = "created_at"
-        elif params.column_sort.lower() == "clientes":
-            column_target = "clients"
-
-        if params.author == "" and params.tag == "":
-
-            r = self.segments.aggregate(
-                [
-                    {
-                        "$facet": {
-                            "total_items": [
-                                {
-                                    "$lookup": {
-                                        "from": "customer",
-                                        "localField": "author",
-                                        "foreignField": "_id",
-                                        "as": "author_details",
-                                    }
-                                },
-                                {"$unwind": "$author_details"},
-                                {
-                                    "$project": {
-                                        "author": 0,
-                                        "filter": 0,
-                                        "applied_filters": 0,
-                                    }
-                                },
-                                {"$count": "total_items"},
-                            ],
-                            "total_show": [
-                                {
-                                    "$lookup": {
-                                        "from": "customer",
-                                        "localField": "author",
-                                        "foreignField": "_id",
-                                        "as": "author_details",
-                                    }
-                                },
-                                {"$unwind": "$author_details"},
-                                {
-                                    "$project": {
-                                        "author": 0,
-                                        "filter": 0,
-                                        "applied_filters": 0,
-                                    }
-                                },
-                                {"$skip": params.skip},
-                                {"$limit": params.limit},
-                                {"$count": "show_items"},
-                            ],
-                            "segments": [
-                                {
-                                    "$lookup": {
-                                        "from": "customer",
-                                        "localField": "author",
-                                        "foreignField": "_id",
-                                        "as": "author_details",
-                                    }
-                                },
-                                {"$unwind": "$author_details"},
-                                {
-                                    "$project": {
-                                        "author": 0,
-                                        "filter": 0,
-                                        "applied_filters": 0,
-                                    }
-                                },
-                                {"$skip": params.skip},
-                                {"$limit": params.limit},
-                                {
-                                    "$sort": {
-                                        f"{column_target}": order,
-                                        "_id": 1,
-                                    }
-                                },
-                            ],
-                        }
-                    },
-                ]
-            )
-        elif params.author != "" and params.tag != "":
-
-            tags = params.tag.replace("[", "").replace("]", "").split(",")
-
-            try:
-                r = self.segments.aggregate(
-                    [
-                        {
-                            "$facet": {
-                                "total_items": [
-                                    {
-                                        "$match": {
-                                            "tags": {"$in": tags},
-                                            "author": params.author,
-                                        }
-                                    },
-                                    {
-                                        "$lookup": {
-                                            "from": "customer",
-                                            "localField": "author",
-                                            "foreignField": "_id",
-                                            "as": "author_details",
-                                        }
-                                    },
-                                    {"$unwind": "$author_details"},
-                                    {
-                                        "$project": {
-                                            "author": 0,
-                                            "filter": 0,
-                                            "applied_filters": 0,
-                                        }
-                                    },
-                                    {"$count": "total_items"},
-                                ],
-                                "total_show": [
-                                    {
-                                        "$match": {
-                                            "tags": {"$in": tags},
-                                            "author": params.author,
-                                        }
-                                    },
-                                    {
-                                        "$lookup": {
-                                            "from": "customer",
-                                            "localField": "author",
-                                            "foreignField": "_id",
-                                            "as": "author_details",
-                                        }
-                                    },
-                                    {"$unwind": "$author_details"},
-                                    {
-                                        "$project": {
-                                            "author": 0,
-                                            "filter": 0,
-                                            "applied_filters": 0,
-                                        }
-                                    },
-                                    {"$skip": params.skip},
-                                    {"$limit": params.limit},
-                                    {"$count": "show_items"},
-                                ],
-                                "segments": [
-                                    {
-                                        "$match": {
-                                            "tags": {"$in": tags},
-                                            "author": params.author,
-                                        }
-                                    },
-                                    {
-                                        "$lookup": {
-                                            "from": "customer",
-                                            "localField": "author",
-                                            "foreignField": "_id",
-                                            "as": "author_details",
-                                        }
-                                    },
-                                    {"$unwind": "$author_details"},
-                                    {
-                                        "$project": {
-                                            "author": 0,
-                                            "filter": 0,
-                                            "applied_filters": 0,
-                                        }
-                                    },
-                                    {"$skip": params.skip},
-                                    {"$limit": params.limit},
-                                    {
-                                        "$sort": {
-                                            f"{column_target }": order,
-                                            "_id": 1,
-                                        }
-                                    },
-                                ],
-                            }
-                        },
-                    ]
-                )
-            except Exception as e:
-                print(e)
-            except OperationFailure as e:
-                print(e)
-
-        elif params.author != "" and params.tag == "":
-            r = self.segments.aggregate(
-                [
-                    {
-                        "$facet": {
-                            "total_items": [
-                                {
-                                    "$match": {
-                                        "author": params.author,
-                                    }
-                                },
-                                {
-                                    "$lookup": {
-                                        "from": "customer",
-                                        "localField": "author",
-                                        "foreignField": "_id",
-                                        "as": "author_details",
-                                    }
-                                },
-                                {"$unwind": "$author_details"},
-                                {
-                                    "$project": {
-                                        "author": 0,
-                                        "filter": 0,
-                                        "applied_filters": 0,
-                                    }
-                                },
-                                {"$count": "total_items"},
-                            ],
-                            "total_show": [
-                                {
-                                    "$match": {
-                                        "author": params.author,
-                                    }
-                                },
-                                {
-                                    "$lookup": {
-                                        "from": "customer",
-                                        "localField": "author",
-                                        "foreignField": "_id",
-                                        "as": "author_details",
-                                    }
-                                },
-                                {"$unwind": "$author_details"},
-                                {
-                                    "$project": {
-                                        "author": 0,
-                                        "filter": 0,
-                                        "applied_filters": 0,
-                                    }
-                                },
-                                {"$skip": params.skip},
-                                {"$limit": params.limit},
-                                {"$count": "show_items"},
-                            ],
-                            "segments": [
-                                {
-                                    "$match": {
-                                        "author": params.author,
-                                    }
-                                },
-                                {
-                                    "$lookup": {
-                                        "from": "customer",
-                                        "localField": "author",
-                                        "foreignField": "_id",
-                                        "as": "author_details",
-                                    }
-                                },
-                                {"$unwind": "$author_details"},
-                                {
-                                    "$project": {
-                                        "author": 0,
-                                        "filter": 0,
-                                        "applied_filters": 0,
-                                    }
-                                },
-                                {"$skip": params.skip},
-                                {"$limit": params.limit},
-                                {
-                                    "$sort": {
-                                        f"{column_target }": order,
-                                        "_id": 1,
-                                    }
-                                },
-                            ],
-                        }
-                    },
-                ]
-            )
-        elif params.author == "" and params.tag != "":
-            tags = params.tag.replace("[", "").replace("]", "").split(",")
-
-            r = self.segments.aggregate(
-                [
-                    {
-                        "$facet": {
-                            "total_items": [
-                                {
-                                    "$match": {
-                                        "tags": {"$in": tags},
-                                    }
-                                },
-                                {
-                                    "$lookup": {
-                                        "from": "customer",
-                                        "localField": "author",
-                                        "foreignField": "_id",
-                                        "as": "author_details",
-                                    }
-                                },
-                                {"$unwind": "$author_details"},
-                                {
-                                    "$project": {
-                                        "author": 0,
-                                        "filter": 0,
-                                        "applied_filters": 0,
-                                    }
-                                },
-                                {"$count": "total_items"},
-                            ],
-                            "total_show": [
-                                {
-                                    "$match": {
-                                        "tags": {"$in": tags},
-                                    }
-                                },
-                                {
-                                    "$lookup": {
-                                        "from": "customer",
-                                        "localField": "author",
-                                        "foreignField": "_id",
-                                        "as": "author_details",
-                                    }
-                                },
-                                {"$unwind": "$author_details"},
-                                {
-                                    "$project": {
-                                        "author": 0,
-                                        "filter": 0,
-                                        "applied_filters": 0,
-                                    }
-                                },
-                                {"$skip": params.skip},
-                                {"$limit": params.limit},
-                                {"$count": "show_items"},
-                            ],
-                            "segments": [
-                                {
-                                    "$match": {
-                                        "tags": {"$in": tags},
-                                    }
-                                },
-                                {
-                                    "$lookup": {
-                                        "from": "customer",
-                                        "localField": "author",
-                                        "foreignField": "_id",
-                                        "as": "author_details",
-                                    }
-                                },
-                                {"$unwind": "$author_details"},
-                                {
-                                    "$project": {
-                                        "author": 0,
-                                        "filter": 0,
-                                        "applied_filters": 0,
-                                    }
-                                },
-                                {"$skip": params.skip},
-                                {"$limit": params.limit},
-                                {
-                                    "$sort": {
-                                        f"{column_target }": order,
-                                        "_id": 1,
-                                    }
-                                },
-                            ],
-                        }
-                    },
-                ]
-            )
-
-        resp = []
-        if r != None:
-            for item in await r.to_list(
-                length=params.limit
-            ):  # por variar y provar ( mas eficiente)
-                resp = item
-            # print(resp)
-
-        return resp
-
-    async def get_all_author_in_segments(self) -> AuthorsInSegments:
-
-        final_response = {}
-        authors = self.segments.aggregate(
-            [
-                {
-                    "$facet": {
-                        "authors": [
-                            {
-                                "$lookup": {
-                                    "from": "customer",
-                                    "localField": "author",
-                                    "foreignField": "_id",
-                                    "as": "author_details",
-                                }
-                            },
-                            {"$unwind": "$author_details"},
-                            {
-                                "$project": {
-                                    "author_details.name": 1,
-                                    "author": 1,
-                                    "_id": 0,
-                                }
-                            },
-                        ]
-                    }
-                },
-            ]
-        )
-
-        resp = []
-
-        if authors != None:
-            for item in await authors.to_list(length=None):
-                resp = item  # en este caso no importa ya que siempre devolvera un unico objeto
-
-            list_authors = []
-            temp_list = []
-
-            for x in resp["authors"]:
-                if x["author"] not in temp_list:
-                    temp_list.append(x["author"])
-                    list_authors.append(
-                        dict(id=x["author"], name=x["author_details"]["name"])
-                    )
-            final_response["authors"] = list_authors
-
-        return final_response
-
-    async def facet_test(self) -> Any:
-
-        r = self.customer.aggregate(
-            [
-                {"$match": {"civil_status": "single"}},
-                # {"$match": {"email.isMain": True, "email.email": "t23@hotmal.com"}},
-                # {"$match": {"age": 77}},
-            ],
-            allowDiskUse=True,
-        )
-        resp = []
-        if r != None:
-            for item in await r.to_list(
-                length=None
-            ):  # por variar y provar ( mas eficiente)
-                resp.append(item)
-
-        # print(resp)
-
         return resp

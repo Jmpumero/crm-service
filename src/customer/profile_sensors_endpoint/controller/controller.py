@@ -192,6 +192,11 @@ async def get_pms_history(
     """
     Get PMS Booking History from DW, given a Customer ID:\n
     **Input**:\n
+    - **customer_id**: Customer ID in DW
+    - **constrain**: Items category to search on
+    - **search**: search string
+    - **skip** : Paging number
+    - **limit**: Max number of items to retrieve\n
 
     **Successful Response**:
 

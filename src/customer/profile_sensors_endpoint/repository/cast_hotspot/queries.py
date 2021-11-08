@@ -1,8 +1,6 @@
 from bson.son import SON
 
 from src.customer.repository import MongoQueries
-from src.customer.schemas.get import query_params
-
 from config.config import Settings
 
 

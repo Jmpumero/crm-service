@@ -34,7 +34,13 @@ class Addresses(BaseModel):
     isMain: bool
 
 
-class BlacklistCustomer(BaseModel):
+class BlacklistLog(BaseModel):
+    date: str
+    motives: List[str]
+    type: str
+
+
+class CustomerBlacklist(BaseModel):
     id: str = Field(..., alias="_id")
     name: Optional[str]
     last_name: Optional[str]
@@ -49,12 +55,13 @@ class BlacklistCustomer(BaseModel):
     birthdate: Optional[str]
     associated_sensors: Optional[List[str]]
     blacklist_status: bool
-    blacklist_enable_motive: List[str]
-    blacklist_disable_motive: List[str]
+    blacklist_last_enabled_motive: List[str]
+    blacklist_last_disabled_motive: List[str]
     stenant: Optional[Any]
     email_main: Optional[Emails] = ""
     phone_main: Optional[Phones] = ""
     address_main: Optional[Addresses] = ""
+    blacklist_log: Optional[List[BlacklistLog]]
 
     class Config:
         allow_population_by_field_name = True
@@ -63,6 +70,6 @@ class BlacklistCustomer(BaseModel):
 
 
 class BlacklistCustomersResponse(BaseModel):
-    customers: List[BlacklistCustomer]
+    customers: List[CustomerBlacklist]
     total_items: int
     total_show: int

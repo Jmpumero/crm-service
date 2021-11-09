@@ -1,7 +1,16 @@
-from typing import Optional
+from typing import List, Optional
 from fastapi.param_functions import Query
 
 from pydantic import BaseModel
+
+
+class GenericSearch(BaseModel):
+    query: Optional[str]
+    columns_search: Optional[List[str]]
+    skip: int = 0
+    limit: int = 10
+    column_sort: Optional[str] = "name"
+    order_sort: Optional[str] = "asc"
 
 
 class SearchCustomersQueryParams(BaseModel):
@@ -43,11 +52,7 @@ class CrossSellingQueryParams(BaseModel):
     # order: Optional[str] = "asc"
 
 
-class SegmenterQueryParams(BaseModel):
-    skip: int = 0
-    limit: int = 10
-    author: Optional[str] = ""
-    tag: Optional[str] = ""
-    column_sort: Optional[str] = "name"
-    order_sort: Optional[str] = "asc"
-    # status: Optional[str] = ""
+class SegmenterQueryParams(GenericSearch):
+    author: Optional[str]
+    tag: Optional[str]
+    status: Optional[str]

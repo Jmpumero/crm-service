@@ -54,6 +54,12 @@ class Addresses(BaseModel):
     isMain: bool
 
 
+class BlacklistLog(BaseModel):
+    date: str
+    motives: List[str]
+    type: str
+
+
 class CreateCustomerBody(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     name: str
@@ -78,8 +84,8 @@ class CreateCustomerBody(BaseModel):
     country: Optional[str] = ""
     city: Optional[str]
     postalCode: Optional[str]
-    blacklist_enable_motive: Optional[List[str]] = []
-    blacklist_disable_motive: Optional[List[str]] = []
+    blacklist_last_enabled_motive: Optional[List[str]] = []
+    blacklist_last_disabled_motive: Optional[List[str]] = []
     create_at: str = ""  # format '%Y-%m-%dT%H:%M:%S', 2021-12-31T23:59:59
     update_at: str = ""  # format '%Y-%m-%dT%H:%M:%S'
     delete_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S'
@@ -88,18 +94,18 @@ class CreateCustomerBody(BaseModel):
     gender: Optional[str] = ""
     profession: Optional[str] = ""
     total_childrens: Optional[int] = 0
-
-    class Config:  # valida si falta un campo/campo desconocido
-        extra = "forbid"
+    blacklist_log: Optional[List[BlacklistLog]]
+    # class Config:  # valida si falta un campo/campo desconocido
 
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
+        extra = "forbid"
 
 
 class UpdateCustomerBody(BaseModel):
-    id: str = Field(default_factory=PyObjectId, alias="_id")
+    id: str = Field(..., alias="_id")
     name: Optional[str]
     last_name: Optional[str]
     full_name: Optional[str]
@@ -117,8 +123,8 @@ class UpdateCustomerBody(BaseModel):
     customer_avatar: Optional[str]
     signature: Optional[str]
     update_at: Optional[str]
-    blacklist_enable_motive: Optional[List[str]] = []
-    blacklist_disable_motive: Optional[List[str]] = []
+    blacklist_last_enabled_motive: Optional[List[str]] = []
+    blacklist_last_disabled_motive: Optional[List[str]] = []
     postalCode: Optional[str]
     country: Optional[str]
     city: Optional[str]
@@ -126,11 +132,13 @@ class UpdateCustomerBody(BaseModel):
     gender: Optional[str]
     profession: Optional[str]
     total_childrens: Optional[int]
+    blacklist_log: Optional[BlacklistLog]
 
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
+        extra = "forbid"
 
 
 class MergeCustomerBody(BaseModel):
@@ -158,14 +166,15 @@ class MergeCustomerBody(BaseModel):
     country: Optional[str] = None
     city: Optional[str]
     postalCode: Optional[str]
-    blacklist_enable_motive: Optional[List[str]] = []
-    blacklist_disable_motive: Optional[List[str]] = []
+    blacklist_last_enabled_motive: Optional[List[str]] = []
+    blacklist_last_disabled_motive: Optional[List[str]] = []
     create_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S', 2021-12-31T23:59:59
     update_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S'
     stenant: Optional[Any]
     gender: Optional[str]
     profession: Optional[str]
     total_childrens: Optional[int]
+    blacklist_log: Optional[BlacklistLog]
 
     class Config:  # valida si falta un campo/campo desconocido
         extra = "forbid"

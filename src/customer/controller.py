@@ -15,6 +15,7 @@ from .services import (
     ProfileDetailService,
     MarketingSubscriptionsService,
     SalesSummary,
+    SegmenterService,
 )
 from core import get_redis
 from .schemas import SearchCustomersQueryParams, PutScoreCard
@@ -53,7 +54,6 @@ from .schemas import (
     Segmenter,
     SegmenterResponse,
     SegmenterQueryParams,
-    AuthorsInSegments,
 )
 from utils.remove_422 import remove_422
 
@@ -73,18 +73,11 @@ async def get_customers(
     return await service.get_customers(query_params)
 
 
-@customers_router.get("/blacklist/")
-@remove_422
-async def get_customers_(
-    query_params: BlacklistQueryParams = Depends(BlacklistQueryParams),
-):
-    service = Service()
-
-    return await service.get_customers_blacklist(query_params)
-
-
 # enpoint que optiene el historial de un sensor del customer (para las tablas blacklist/crud)
-@customers_router.get("/customer/{customer_id}/history-sensor")
+@customers_router.get(
+    "/customers/{customer_id}/history-sensor",
+    response_model=Any,
+)
 @remove_422
 async def get_customer_sensor(
     customer_id: str,
@@ -108,14 +101,6 @@ async def get_customer_notes_comments(customer_id: str):
 
 
 ##############################################################################
-@customers_router.put(
-    "/blacklist/update/customer", response_model=BlackListBodyResponse
-)
-@remove_422
-async def update_customer_in_blacklist(body: BlackListBody):
-
-    service = Service()
-    return await service.post_blacklist_update_customer(body)
 
 
 @customers_router.get("/customers/{customer_id}/sales-summary")
@@ -131,7 +116,7 @@ async def get_customer_sales_summary(
 #### CRUD ####
 
 
-@customers_router.post("/customer/", response_model=CustomerCRUDResponse)
+@customers_router.post("/customers/", response_model=CustomerCRUDResponse)
 @remove_422
 async def created_customer_crud(body: CreateCustomerBody):
 
@@ -237,27 +222,19 @@ async def post_customer_score_card(customer_id: str, score_card: PutScoreCard):
 
 
 #### Segmenter ####
-@customers_router.get("/segmenter", response_model=Any)
+@customers_router.get("/segments", response_model=Any)
 @remove_422
 async def get_segmenter_list(
     query_params: SegmenterQueryParams = Depends(SegmenterQueryParams),
 ):
 
-    service = Service()
+    service = SegmenterService()
     return await service.get_segmenters(query_params)
 
 
-@customers_router.get("/segmenter/authors", response_model=AuthorsInSegments)
-@remove_422
-async def get_author_segments_list():
+# @customers_router.get("/segmenter/authors", response_model=)
+# @remove_422
+# async def get_author_segments_list():
 
-    service = Service()
-    return await service.get_author_segments_list()
-
-
-@customers_router.get("/get/test")
-@remove_422
-async def get_test():
-
-    service = Service()
-    return await service.get_test()
+#     service = Service()
+#     return await service.get_author_segments_list()

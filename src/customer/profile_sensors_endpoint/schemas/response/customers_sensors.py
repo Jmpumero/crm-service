@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Any
 from enum import Enum
 
 from pydantic import BaseModel
@@ -181,3 +181,18 @@ class PmsHistory(BaseModel):
 class SensorsTab(BaseModel):
     response: Response
     sensors_list: List[str]
+
+
+class PmsGeneral(BaseModel):
+    first_checkin: Optional[Any]
+    first_checkout: Optional[Any]
+    last_checkin: Optional[Any]
+    last_checkout: Optional[Any]
+    first_property: Optional[str]
+    last_property: Optional[str]
+    first_room_type: Optional[str]
+    last_room_type: Optional[str]
+    first_amount: Optional[int]
+    last_amount: Optional[int]
+    first_duration: Optional[int]
+    last_duration: Optional[int]

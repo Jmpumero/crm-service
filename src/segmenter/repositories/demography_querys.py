@@ -225,3 +225,46 @@ class DemographyRepo(ConnectionMongo):
         r = await result.to_list(length=None)
 
         return r
+
+    def convert_date_update(self, data):
+
+        from_time = datetime.fromtimestamp(data["date_range"]["from_"] / 1000.0)
+        to_time = datetime.fromtimestamp(data["date_range"]["to"] / 1000.0)
+        data["date_range"]["from_"] = datetime.strftime(from_time, "%Y-%m-%dT%H:%M:%S")
+        data["date_range"]["to"] = datetime.strftime(to_time, "%Y-%m-%dT%H:%M:%S")
+
+        if data["applied_filters"] != None and len(data["applied_filters"]) > 0:
+            for x in data["applied_filters"]:
+
+                if (x["birth_date"] != None) and (
+                    x["birth_date"]["condition"] == "null"
+                    or x["birth_date"]["condition"] == "not_null"
+                ):
+                    ...
+                else:
+                    if (x["birth_date"] != None) and (
+                        x["birth_date"]["condition"] == "between"
+                    ):
+
+                        from_time = datetime.fromtimestamp(
+                            x["birth_date"]["date_range"]["from_"] / 1000.0
+                        )
+                        to_time = datetime.fromtimestamp(
+                            x["birth_date"]["date_range"]["to"] / 1000.0
+                        )
+                        x["birth_date"]["date_range"]["from_"] = datetime.strftime(
+                            from_time, "%Y-%m-%dT%H:%M:%S"
+                        )
+                        x["birth_date"]["date_range"]["to"] = datetime.strftime(
+                            to_time, "%Y-%m-%dT%H:%M:%S"
+                        )
+                    elif x["birth_date"] != None and x["birth_date"]["condition"] != "":
+
+                        date_time = datetime.fromtimestamp(
+                            int(x["birth_date"]["date"]) / 1000.0
+                        )
+                        x["birth_date"]["date"] = datetime.strftime(
+                            date_time, "%Y-%m-%dT%H:%M:%S"
+                        )
+
+        return data

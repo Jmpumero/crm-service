@@ -1,1 +1,1 @@
-from .response import SegmentDetails, GenericResponse
+from .response import SegmentDetails, GenericResponse, FilterResponse

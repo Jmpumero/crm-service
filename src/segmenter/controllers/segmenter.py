@@ -12,6 +12,7 @@ from ..schemas import (
     SegmentDetails,
     UpdateStatusSegment,
     GenericResponse,
+    FilterSegment,
 )
 from http_exceptions import BadRequestError
 from utils.remove_422 import remove_422
@@ -79,20 +80,15 @@ async def update_status_segment(
     segment_id: str = Path(...), body: UpdateStatusSegment = Body(...)
 ) -> dict[str, str]:
     service: SegmentService = SegmentService()
-    result = await service.update_status_segment(segment_id, body.status)
-    response = {"code": 401, "msg": "Segment not found"}
-
-    if result != None:
-        response = {"code": 200, "msg": "Segment update successfully"}
-    return response
+    return await service.update_status_segment(segment_id, body.status)
 
 
-# @segments_details_router.get(
-#     "/segments/test/query",
-#     responses={400: {"model": BadRequestError}},
-# )
-# @remove_422
-# async def test_query_segment(body=Body(...)):
-#     service: SegmentService = SegmentService()
+@segments_details_router.post(
+    "/segment/filters",
+    responses={400: {"model": BadRequestError}},
+)
+@remove_422
+async def update_segment(body: FilterSegment = Body(...)) -> dict[str, str]:
+    service: SegmentService = SegmentService()
 
-#     return await service.test_segments(body)
+    return await service.apply_filter_segment(body)

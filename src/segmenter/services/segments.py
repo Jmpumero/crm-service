@@ -3,7 +3,7 @@ from bson import ObjectId
 from datetime import datetime
 
 from ..repositories import SegmenterDetailsRepo, DemographyRepo
-from ..schemas import CreateSegment
+from ..schemas import CreateSegment, FilterSegment
 
 
 class SegmentService:
@@ -41,17 +41,18 @@ class SegmentService:
         updated_segment = await self.segmenter_detail_repo.find_and_update_status(
             segment_id, status
         )
+        response = {"code": 401, "msg": "Segment not found"}
 
-        return updated_segment
+        if updated_segment != None:
+            response = {"code": 200, "msg": "Segment update successfully"}
+        return response
 
     async def get_one_segment(self, segment_id):
 
         return await self.segmenter_detail_repo.find_one_segment(segment_id)
 
-    async def test_segments(self, data):
+    async def apply_filter_segment(self, data):
 
-        date = {"from_": 3654256987, "to": 1578962454123}
-        t = ""
-        t = await self.test.test_beta_query(data)
+        result = await self.segmenter_detail_repo.apply_filter_segment(data.dict())
 
-        return t
+        return result

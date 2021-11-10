@@ -22,6 +22,12 @@ class PmsService(PmsQueries):
     def __init__(self):
         super().__init__()
 
+    def validate_most_used_room_type(self, room_list):
+        try:
+            return room_list[0]["_id"][0]
+        except TypeError:
+            return room_list[0]["_id"]
+
     async def get_pms_stats(self, customer_id, sensor):
         masters_list = []
         books_list = []
@@ -34,6 +40,8 @@ class PmsService(PmsQueries):
         sales_channels_list = []
         pax_list = []
         lodges_list = []
+        upselling_list = []
+        food_bev_list = []
 
         # try:
 
@@ -88,41 +96,6 @@ class PmsService(PmsQueries):
 
                 # RESUMEN GLOBAL
 
-                # first_lodge_checkin = datetime.strptime(
-                #     masters_list[0]["data"]["bBooks"][0]["checkin"], "%Y-%m-%d"
-                # )
-
-                # first_lodge_checkout = datetime.strptime(
-                #     masters_list[0]["data"]["bBooks"][0]["checkout"], "%Y-%m-%d"
-                # )
-
-                # first_lodge_property = masters_list[0]["data"]["sproperty"]["name"]
-
-                # first_lodge_Room_type = masters_list[0]["data"]["bBooks"][0][
-                #     "riRoomType"
-                # ]["name"]
-
-                # first_lodge_amount = masters_list[0]["data"]["bBooks"][0]["netAmt"]
-
-                # last_lodge_checkin = datetime.strptime(
-                #     masters_list[-1]["data"]["bBooks"][-1]["checkin"], "%Y-%m-%d"
-                # )
-                # last_lodge_checkout = datetime.strptime(
-                #     masters_list[-1]["data"]["bBooks"][-1]["checkout"], "%Y-%m-%d"
-                # )
-                # last_lodge_property = masters_list[-1]["data"]["sproperty"]["name"]
-                # last_lodge_Room_type = masters_list[-1]["data"]["bBooks"][-1][
-                #     "riRoomType"
-                # ]["name"]
-                # last_lodge_amount = masters_list[-1]["data"]["bBooks"][-1]["netAmt"]
-
-                # first_lodge_duration = (
-                #     first_lodge_checkout - first_lodge_checkin
-                # ) / timedelta(milliseconds=1)
-                # last_lodge_duration = (
-                #     last_lodge_checkout - last_lodge_checkin
-                # ) / timedelta(milliseconds=1)
-
                 lodges_list.append(
                     PmsGeneral(
                         first_checkin=datetime.strptime(
@@ -169,6 +142,11 @@ class PmsService(PmsQueries):
                     )
                 )
 
+                async for i in self.get_upsellings_food_beverages(
+                    customer_id, reservation["entity"]
+                ):
+                    upselling_list.append(i)
+
             elif reservation["entity"] == "pms_pri_guest":
                 incomes_list.append(reservation["data"]["netAmt"])
                 nights_list.append(reservation["data"]["nights"])
@@ -201,37 +179,6 @@ class PmsService(PmsQueries):
                         cancellation_list.append(cancellation)
 
                 # RESUMEN GLOBAL
-
-                # first_lodge_checkin = datetime.strptime(
-                #     reservation["data"]["checkin"], "%Y-%m-%d"
-                # )
-                # first_lodge_checkout = datetime.strptime(
-                #     reservation["data"]["checkout"], "%Y-%m-%d"
-                # )
-                # first_lodge_property = reservation["data"]["riRatePlan"]["sproperty"][
-                #     "name"
-                # ]
-                # first_lodge_Room_type = reservation["data"]["riRoomType"]["name"]
-                # first_lodge_amount = reservation["data"]["netAmt"]
-
-                # last_lodge_checkin = datetime.strptime(
-                #     reservation["data"]["checkin"], "%Y-%m-%d"
-                # )
-                # last_lodge_checkout = datetime.strptime(
-                #     reservation["data"]["checkout"], "%Y-%m-%d"
-                # )
-                # last_lodge_property = reservation["data"]["riRatePlan"]["sproperty"][
-                #     "name"
-                # ]
-                # last_lodge_Room_type = reservation["data"]["riRoomType"]["name"]
-                # last_lodge_amount = reservation["data"]["netAmt"]
-
-                # first_lodge_duration = (
-                #     first_lodge_checkout - first_lodge_checkin
-                # ) / timedelta(milliseconds=1)
-                # last_lodge_duration = (
-                #     last_lodge_checkout - last_lodge_checkin
-                # ) / timedelta(milliseconds=1)
 
                 lodges_list.append(
                     PmsGeneral(
@@ -277,9 +224,13 @@ class PmsService(PmsQueries):
                         / timedelta(milliseconds=1),
                     )
                 )
-        # for i in used_room_type_list:
-        #     print("****")
-        #     print(used_room_type_list)
+
+                async for i in self.get_upsellings_food_beverages(
+                    customer_id, reservation["entity"]
+                ):
+                    print(i)
+
+        print(upselling_list)
 
         response = {
             "pms_response": {"status_code": status.HTTP_200_OK, "message": "Ok"},
@@ -298,9 +249,10 @@ class PmsService(PmsQueries):
                 "amount": lodges_list[-1].last_amount,
             },
             "pms_avg_stay": int(statistics.mean(stay_time_list)),
-            # "pms_last_used_room_type": last_lodge_Room_type,
-            # "pms_most_used_room_type": used_room_type_list[0]["_id"][0],
-            # "pms_most_used_room_type": used_room_type_list[0]["_id"],
+            "pms_last_used_room_type": lodges_list[-1].last_room_type,
+            "pms_most_used_room_type": self.validate_most_used_room_type(
+                used_room_type_list
+            ),
             "pms_total_income": functools.reduce(lambda a, b: a + b, incomes_list),
             "pms_avg_pax": int(statistics.mean(pax_list)),
             "pms_consolidate_nights": int(

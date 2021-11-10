@@ -5,10 +5,10 @@ from pydantic import BaseModel
 
 
 class PmsHistoryListConstrains(Enum):
-    booking_code = "Booking"
-    booking_date = "Fecha"
-    booking_min_amt = "Monto min."
-    booking_max_amt = "Monto max."
+    booking_code = "booking"
+    booking_date = "date"
+    booking_min_amt = "min_amount"
+    booking_max_amt = "max_amount"
 
 
 class Response(BaseModel):
@@ -165,7 +165,7 @@ class PmsHistoryPrimaryGuest(BaseModel):
     country: Optional[str] = None
     city: Optional[str]
     booking: Optional[PmsBook]
-    companion_data: Optional[List[PmsHistorySecondaryGuest]]
+    # companion_data: Optional[List[PmsHistorySecondaryGuest]]
 
 
 class PmsHistory(BaseModel):
@@ -196,3 +196,14 @@ class PmsGeneral(BaseModel):
     last_amount: Optional[int]
     first_duration: Optional[int]
     last_duration: Optional[int]
+
+
+class Upsellings(BaseModel):
+    total_upsellings: Optional[int]
+    total_upsellings_income: Optional[float]
+
+
+class FoodBeverages(BaseModel):
+    total_paid: Optional[float]
+    consuptions_amount: Optional[int]
+    avg_consuption_expenses: Optional[float]

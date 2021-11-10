@@ -1,6 +1,15 @@
 from typing import List, Optional
-
+from enum import Enum
 from pydantic import BaseModel, Field
+
+from src.segmenter.schemas.get.response import segment
+
+
+class StatusSegment(Enum):
+    status_draft = "draft"
+    status_in_progress = "in_progress"
+    status_active = "active"
+    status_inactive = "inactive"
 
 
 class DateRange(BaseModel):
@@ -9,8 +18,8 @@ class DateRange(BaseModel):
 
 
 class IntNumericRange(BaseModel):
-    from_: int = Field(..., alias="from")
-    to: int
+    from_: int = Field(alias="from")
+    to: Optional[int]
 
 
 class DateWithConditions(BaseModel):
@@ -33,7 +42,6 @@ class AppliedFilters(BaseModel):
 
 
 class UpdatedSegment(BaseModel):
-    segment_id: str
     name: str
     author: str
     date_range: DateRange
@@ -45,3 +53,7 @@ class UpdatedSegment(BaseModel):
     class Config:
         allow_population_by_field_name = True
         extra = "forbid"
+
+
+class UpdateStatusSegment(BaseModel):
+    status: str

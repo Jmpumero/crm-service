@@ -7,13 +7,18 @@ from bson import ObjectId
 from enum import Enum
 
 
+class GenericResponse(BaseModel):
+    code: int
+    msg: str
+
+
 class DateRange(BaseModel):
-    from_: str = Field(..., alias="from")
+    from_: str
     to: str
 
 
 class IntNumericRange(BaseModel):
-    from_: int = Field(..., alias="from")
+    from_: int
     to: int
 
 
@@ -31,7 +36,6 @@ class AppliedFilters(BaseModel):
     profession: Optional[str]
     childrens: Optional[int]
     nationality: Optional[str]
-    register_date: Optional[DateWithConditions]
     birth_date: Optional[DateWithConditions]
     languages: Optional[List[str]]
 
@@ -44,12 +48,11 @@ class SegmentDetails(BaseModel):
     update_at: str
     status: str
     applied_filters: Optional[list[AppliedFilters]]
+    date_range: DateRange
+    group_by: str
+    time: str
 
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
-
-
-class SegmentDetailResponse(BaseModel):
-    ...

@@ -6,7 +6,7 @@ from ..repositories import SegmenterDetailsRepo, DemographyRepo
 from ..schemas import CreateSegment
 
 
-class SegmentDetailsService:
+class SegmentService:
     def __init__(self):
         self.segmenter_detail_repo = SegmenterDetailsRepo()
         self.test = DemographyRepo()
@@ -37,7 +37,15 @@ class SegmentDetailsService:
 
         return updated_segment
 
+    async def update_status_segment(self, segment_id: str, status: str):
+        updated_segment = await self.segmenter_detail_repo.find_and_update_status(
+            segment_id, status
+        )
+
+        return updated_segment
+
     async def get_one_segment(self, segment_id):
+
         return await self.segmenter_detail_repo.find_one_segment(segment_id)
 
     async def test_segments(self, data):

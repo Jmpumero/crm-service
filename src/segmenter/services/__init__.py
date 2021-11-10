@@ -1,1 +1,1 @@
-from .segments import SegmentDetailsService
+from .segments import SegmentService

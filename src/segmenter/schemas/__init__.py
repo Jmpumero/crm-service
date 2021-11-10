@@ -1,3 +1,3 @@
 from .post import CreateSegment
-from .put import UpdatedSegment
-from .get import SegmentDetails
+from .put import UpdatedSegment, UpdateStatusSegment, StatusSegment
+from .get import SegmentDetails, GenericResponse

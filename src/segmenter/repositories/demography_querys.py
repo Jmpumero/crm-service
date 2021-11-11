@@ -23,6 +23,7 @@ class DemographyRepo(ConnectionMongo):
             "documentId": 1,
             "civil_status": 1,
             "age": 1,
+            # "birthdate": 1,
             "birthdate": {"$dateFromString": {"dateString": "$birthdate"}},
             "language": 1,
             "signature": 1,
@@ -44,6 +45,7 @@ class DemographyRepo(ConnectionMongo):
             "create_at": {"$dateFromString": {"dateString": "$create_at"}},
             "update_at": {"$dateFromString": {"dateString": "$update_at"}},
         }
+        self.string_projection = {}
 
     def milliseconds_to_string(self, date):
 
@@ -84,17 +86,21 @@ class DemographyRepo(ConnectionMongo):
         return query
 
     def builder_date_range(
-        self, status, column, condition, date=None, from_=None, to_=None
+        self, status, column, condition, date="", from_=None, to_=None
     ):
-        if condition == "Between":
+        query = {"$match": {}}
 
-            if status:
+        if date == "":
 
-                query = {"$match": {f"{column}": {"$gte": from_, "$lt": to_}}}
-            else:
-                query = {
-                    "$match": {"$nor": [{f"{column}": {"$gte": from_, "$lt": to_}}]}
-                }
+            if condition == "Between":
+
+                if status:
+
+                    query = {"$match": {f"{column}": {"$gte": from_, "$lt": to_}}}
+                else:
+                    query = {
+                        "$match": {"$nor": [{f"{column}": {"$gte": from_, "$lt": to_}}]}
+                    }
         elif condition == "Equal to":
             query = self.build_basic_query_(status, column, "$eq", date)
         elif condition == "Less to":
@@ -118,6 +124,7 @@ class DemographyRepo(ConnectionMongo):
                 query = {"$match": {f"{column}": {"$not": {"$eq": date}}}}
             else:
                 query = {"$match": {f"{column}": {"$eq": date}}}
+
         return query
 
     def builder_age_range(self, status, from_=None, to_=None):
@@ -237,13 +244,13 @@ class DemographyRepo(ConnectionMongo):
             for x in data["applied_filters"]:
 
                 if (x["birth_date"] != None) and (
-                    x["birth_date"]["condition"] == "null"
-                    or x["birth_date"]["condition"] == "not_null"
+                    x["birth_date"]["condition"] == "Null"
+                    or x["birth_date"]["condition"] == "No Null"
                 ):
                     ...
                 else:
                     if (x["birth_date"] != None) and (
-                        x["birth_date"]["condition"] == "between"
+                        x["birth_date"]["condition"] == "Between"
                     ):
 
                         from_time = datetime.fromtimestamp(

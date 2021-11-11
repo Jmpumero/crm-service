@@ -248,7 +248,8 @@ class Service(MongoQueries):
         self, customer_id, query_params: CustomerQueryParamsSensor
     ):
 
-        if query_params.sensor == "sensor_1":
+        if query_params.sensor == "sensor_2":
+            # print("cast")
 
             data = await HistorySensorQueries.get_history_sensor_1(
                 self, customer_id, query_params.skip, query_params.limit
@@ -260,7 +261,7 @@ class Service(MongoQueries):
                 else data[0]["total_items"],
             )
 
-        elif query_params.sensor == "sensor_2":
+        elif query_params.sensor == "sensor_3":
             data = await HistorySensorQueries.get_history_sensor_2(
                 self, customer_id, query_params.skip, query_params.limit
             )
@@ -273,9 +274,9 @@ class Service(MongoQueries):
                 else data[0]["total_items"],
             )
 
-        elif query_params.sensor == "sensor_3":
-            items = []
         elif query_params.sensor == "sensor_4":
+            items = []
+        elif query_params.sensor == "sensor_1":
             items = []
         else:
             response = self.response_history_sensor_building([], [])

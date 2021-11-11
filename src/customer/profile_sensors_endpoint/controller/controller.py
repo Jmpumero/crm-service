@@ -184,10 +184,10 @@ async def get_pms(customer_id: str = Path(...)):
 @remove_422
 async def get_pms_history(
     customer_id: str = Path(...),
-    constrain: Optional[PmsHistoryListConstrains] = Query(...),
-    search: Optional[str] = Query(...),
+    constrain: Optional[PmsHistoryListConstrains] = "select_one",
+    search: Optional[str] = None,
     skip: int = Query(default=0),
-    limit: int = Query(default=25),
+    limit: int = Query(default=10),
 ):
     """
     Get PMS Booking History from DW, given a Customer ID:\n

@@ -1,6 +1,8 @@
 import statistics
 from functools import reduce
 from datetime import datetime, timedelta
+from collections import Counter
+
 from fastapi import status
 from fastapi.responses import JSONResponse
 
@@ -22,6 +24,13 @@ class PmsService(PmsQueries):
 
     def __init__(self):
         super().__init__()
+
+    def lodges_per_year(self, lodges_list):
+        lodges = [lodge.first_checkin.year for lodge in lodges_list]
+        years = Counter(lodges).keys()  # equals to list(set(words))
+        ocurrences = Counter(lodges).values()  # counts the elements' frequency
+
+        return {"years": list(years), "ocurrences": list(ocurrences)}
 
     def upsellings_and_food_beverages(self, forecasts, concept):
 
@@ -339,6 +348,10 @@ class PmsService(PmsQueries):
             "pms_food_beverages_avg_cons_expenses": self.upsellings_and_food_beverages(
                 forecasts_list_reduced, "FOOD AND BEVERAGES"
             )["avg"],
+            "pms_lodges_per_year": {
+                "years": self.lodges_per_year(lodges_list)["years"],
+                "lodges": self.lodges_per_year(lodges_list)["ocurrences"],
+            },
         }
 
         return response

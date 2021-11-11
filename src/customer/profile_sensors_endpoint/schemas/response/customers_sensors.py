@@ -134,6 +134,11 @@ class Forecasts(BaseModel):
     avg_income: Optional[float]
 
 
+class LodgesPerYear(BaseModel):
+    years: List[int]
+    lodges: list[int]
+
+
 class PmsResponse(BaseModel):
     pms_response: Response
     pms_first_stay: Optional[PmsStay]
@@ -153,6 +158,7 @@ class PmsResponse(BaseModel):
     pms_food_beverages_paid_total: Optional[float]
     pms_food_beverages_consuptions: Optional[int]
     pms_food_beverages_avg_cons_expenses: Optional[float]
+    pms_lodges_per_year: Optional[LodgesPerYear]
 
 
 class PmsHistorySecondaryGuest(BaseModel):

@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 
 class PmsHistoryListConstrains(Enum):
+    booking_select = "select_one"
     booking_code = "booking"
     booking_date = "date"
     booking_min_amt = "min_amount"
@@ -126,6 +127,13 @@ class PmsBook(BaseModel):
     taxes: Optional[str]
 
 
+class Forecasts(BaseModel):
+    concept: Optional[str]
+    count: Optional[int]
+    net_amount: Optional[float]
+    avg_income: Optional[float]
+
+
 class PmsResponse(BaseModel):
     pms_response: Response
     pms_first_stay: Optional[PmsStay]
@@ -140,6 +148,11 @@ class PmsResponse(BaseModel):
     pms_cancelled_bookings: Optional[int]
     pms_preferred_sales_channel: Optional[str]
     pms_total_lodge_income: Optional[float]
+    pms_total_upsellings: Optional[int]
+    pms_total_upsellings_income: Optional[int]
+    pms_food_beverages_paid_total: Optional[float]
+    pms_food_beverages_consuptions: Optional[int]
+    pms_food_beverages_avg_cons_expenses: Optional[float]
 
 
 class PmsHistorySecondaryGuest(BaseModel):

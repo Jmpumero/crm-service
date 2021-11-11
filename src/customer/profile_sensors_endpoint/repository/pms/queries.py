@@ -120,7 +120,9 @@ class PmsQueries(MongoQueries):
 
         return sale_channels
 
-    def get_bookings_agg_customer(self, customer_id, constrain, search, skip, limit):
+    def get_bookings_agg_customer_old(
+        self, customer_id, constrain, search, skip, limit
+    ):
         if constrain.value == "booking":
             match_stage = {
                 "$match": {
@@ -188,10 +190,9 @@ class PmsQueries(MongoQueries):
 
         return result
 
-    def get_bookings_agg_customer_old(
-        self, customer_id, constrain, search, skip, limit, customer_type="pms_booker"
+    def get_bookings_agg_customer(
+        self, customer_id, customer_type, constrain, search, skip, limit
     ):
-
         if customer_type == "pms_booker":
             booking_constrain = "data.bBooks.code"
             date_constrain = "data.bBooks.checkin"
@@ -201,7 +202,13 @@ class PmsQueries(MongoQueries):
             date_constrain = "data.checkin"
             amount_constrain = "data.netAmt"
 
-        if constrain.value == "booking":
+        if constrain.value == "select_one":
+            match_stage = {
+                "$match": {
+                    "customer_id": customer_id,
+                }
+            }
+        elif constrain.value == "booking":
             match_stage = {
                 "$match": {
                     "$and": [
@@ -287,6 +294,7 @@ class PmsQueries(MongoQueries):
                     "_id": "$data.bBooks.bForecast.concept",
                     "count": {"$sum": 1},
                     "total_income": {"$sum": "$data.bBooks.bForecast.netAmt"},
+                    "average_income": {"$avg": "$data.bBooks.bForecast.netAmt"},
                 }
             }
 
@@ -306,6 +314,7 @@ class PmsQueries(MongoQueries):
                     "_id": "$data.bForecast.concept",
                     "count": {"$sum": 1},
                     "total_income": {"$sum": "$data.bForecast.netAmt"},
+                    "average_income": {"$avg": "$data.bForecast.netAmt"},
                 }
             }
 

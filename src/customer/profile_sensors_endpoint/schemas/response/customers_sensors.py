@@ -1,14 +1,15 @@
-from typing import List, Optional
+from typing import List, Optional, Any
 from enum import Enum
 
 from pydantic import BaseModel
 
 
 class PmsHistoryListConstrains(Enum):
-    booking_code = "Booking"
-    booking_date = "Fecha"
-    booking_min_amt = "Monto min."
-    booking_max_amt = "Monto max."
+    booking_select = "select_one"
+    booking_code = "booking"
+    booking_date = "date"
+    booking_min_amt = "min_amount"
+    booking_max_amt = "max_amount"
 
 
 class Response(BaseModel):
@@ -126,6 +127,18 @@ class PmsBook(BaseModel):
     taxes: Optional[str]
 
 
+class Forecasts(BaseModel):
+    concept: Optional[str]
+    count: Optional[int]
+    net_amount: Optional[float]
+    avg_income: Optional[float]
+
+
+class LodgesPerYear(BaseModel):
+    years: List[int]
+    lodges: list[int]
+
+
 class PmsResponse(BaseModel):
     pms_response: Response
     pms_first_stay: Optional[PmsStay]
@@ -140,6 +153,12 @@ class PmsResponse(BaseModel):
     pms_cancelled_bookings: Optional[int]
     pms_preferred_sales_channel: Optional[str]
     pms_total_lodge_income: Optional[float]
+    pms_total_upsellings: Optional[int]
+    pms_total_upsellings_income: Optional[int]
+    pms_food_beverages_paid_total: Optional[float]
+    pms_food_beverages_consuptions: Optional[int]
+    pms_food_beverages_avg_cons_expenses: Optional[float]
+    pms_lodges_per_year: Optional[LodgesPerYear]
 
 
 class PmsHistorySecondaryGuest(BaseModel):
@@ -165,7 +184,7 @@ class PmsHistoryPrimaryGuest(BaseModel):
     country: Optional[str] = None
     city: Optional[str]
     booking: Optional[PmsBook]
-    companion_data: Optional[List[PmsHistorySecondaryGuest]]
+    # companion_data: Optional[List[PmsHistorySecondaryGuest]]
 
 
 class PmsHistory(BaseModel):
@@ -181,3 +200,29 @@ class PmsHistory(BaseModel):
 class SensorsTab(BaseModel):
     response: Response
     sensors_list: List[str]
+
+
+class PmsGeneral(BaseModel):
+    first_checkin: Optional[Any]
+    first_checkout: Optional[Any]
+    last_checkin: Optional[Any]
+    last_checkout: Optional[Any]
+    first_property: Optional[str]
+    last_property: Optional[str]
+    first_room_type: Optional[str]
+    last_room_type: Optional[str]
+    first_amount: Optional[int]
+    last_amount: Optional[int]
+    first_duration: Optional[int]
+    last_duration: Optional[int]
+
+
+class Upsellings(BaseModel):
+    total_upsellings: Optional[int]
+    total_upsellings_income: Optional[float]
+
+
+class FoodBeverages(BaseModel):
+    total_paid: Optional[float]
+    consuptions_amount: Optional[int]
+    avg_consuption_expenses: Optional[float]

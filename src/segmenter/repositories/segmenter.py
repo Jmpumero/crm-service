@@ -110,8 +110,12 @@ class SegmenterDetailsRepo(ConnectionMongo):
                 #         )
                 #     )
 
-                if filter["birth_date"] != None and filter["birth_date"] != "":
-
+                if (
+                    filter["birth_date"] != None
+                    and filter["birth_date"]["condition"] != "Between"
+                    and filter["birth_date"]["date"] != None
+                ):
+                    print("Dios no me he muerto, porque me quieres o porque me odias?")
                     date = self.demography.milliseconds_to_date(
                         int(filter["birth_date"]["date"])
                     )
@@ -126,14 +130,34 @@ class SegmenterDetailsRepo(ConnectionMongo):
                             "",
                         )
                     )
+                elif (
+                    filter["birth_date"] != None
+                    and filter["birth_date"]["condition"] == "Between"
+                ):
+                    print("***************")
+                    from_ = self.demography.milliseconds_to_date(
+                        int(filter["birth_date"]["date_range"]["from_"])
+                    )
+                    to = self.demography.milliseconds_to_date(
+                        int(filter["birth_date"]["date_range"]["to"])
+                    )
+                    array.append(
+                        self.demography.builder_date_range(
+                            status,
+                            "birthdate",
+                            "Between",
+                            "",
+                            from_,
+                            to,
+                        )
+                    )
 
-                # if filter["civil_status"] != "" and filter["civil_status"] != None:
+                # if filter["languages"] != None:
+
                 #     array.append(
-                #         self.demography.builder_generic_query(
-                #             "civil_status", filter["civil_status"], status
-                #         )
+                #         self.demography.builder_language("all", filter["languages"])
                 #     )
-
+                ...
         return array
 
     def build_pipeline_segment(self, data: dict) -> Any:

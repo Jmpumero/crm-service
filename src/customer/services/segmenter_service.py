@@ -11,6 +11,9 @@ class SegmenterService(MongoQueries):
         super().__init__()
         self.repository = SegmenterQueries()
 
+    def simple_delete_duplicate_list(self, array):
+        return list(set(array))
+
     async def get_author_segments_list(self) -> Any:
         authors = {}
         try:
@@ -18,11 +21,12 @@ class SegmenterService(MongoQueries):
             authors = await authors.to_list(length=None)
 
             list_authors = []
-            # print(authors)
-            for x in range(len(authors)):
-                # print(authors[x])
-                list_authors.append(authors[x]["author"])
 
+            for x in range(len(authors)):
+
+                list_authors.append(authors[x]["author"])
+            list_authors = self.simple_delete_duplicate_list(list_authors)
+            # print(list_authors)
         except Exception as e:
             print(e)
         return list_authors

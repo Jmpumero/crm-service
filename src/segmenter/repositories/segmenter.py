@@ -27,9 +27,16 @@ class SegmenterDetailsRepo(ConnectionMongo):
     async def find_one_and_update(
         self, segment_id: str, updated_segment: UpdatedSegment
     ) -> Any:
+        pipeline = self.build_pipeline_segment(updated_segment.dict())
+        r = await pipeline.to_list(length=None)
+        if len(r) == 0:
+            total_clients = 0
+        else:
+            total_clients = r[0]["total"]
+
         body_update = self.demography.convert_date_update(updated_segment.dict())
         # print(body_update)
-        pipeline = self.build_pipeline_segment(body_update)
+        body_update["clients"] = total_clients
         segment: Any = await self.segments.find_one_and_update(
             {"_id": segment_id},
             {"$set": body_update},
@@ -49,7 +56,8 @@ class SegmenterDetailsRepo(ConnectionMongo):
         aggregation_array = []
         project_date = self.demography.builder_date_query_project()
         # ******
-        from_ = datetime.fromtimestamp(data["date_range"]["from_"] / 1000)
+        # print(type(int(data["date_range"]["from_"])))
+        from_ = datetime.fromtimestamp((data["date_range"]["from_"]) / 1000)
         to = datetime.fromtimestamp(data["date_range"]["to"] / 1000)
         # *****
         date_range = self.demography.builder_date_range(
@@ -84,38 +92,38 @@ class SegmenterDetailsRepo(ConnectionMongo):
         for filter in array_filters:
             if filter["filter_name"] == "demography":
 
-                # array = self.build_basic_demography_stages(
-                #     filter, array, "gender", status
-                # )
-                # array = self.build_basic_demography_stages(
-                #     filter, array, "civil_status", status
-                # )
-                # array = self.build_basic_demography_stages(
-                #     filter, array, "profession", status
-                # )
-                # array = self.build_basic_demography_stages(
-                #     filter, array, "nationality", status
-                # )
-                # array = self.build_basic_demography_stages(
-                #     filter, array, "childrens", status
-                # )
+                array = self.build_basic_demography_stages(
+                    filter, array, "gender", status
+                )
+                array = self.build_basic_demography_stages(
+                    filter, array, "civil_status", status
+                )
+                array = self.build_basic_demography_stages(
+                    filter, array, "profession", status
+                )
+                array = self.build_basic_demography_stages(
+                    filter, array, "nationality", status
+                )
+                array = self.build_basic_demography_stages(
+                    filter, array, "childrens", status
+                )
 
-                # if filter["age_range"] != None and filter["age_range"] != "":
+                if filter["age_range"] != None and filter["age_range"] != "":
 
-                #     array.append(
-                #         self.demography.builder_age_range(
-                #             status,
-                #             filter["age_range"]["from_"],
-                #             filter["age_range"]["to"],
-                #         )
-                #     )
+                    array.append(
+                        self.demography.builder_age_range(
+                            status,
+                            filter["age_range"]["from_"],
+                            filter["age_range"]["to"],
+                        )
+                    )
 
                 if (
                     filter["birth_date"] != None
                     and filter["birth_date"]["condition"] != "Between"
                     and filter["birth_date"]["date"] != None
                 ):
-                    print("Dios no me he muerto, porque me quieres o porque me odias?")
+
                     date = self.demography.milliseconds_to_date(
                         int(filter["birth_date"]["date"])
                     )
@@ -134,7 +142,7 @@ class SegmenterDetailsRepo(ConnectionMongo):
                     filter["birth_date"] != None
                     and filter["birth_date"]["condition"] == "Between"
                 ):
-                    print("***************")
+
                     from_ = self.demography.milliseconds_to_date(
                         int(filter["birth_date"]["date_range"]["from_"])
                     )
@@ -152,12 +160,12 @@ class SegmenterDetailsRepo(ConnectionMongo):
                         )
                     )
 
-                # if filter["languages"] != None:
+                if filter["languages"] != None:
 
-                #     array.append(
-                #         self.demography.builder_language("all", filter["languages"])
-                #     )
-                ...
+                    array.append(
+                        self.demography.builder_language("all", filter["languages"])
+                    )
+
         return array
 
     def build_pipeline_segment(self, data: dict) -> Any:
@@ -165,8 +173,8 @@ class SegmenterDetailsRepo(ConnectionMongo):
         aggregation_array = []
         aggregation_array = self.set_stages_date(True, data)
         aggregation_array = self.set_stages_demography(aggregation_array, True, data)
-        print(aggregation_array)
         aggregation_array.append({"$count": "total"})
+        # print(aggregation_array)
         r = self.customer.aggregate(aggregation_array)
 
         return r

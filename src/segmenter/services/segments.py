@@ -49,7 +49,9 @@ class SegmentService:
 
     async def get_one_segment(self, segment_id):
 
-        return await self.segmenter_detail_repo.find_one_segment(segment_id)
+        r = await self.segmenter_detail_repo.find_one_segment(segment_id)
+        print(r)
+        return r
 
     async def apply_filter_segment(self, data):
 

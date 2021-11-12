@@ -33,10 +33,12 @@ class SegmenterDetailsRepo(ConnectionMongo):
             total_clients = 0
         else:
             total_clients = r[0]["total"]
-
+        today = datetime.utcnow()
+        today = datetime.strftime(today, "%Y-%m-%dT%H:%M:%S.%f")
         body_update = self.demography.convert_date_update(updated_segment.dict())
-        # print(body_update)
+        # print(today)
         body_update["clients"] = total_clients
+        body_update["update_at"] = today
         segment: Any = await self.segments.find_one_and_update(
             {"_id": segment_id},
             {"$set": body_update},

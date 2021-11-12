@@ -45,7 +45,7 @@ class UpdatedSegment(BaseModel):
     name: str
     author: str
     date_range: DateRange
-    datetime_range: Optional[DateRange]
+    # datetime_range: Optional[DateRange]
     group_by: str
     time: Optional[str]
     applied_filters: Optional[list[AppliedFilters]]

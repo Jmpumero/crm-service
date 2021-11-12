@@ -48,10 +48,10 @@ class SegmentDetails(BaseModel):
     update_at: str
     status: str
     applied_filters: Optional[list[AppliedFilters]]
-    date_range: DateRange
-    group_by: str
-    time: str
-    clients: int
+    date_range: Optional[DateRange]
+    group_by: Optional[str]
+    time: Optional[str]
+    clients: Optional[int]
 
     class Config:
         allow_population_by_field_name = True

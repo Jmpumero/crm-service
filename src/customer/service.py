@@ -445,3 +445,16 @@ class Service(MongoQueries):
             "total_cross_selling_show": len(items_cross_selling),
         }
         return CrossSellingAndProductsResponse(**response)
+
+    async def delete_cross_selling(self, cross_selling_id):
+        response = None
+        cross_repo = CrossSellingQueries()
+        response = await cross_repo.delete_one_cross_selling(cross_selling_id)
+        if response != None:
+            response = {"msg": " Success Cross Selling deleted ", "code": 204}
+        else:
+            response = {
+                "msg": " Failed Cross Selling Delete, Cross Selling not found ",
+                "code": 404,
+            }
+        return response

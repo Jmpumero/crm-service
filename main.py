@@ -19,11 +19,15 @@ from http_exceptions import (
     validation_handler,
 )
 from utils.remove_422 import remove_422s
-from src import customers_router, customers_profile_router, segments_details_router
+from src import (
+    customers_router,
+    customers_profile_router,
+    segments_details_router,
+    creativity_router,
+)
 from src.customer.controller import customers_router
 from src.customer.profile_sensors_endpoint.controller import sensor_router
 from src.blacklist import blacklist_router
-
 
 global_settings: Settings = Settings()
 
@@ -50,6 +54,7 @@ app.include_router(customers_profile_router)
 app.include_router(blacklist_router)
 app.include_router(segments_details_router)
 app.include_router(get_openapi_router(app))
+app.include_router(creativity_router)
 
 app.add_exception_handler(RequestValidationError, validation_handler)
 app.add_exception_handler(BadGatewayException, base_handler)

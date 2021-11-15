@@ -202,6 +202,14 @@ async def created_cross_selling(body: NewCrossSelling):
     return await service.post_create_cross_selling(body)
 
 
+@customers_router.delete("/cross-selling/{cross_selling_id}")
+@remove_422
+async def delete_cross_selling(cross_selling_id: str):
+
+    service = Service()
+    return await service.delete_cross_selling(cross_selling_id)
+
+
 #### Score Card ####
 
 

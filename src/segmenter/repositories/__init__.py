@@ -1,2 +1,2 @@
-from .segment_details import SegmenterDetailsRepo
+from .segmenter import SegmenterDetailsRepo
 from .demography_querys import DemographyRepo

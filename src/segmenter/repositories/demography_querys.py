@@ -24,7 +24,7 @@ class DemographyRepo(ConnectionMongo):
             "civil_status": 1,
             "age": 1,
             "birthdate": {"$dateFromString": {"dateString": "$birthdate"}},
-            "language": 1,
+            "languages": 1,
             "signature": 1,
             "social_media": 1,
             "customer_avatar": 1,
@@ -44,6 +44,7 @@ class DemographyRepo(ConnectionMongo):
             "create_at": {"$dateFromString": {"dateString": "$create_at"}},
             "update_at": {"$dateFromString": {"dateString": "$update_at"}},
         }
+        self.string_projection = {}
 
     def milliseconds_to_string(self, date):
 
@@ -84,17 +85,21 @@ class DemographyRepo(ConnectionMongo):
         return query
 
     def builder_date_range(
-        self, status, column, condition, date=None, from_=None, to_=None
+        self, status, column, condition, date="", from_=None, to_=None
     ):
-        if condition == "Between":
+        query = {"$match": {}}
 
-            if status:
+        if date == "":
 
-                query = {"$match": {f"{column}": {"$gte": from_, "$lt": to_}}}
-            else:
-                query = {
-                    "$match": {"$nor": [{f"{column}": {"$gte": from_, "$lt": to_}}]}
-                }
+            if condition == "Between":
+
+                if status:
+
+                    query = {"$match": {f"{column}": {"$gte": from_, "$lt": to_}}}
+                else:
+                    query = {
+                        "$match": {"$nor": [{f"{column}": {"$gte": from_, "$lt": to_}}]}
+                    }
         elif condition == "Equal to":
             query = self.build_basic_query_(status, column, "$eq", date)
         elif condition == "Less to":
@@ -118,6 +123,7 @@ class DemographyRepo(ConnectionMongo):
                 query = {"$match": {f"{column}": {"$not": {"$eq": date}}}}
             else:
                 query = {"$match": {f"{column}": {"$eq": date}}}
+
         return query
 
     def builder_age_range(self, status, from_=None, to_=None):
@@ -225,3 +231,111 @@ class DemographyRepo(ConnectionMongo):
         r = await result.to_list(length=None)
 
         return r
+
+    def str_to_milleseconds(self, data):
+
+        # from_time = datetime.fromtimestamp((data["date_range"]["from_"]) )
+        if data["date_range"] != None:
+            from_time = datetime.strptime(
+                (data["date_range"]["from_"]), "%Y-%m-%dT%H:%M:%S"
+            )
+            to_time = datetime.strptime((data["date_range"]["to"]), "%Y-%m-%dT%H:%M:%S")
+            data["date_range"]["from_"] = int(from_time.timestamp() * 1000)
+            data["date_range"]["to"] = int(to_time.timestamp() * 1000)
+
+        create_at = datetime.strptime((data["create_at"]), "%Y-%m-%dT%H:%M:%S.%f")
+        data["create_at"] = int(create_at.timestamp() * 1000)
+        update_at = datetime.strptime((data["update_at"]), "%Y-%m-%dT%H:%M:%S.%f")
+        data["update_at"] = int(update_at.timestamp() * 1000)
+
+        if data["applied_filters"] != None and len(data["applied_filters"]) > 0:
+            for x in data["applied_filters"]:
+
+                if (x["birth_date"] != None) and (
+                    x["birth_date"]["condition"] == "Null"
+                    or x["birth_date"]["condition"] == "No Null"
+                ):
+                    ...
+                    # casos especiales
+
+                else:
+                    if (x["birth_date"] != None) and (
+                        x["birth_date"]["condition"] == "Between"
+                    ):
+
+                        from_time = datetime.strptime(
+                            (x["birth_date"]["date_range"]["from_"]),
+                            "%Y-%m-%dT%H:%M:%S",
+                        )
+                        to_time = datetime.strptime(
+                            (x["birth_date"]["date_range"]["to"]), "%Y-%m-%dT%H:%M:%S"
+                        )
+                        x["birth_date"]["date_range"]["from_"] = int(
+                            from_time.timestamp() * 1000
+                        )
+                        x["birth_date"]["date_range"]["to"] = int(
+                            to_time.timestamp() * 1000
+                        )
+
+                    elif x["birth_date"] != None and x["birth_date"]["condition"] != "":
+
+                        date_time = datetime.strptime(
+                            (x["birth_date"]["date"]),
+                            "%Y-%m-%dT%H:%M:%S",
+                        )
+
+                        x["birth_date"]["date"] = int(date_time.timestamp() * 1000)
+                        # print(int(date_time.timestamp() * 1000))
+                        # date_time = datetime.fromtimestamp(
+                        #     int(x["birth_date"]["date"]) / 1000.0
+                        # )
+                        # x["birth_date"]["date"] = datetime.strftime(
+                        #     date_time, "%Y-%m-%dT%H:%M:%S"
+                        # )
+
+        return data
+
+    def convert_date_update(self, data):
+
+        from_time = datetime.fromtimestamp((data["date_range"]["from_"]) / 1000.0)
+        to_time = datetime.fromtimestamp(data["date_range"]["to"] / 1000.0)
+        data["date_range"]["from_"] = datetime.strftime(from_time, "%Y-%m-%dT%H:%M:%S")
+        data["date_range"]["to"] = datetime.strftime(to_time, "%Y-%m-%dT%H:%M:%S")
+
+        if data["applied_filters"] != None and len(data["applied_filters"]) > 0:
+            for x in data["applied_filters"]:
+
+                if (x["birth_date"] != None) and (
+                    x["birth_date"]["condition"] == "Null"
+                    or x["birth_date"]["condition"] == "No Null"
+                ):
+                    ...
+                    # casos especiales
+                    # por hacer, cambiar primero todo a tipo isodate o eliminar los "" del modelo
+                else:
+                    if (x["birth_date"] != None) and (
+                        x["birth_date"]["condition"] == "Between"
+                    ):
+
+                        from_time = datetime.fromtimestamp(
+                            x["birth_date"]["date_range"]["from_"] / 1000.0
+                        )
+                        to_time = datetime.fromtimestamp(
+                            x["birth_date"]["date_range"]["to"] / 1000.0
+                        )
+                        x["birth_date"]["date_range"]["from_"] = datetime.strftime(
+                            from_time, "%Y-%m-%dT%H:%M:%S"
+                        )
+                        x["birth_date"]["date_range"]["to"] = datetime.strftime(
+                            to_time, "%Y-%m-%dT%H:%M:%S"
+                        )
+                    elif x["birth_date"] != None and x["birth_date"]["condition"] != "":
+
+                        date_time = datetime.fromtimestamp(
+                            int(x["birth_date"]["date"]) / 1000.0
+                        )
+                        x["birth_date"]["date"] = datetime.strftime(
+                            date_time, "%Y-%m-%dT%H:%M:%S"
+                        )
+
+        return data

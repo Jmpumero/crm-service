@@ -60,6 +60,7 @@ class BlacklistLog(BaseModel):
     type: str
 
 
+# OJO quitar todos los ""
 class CreateCustomerBody(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     name: str
@@ -91,7 +92,7 @@ class CreateCustomerBody(BaseModel):
     delete_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S'
     general_score: Optional[int]
     stenant: Optional[Any]
-    gender: Optional[str] = ""
+    gender: Optional[str]
     profession: Optional[str] = ""
     total_childrens: Optional[int] = 0
     blacklist_log: Optional[List[BlacklistLog]]

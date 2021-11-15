@@ -38,3 +38,7 @@ class CrossSellingQueries(MongoQueries):
 
     def get_total_cross_selling(cls):
         return cls.cross_selling.count_documents({})
+
+    async def delete_one_cross_selling(cls, id):
+
+        return await cls.cross_selling.find_one_and_delete({"_id": id})

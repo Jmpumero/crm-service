@@ -248,7 +248,8 @@ class Service(MongoQueries):
         self, customer_id, query_params: CustomerQueryParamsSensor
     ):
 
-        if query_params.sensor == "sensor_1":
+        if query_params.sensor == "sensor_2":
+            # print("cast")
 
             data = await HistorySensorQueries.get_history_sensor_1(
                 self, customer_id, query_params.skip, query_params.limit
@@ -260,7 +261,7 @@ class Service(MongoQueries):
                 else data[0]["total_items"],
             )
 
-        elif query_params.sensor == "sensor_2":
+        elif query_params.sensor == "sensor_3":
             data = await HistorySensorQueries.get_history_sensor_2(
                 self, customer_id, query_params.skip, query_params.limit
             )
@@ -273,9 +274,9 @@ class Service(MongoQueries):
                 else data[0]["total_items"],
             )
 
-        elif query_params.sensor == "sensor_3":
-            items = []
         elif query_params.sensor == "sensor_4":
+            items = []
+        elif query_params.sensor == "sensor_1":
             items = []
         else:
             response = self.response_history_sensor_building([], [])
@@ -302,33 +303,45 @@ class Service(MongoQueries):
 
         if query_params.query == "":
 
-            cursor = self.find_all_customers_in_crud_view(
+            cursor = self.find_customers_in_crud_view(
                 query_params.skip,
                 query_params.limit,
                 query_params.column_sort.replace(" ", ""),
                 query_params.order,
                 special_query,
+                "",
             )
 
         else:
 
-            cursor = self.find_filter_customers_in_crud_view(
-                query_params.query,
+            cursor = self.find_customers_in_crud_view(
                 query_params.skip,
                 query_params.limit,
                 query_params.column_sort.replace(" ", ""),
                 query_params.order,
+                special_query,
+                query_params.query,
             )
 
-        for customer in await cursor.to_list(length=None):
+        customers = await cursor.to_list(length=None)
 
-            customers.append(customer)
+        # for customer in await cursor.to_list(length=None):
 
-        response = {
-            "customers": customers,
-            "total_items": total_customer,
-            "total_show": len(customers),
-        }
+        #     customers.append(customer)
+
+        if len(customers[0]["items"]) > 0:
+            response = {
+                "customers": customers[0]["items"],
+                "total_items": customers[0]["total_items"][0]["total"],
+                "total_show": len(customers[0]["items"]),
+            }
+        else:
+            response = {
+                "customers": [],
+                "total_items": 0,
+                "total_show": 0,
+            }
+
         return response
 
     async def update_customer(self, body) -> CustomerCRUDResponse:
@@ -444,3 +457,16 @@ class Service(MongoQueries):
             "total_cross_selling_show": len(items_cross_selling),
         }
         return CrossSellingAndProductsResponse(**response)
+
+    async def delete_cross_selling(self, cross_selling_id):
+        response = None
+        cross_repo = CrossSellingQueries()
+        response = await cross_repo.delete_one_cross_selling(cross_selling_id)
+        if response != None:
+            response = {"msg": " Success Cross Selling deleted ", "code": 204}
+        else:
+            response = {
+                "msg": " Failed Cross Selling Delete, Cross Selling not found ",
+                "code": 404,
+            }
+        return response

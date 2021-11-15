@@ -329,12 +329,19 @@ class Service(MongoQueries):
 
         #     customers.append(customer)
 
-        # response = {
-        #     "customers": customers[0]["items"],
-        #     "total_items": customers[0]["total_items"][0]["total"],
-        #     "total_show": len(customers),
-        # }
-        response = customers
+        if len(customers[0]["items"]) > 0:
+            response = {
+                "customers": customers[0]["items"],
+                "total_items": customers[0]["total_items"][0]["total"],
+                "total_show": len(customers[0]["items"]),
+            }
+        else:
+            response = {
+                "customers": [],
+                "total_items": 0,
+                "total_show": 0,
+            }
+
         return response
 
     async def update_customer(self, body) -> CustomerCRUDResponse:

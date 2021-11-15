@@ -5,20 +5,8 @@ from pydantic import BaseModel, Field
 from src.segmenter.schemas.get.response import segment
 
 
-class StatusSegment(Enum):
-    status_draft = "draft"
-    status_in_progress = "in_progress"
-    status_active = "active"
-    status_inactive = "inactive"
-
-
 class DateRange(BaseModel):
     from_: Optional[int]
-    to: Optional[int]
-
-
-class IntNumericRange(BaseModel):
-    from_: int = Field(alias="from")
     to: Optional[int]
 
 
@@ -36,24 +24,20 @@ class AppliedFilters(BaseModel):
     profession: Optional[str]
     childrens: Optional[int]
     nationality: Optional[str]
-    # register_date: Optional[DateWithConditions]
     birth_date: Optional[DateWithConditions]
     languages: Optional[List[str]]
 
 
-class UpdatedSegment(BaseModel):
+class FilterSegment(BaseModel):
+
     name: str
     author: str
     date_range: DateRange
     # datetime_range: Optional[DateRange]
     group_by: str
     time: Optional[str]
-    applied_filters: Optional[list[AppliedFilters]]
+    applied_filters: list[AppliedFilters]
 
     class Config:
         allow_population_by_field_name = True
         extra = "forbid"
-
-
-class UpdateStatusSegment(BaseModel):
-    status: str

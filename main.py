@@ -27,6 +27,7 @@ from src import (
 )
 from src.customer.controller import customers_router
 from src.customer.profile_sensors_endpoint.controller import sensor_router
+from src.dashboard import dashboard_router
 from src.blacklist import blacklist_router
 
 global_settings: Settings = Settings()
@@ -46,7 +47,7 @@ app.add_middleware(
 )
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
+app.include_router(dashboard_router)
 app.include_router(sensor_router)
 app.include_router(customers_router)
 app.include_router(customers_profile_router)

@@ -55,3 +55,21 @@ def calculate_customer_age(birthdate):
         days=365.2425
     )
     return age
+
+
+def timestamp(dt):
+    epoch = datetime.utcfromtimestamp(0)
+    return (dt - epoch).total_seconds() * 1000.0
+
+
+def days_since_date(date):
+    today = datetime.utcnow()
+
+    date_with_time = datetime(
+        year=date.year,
+        month=date.month,
+        day=date.day,
+    )
+
+    delta = today - date_with_time
+    return delta.days

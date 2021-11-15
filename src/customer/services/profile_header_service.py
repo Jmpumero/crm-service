@@ -1,3 +1,5 @@
+import statistics
+from datetime import datetime, timedelta
 from functools import reduce
 from typing import Any
 from src.customer.repository import MongoQueries
@@ -8,11 +10,8 @@ from ..schemas import (
 from http_exceptions import NotFoundException
 
 from src.customer.profile_sensors_endpoint.schemas.response.customers_sensors import (
-    PmsBook,
-    PmsHistoryPrimaryGuest,
-    PmsHistorySecondaryGuest,
-    PmsGeneral,
     Forecasts,
+    PmsGeneral,
 )
 
 from src.customer.profile_sensors_endpoint.repository.pms import PmsQueries
@@ -25,6 +24,10 @@ class ProfileHeaderService(MongoQueries):
 
     async def get_profile_header(self, customer_id: str) -> Any:
         revenue_list = []
+        nights_list = []
+        revenue_list = []
+        anticipation_list = []
+        stays_list = []
 
         customer: Any = await self.customer.find_one({"_id": customer_id})
 
@@ -41,23 +44,54 @@ class ProfileHeaderService(MongoQueries):
             reservation async for reservation in customer_reservations_master
         ]
 
-        # custromer total nights
-        nights = [
-            [reservation["nights"] for reservation in reservation["data"]["bBooks"]]
-            for reservation in reservations_list
-        ]
+        for reservation in reservations_list:
+            # nights
+            if reservation["entity"] == "pms_booker":
+                for book in reservation["data"]["bBooks"]:
+                    nights_list.append(book["nights"])
+            else:
+                nights_list.append(reservation["data"]["nights"])
 
-        flatten_nights = [val for sublist in nights for val in sublist]
+            # revenues
+            async for revenue in pms_queries.get_upsellings_food_beverages(
+                customer_id, reservation["entity"]
+            ):
+                revenue_list.append(revenue)
 
-        # revenues
-        async for reserv in customer_reservations_master:
+            # anticipation
+            reservation_creation_date = datetime.strptime(
+                reservation["data"]["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ"
+            )
+            reservation_checkin_date = datetime.strptime(
+                reservation["data"]["checkin"], "%Y-%m-%d"
+            )
+            anticipation_time = (
+                reservation_creation_date - reservation_checkin_date
+            ) / timedelta(milliseconds=1)
+            anticipation_list.append(anticipation_time)
 
-            revenue_list = [
-                revenue
-                async for revenue in pms_queries.get_upsellings_food_beverages(
-                    customer_id, reserv["entity"]
+            if reservation["entity"] == "pms_booker":
+                stays_list.append(
+                    PmsGeneral(
+                        last_property=reservation["data"]["sproperty"]["name"],
+                        last_checkout=datetime.strptime(
+                            reservation["data"]["bBooks"][-1]["checkout"],
+                            "%Y-%m-%d",
+                        ),
+                    )
                 )
-            ]
+            else:
+                stays_list.append(
+                    PmsGeneral(
+                        last_property=reservation["data"]["riRatePlan"]["sproperty"][
+                            "name"
+                        ],
+                        last_checkout=datetime.strptime(
+                            reservation["data"]["checkout"],
+                            "%Y-%m-%d",
+                        ),
+                    )
+                )
 
         revenue_clean = pms_lib.remove_duplicates(revenue_list)
 
@@ -75,6 +109,12 @@ class ProfileHeaderService(MongoQueries):
 
         languages = customer.get("language") or []
 
+        lifetime_expenditure = (
+            pms_lib.get_revenues(revenue_list_reduced, "ACCOMMODATION")["total"]
+            + pms_lib.get_revenues(revenue_list_reduced, "UPSELLING")["total"]
+            + pms_lib.get_revenues(revenue_list_reduced, "FOOD AND BEVERAGES")["total"]
+        )
+
         data = {
             "_id": customer.get("_id", None),
             "name": customer.get("name", None),
@@ -88,12 +128,14 @@ class ProfileHeaderService(MongoQueries):
             "age": customer.get("age", None),
             # "next_hotel_stay": "random hotel",
             # "next_stay_date": "25/10/2021",
-            "last_checkout_date": "21/04/2021",
-            "last_stay_hotel": "super random hotel",
-            "total_stays": await pms_queries.count_customer_master_books(customer_id),
-            "total_nights": reduce(lambda a, b: a + b, flatten_nights, 0),
-            "days_since_last_stay": 15,
-            "lifetime_expenses": 0,
+            "last_checkout_date": str(stays_list[-1].last_checkout.date()),
+            "last_stay_hotel": stays_list[-1].last_property,
+            "total_stays": len(reservations_list),
+            "total_nights": reduce(lambda a, b: a + b, nights_list, 0),
+            "days_since_last_stay": pms_lib.days_since_date(
+                stays_list[-1].last_checkout.date()
+            ),
+            "lifetime_expenses": lifetime_expenditure,
             "total_lodging_expenses": pms_lib.get_revenues(
                 revenue_list_reduced, "ACCOMMODATION"
             )["total"],
@@ -101,8 +143,9 @@ class ProfileHeaderService(MongoQueries):
                 revenue_list_reduced, "UPSELLING"
             )["total"]
             + pms_lib.get_revenues(revenue_list_reduced, "FOOD AND BEVERAGES")["total"],
-            "average_expenditure_per_stay": 680.60,
-            "average_days_before_booking": 35,
+            "average_expenditure_per_stay": lifetime_expenditure
+            / len(reservations_list),
+            "average_days_before_booking": int(statistics.mean(anticipation_list)),
         }
 
         return CustomerProfileHeaderResponse(**data)

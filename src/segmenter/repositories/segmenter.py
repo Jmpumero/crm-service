@@ -21,8 +21,13 @@ class SegmenterDetailsRepo(ConnectionMongo):
         return new_segment
 
     async def find_one_segment(self, id):
+        r = await self.segments.find_one({"_id": id})
+        # print(r)
+        return self.str_to_date(r)
+        # return r
 
-        return await self.segments.find_one({"_id": id})
+    def str_to_date(self, data):
+        return self.demography.str_to_milleseconds(data)
 
     async def find_one_and_update(
         self, segment_id: str, updated_segment: UpdatedSegment
@@ -45,6 +50,8 @@ class SegmenterDetailsRepo(ConnectionMongo):
             return_document=ReturnDocument.AFTER,
         )
 
+        # segment2 = self.demography.str_to_milleseconds(segment)
+        # print(segment2)
         return segment
 
     async def find_and_update_status(self, segment_id, status):

@@ -88,7 +88,7 @@ async def update_status_segment(
     responses={400: {"model": BadRequestError}},
 )
 @remove_422
-async def update_segment(body: FilterSegment = Body(...)) -> dict[str, str]:
+async def apply_segment_filters(body: FilterSegment = Body(...)) -> dict[str, str]:
     service: SegmentService = SegmentService()
 
     return await service.apply_filter_segment(body)

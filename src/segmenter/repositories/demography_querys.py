@@ -232,9 +232,72 @@ class DemographyRepo(ConnectionMongo):
 
         return r
 
+    def str_to_milleseconds(self, data):
+
+        # from_time = datetime.fromtimestamp((data["date_range"]["from_"]) )
+
+        from_time = datetime.strptime(
+            (data["date_range"]["from_"]), "%Y-%m-%dT%H:%M:%S"
+        )
+        to_time = datetime.strptime((data["date_range"]["to"]), "%Y-%m-%dT%H:%M:%S")
+        data["date_range"]["from_"] = int(from_time.timestamp() * 1000)
+        data["date_range"]["to"] = int(to_time.timestamp() * 1000)
+
+        create_at = datetime.strptime((data["create_at"]), "%Y-%m-%dT%H:%M:%S.%f")
+        data["create_at"] = int(create_at.timestamp() * 1000)
+        update_at = datetime.strptime((data["update_at"]), "%Y-%m-%dT%H:%M:%S.%f")
+        data["update_at"] = int(update_at.timestamp() * 1000)
+
+        if data["applied_filters"] != None and len(data["applied_filters"]) > 0:
+            for x in data["applied_filters"]:
+
+                if (x["birth_date"] != None) and (
+                    x["birth_date"]["condition"] == "Null"
+                    or x["birth_date"]["condition"] == "No Null"
+                ):
+                    ...
+                    # casos especiales
+                    # por hacer, cambiar primero todo a tipo isodate o eliminar los "" del modelo
+                else:
+                    if (x["birth_date"] != None) and (
+                        x["birth_date"]["condition"] == "Between"
+                    ):
+
+                        from_time = datetime.strptime(
+                            (x["birth_date"]["date_range"]["from_"]),
+                            "%Y-%m-%dT%H:%M:%S",
+                        )
+                        to_time = datetime.strptime(
+                            (x["birth_date"]["date_range"]["to"]), "%Y-%m-%dT%H:%M:%S"
+                        )
+                        x["birth_date"]["date_range"]["from_"] = int(
+                            from_time.timestamp() * 1000
+                        )
+                        x["birth_date"]["date_range"]["to"] = int(
+                            to_time.timestamp() * 1000
+                        )
+
+                    elif x["birth_date"] != None and x["birth_date"]["condition"] != "":
+
+                        date_time = datetime.strptime(
+                            (x["birth_date"]["date"]),
+                            "%Y-%m-%dT%H:%M:%S",
+                        )
+
+                        x["birth_date"]["date"] = int(date_time.timestamp() * 1000)
+                        # print(int(date_time.timestamp() * 1000))
+                        # date_time = datetime.fromtimestamp(
+                        #     int(x["birth_date"]["date"]) / 1000.0
+                        # )
+                        # x["birth_date"]["date"] = datetime.strftime(
+                        #     date_time, "%Y-%m-%dT%H:%M:%S"
+                        # )
+
+        return data
+
     def convert_date_update(self, data):
 
-        from_time = datetime.fromtimestamp(data["date_range"]["from_"] / 1000.0)
+        from_time = datetime.fromtimestamp((data["date_range"]["from_"]) / 1000.0)
         to_time = datetime.fromtimestamp(data["date_range"]["to"] / 1000.0)
         data["date_range"]["from_"] = datetime.strftime(from_time, "%Y-%m-%dT%H:%M:%S")
         data["date_range"]["to"] = datetime.strftime(to_time, "%Y-%m-%dT%H:%M:%S")
@@ -247,6 +310,8 @@ class DemographyRepo(ConnectionMongo):
                     or x["birth_date"]["condition"] == "No Null"
                 ):
                     ...
+                    # casos especiales
+                    # por hacer, cambiar primero todo a tipo isodate o eliminar los "" del modelo
                 else:
                     if (x["birth_date"] != None) and (
                         x["birth_date"]["condition"] == "Between"

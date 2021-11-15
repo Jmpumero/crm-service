@@ -34,7 +34,7 @@ class SegmentService:
         updated_segment = await self.segmenter_detail_repo.find_one_and_update(
             segment_id, segment
         )
-
+        # print(updated_segment)
         return updated_segment
 
     async def update_status_segment(self, segment_id: str, status: str):
@@ -50,7 +50,7 @@ class SegmentService:
     async def get_one_segment(self, segment_id):
 
         r = await self.segmenter_detail_repo.find_one_segment(segment_id)
-        print(r)
+        # print(r)
         return r
 
     async def apply_filter_segment(self, data):

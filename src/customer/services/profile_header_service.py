@@ -118,7 +118,7 @@ class ProfileHeaderService(MongoQueries):
         data = {
             "_id": customer.get("_id", None),
             "name": customer.get("name", None),
-            "image": customer.get("customer_avatar", None),
+            "customer_avatar": customer.get("customer_avatar", None),
             "last_name": customer.get("last_name", None),
             # "score": 0,
             "languages": [language.get("language", None) for language in languages],

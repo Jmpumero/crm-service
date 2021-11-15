@@ -1100,6 +1100,209 @@ class MongoQueries(ConnectionMongo):
 
         return customers
 
+    def find_customers_in_crud_view(
+        self, skip, limit, column_sort, order, special_query, query
+    ):
+        order_sort = 1
+        if column_sort:
+            if order.lower() == "desc":
+                order_sort = -1
+                if query != None and query != "":
+
+                    customers = self.customer.aggregate(
+                        [
+                            {
+                                "$facet": {
+                                    "items": [
+                                        {"$match": {"customer_status": True}},
+                                        {
+                                            "$match": {
+                                                "$or": [
+                                                    {
+                                                        "full_name": {
+                                                            "$regex": f".*{query}.*",
+                                                            "$options": "i",
+                                                        }
+                                                    },
+                                                    {
+                                                        "name": {
+                                                            "$regex": f".*{query}.*",
+                                                            "$options": "i",
+                                                        }
+                                                    },
+                                                    {
+                                                        "email": {
+                                                            "$elemMatch": {
+                                                                "email": {
+                                                                    "$regex": f".*{query}.*",
+                                                                    "$options": "i",
+                                                                },
+                                                                "isMain": True,
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        "phone": {
+                                                            "$elemMatch": {
+                                                                "intl_format": {
+                                                                    "$regex": f".*\+{query}.*",
+                                                                    "$options": "i",
+                                                                },
+                                                                "isMain": True,
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        "phone": {
+                                                            "$elemMatch": {
+                                                                "local_format": {
+                                                                    "$regex": f".*{query}.*",
+                                                                    "$options": "i",
+                                                                },
+                                                                "isMain": True,
+                                                            }
+                                                        }
+                                                    },
+                                                ]
+                                            }
+                                        },
+                                        {"$project": blacklist_customer_projections},
+                                        {"$skip": skip},
+                                        {"$limit": limit},
+                                        {
+                                            "$sort": {
+                                                f"{column_sort}": order_sort,
+                                                "_id": 1,
+                                            }
+                                        },
+                                    ],
+                                    "total_items": [
+                                        {"$match": {"customer_status": True}},
+                                        {
+                                            "$match": {
+                                                "$or": [
+                                                    {
+                                                        "full_name": {
+                                                            "$regex": f".*{query}.*",
+                                                            "$options": "i",
+                                                        }
+                                                    },
+                                                    {
+                                                        "name": {
+                                                            "$regex": f".*{query}.*",
+                                                            "$options": "i",
+                                                        }
+                                                    },
+                                                    {
+                                                        "email": {
+                                                            "$elemMatch": {
+                                                                "email": {
+                                                                    "$regex": f".*{query}.*",
+                                                                    "$options": "i",
+                                                                },
+                                                                "isMain": True,
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        "phone": {
+                                                            "$elemMatch": {
+                                                                "intl_format": {
+                                                                    "$regex": f".*\+{query}.*",
+                                                                    "$options": "i",
+                                                                },
+                                                                "isMain": True,
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        "phone": {
+                                                            "$elemMatch": {
+                                                                "local_format": {
+                                                                    "$regex": f".*{query}.*",
+                                                                    "$options": "i",
+                                                                },
+                                                                "isMain": True,
+                                                            }
+                                                        }
+                                                    },
+                                                ]
+                                            }
+                                        },
+                                        {"$project": blacklist_customer_projections},
+                                        {
+                                            "$sort": {
+                                                f"{column_sort}": order_sort,
+                                                "_id": 1,
+                                            }
+                                        },
+                                        {"$count": "total"},
+                                    ],
+                                },
+                            }
+                        ]
+                    )
+                else:
+
+                    customers = self.customer.aggregate(
+                        [
+                            {
+                                "$facet": {
+                                    "items": [
+                                        {"$match": {"customer_status": True}},
+                                        {"$project": blacklist_customer_projections},
+                                        {"$skip": skip},
+                                        {"$limit": limit},
+                                        {
+                                            "$sort": {
+                                                f"{column_sort}": order_sort,
+                                                "_id": 1,
+                                            }
+                                        },
+                                    ],
+                                    "total_items": [
+                                        {"$match": {"customer_status": True}},
+                                        {"$project": blacklist_customer_projections},
+                                        {"$count": "total"},
+                                    ],
+                                },
+                            }
+                        ]
+                    )
+                    # customers = self.customer.aggregate(
+                    #     [
+                    #         {"$match": {"customer_status": True}},
+                    #         {"$project": blacklist_customer_projections},
+                    #         {"$skip": skip},
+                    #         {"$limit": limit},
+                    #         {
+                    #             "$sort": {
+                    #                 f"{column_sort}": order_sort,
+                    #                 "_id": 1,
+                    #             }
+                    #         },
+                    #     ]
+                    # )
+
+            else:
+
+                customers = self.customer.aggregate(
+                    [
+                        {"$match": {"customer_status": True}},
+                        {"$project": blacklist_customer_projections},
+                        {"$skip": skip},
+                        {"$limit": limit},
+                        {
+                            "$sort": {
+                                f"{column_sort}": order_sort,
+                                "_id": 1,
+                            }
+                        },
+                    ]
+                )
+
+        return customers
+
     def find_filter_customers_in_crud_view(
         self, query, skip, limit, column_sort, order
     ):

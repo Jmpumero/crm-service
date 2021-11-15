@@ -16,6 +16,8 @@ class SegmenterDetailsRepo(ConnectionMongo):
         self.demography = DemographyRepo()
 
     async def create_segment(self, data: dict[str, str]) -> Any:
+        data["date_range"] = None
+        data["applied_filters"] = None
         new_segment: Any = await self.segments.insert_one(data)
 
         return new_segment

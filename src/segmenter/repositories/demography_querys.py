@@ -235,13 +235,13 @@ class DemographyRepo(ConnectionMongo):
     def str_to_milleseconds(self, data):
 
         # from_time = datetime.fromtimestamp((data["date_range"]["from_"]) )
-
-        from_time = datetime.strptime(
-            (data["date_range"]["from_"]), "%Y-%m-%dT%H:%M:%S"
-        )
-        to_time = datetime.strptime((data["date_range"]["to"]), "%Y-%m-%dT%H:%M:%S")
-        data["date_range"]["from_"] = int(from_time.timestamp() * 1000)
-        data["date_range"]["to"] = int(to_time.timestamp() * 1000)
+        if data["date_range"] != None:
+            from_time = datetime.strptime(
+                (data["date_range"]["from_"]), "%Y-%m-%dT%H:%M:%S"
+            )
+            to_time = datetime.strptime((data["date_range"]["to"]), "%Y-%m-%dT%H:%M:%S")
+            data["date_range"]["from_"] = int(from_time.timestamp() * 1000)
+            data["date_range"]["to"] = int(to_time.timestamp() * 1000)
 
         create_at = datetime.strptime((data["create_at"]), "%Y-%m-%dT%H:%M:%S.%f")
         data["create_at"] = int(create_at.timestamp() * 1000)
@@ -257,7 +257,7 @@ class DemographyRepo(ConnectionMongo):
                 ):
                     ...
                     # casos especiales
-                    # por hacer, cambiar primero todo a tipo isodate o eliminar los "" del modelo
+
                 else:
                     if (x["birth_date"] != None) and (
                         x["birth_date"]["condition"] == "Between"

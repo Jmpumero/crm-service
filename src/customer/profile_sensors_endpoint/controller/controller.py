@@ -40,6 +40,7 @@ sensor_router = APIRouter(
 # SENSORS TAB ENDPOINT
 @sensor_router.get(
     "/customer/{customer_id}/sensors",
+    summary="Sensors Tab in Customer Profile",
     response_model=SensorsTab,
     response_model_exclude_unset=True,
     responses={status.HTTP_404_NOT_FOUND: {"model": NotFoundError}},
@@ -58,6 +59,7 @@ async def get_sensors_tab(customer_id: str = Path(...)):
 # CAST ENDPOINT
 @sensor_router.get(
     "/customer/{customer_id}/cast",
+    summary="Cast Statistics",
     response_model=CastResponse,
     response_model_exclude_unset=True,
     responses={status.HTTP_404_NOT_FOUND: {"model": NotFoundError}},
@@ -89,6 +91,7 @@ async def get_cast(customer_id: str = Path(...)):
 # CAST HISTORY ENDPOINT
 @sensor_router.get(
     "/customer/{customer_id}/cast-history",
+    summary="Cast Playback Historic",
     response_model=PlaybackHistory,
     response_model_exclude_unset=True,
     responses={status.HTTP_404_NOT_FOUND: {"model": NotFoundError}},
@@ -127,6 +130,7 @@ async def get_cast_history(
 # HOTSPOT ENDPOINT
 @sensor_router.get(
     "/customer/{customer_id}/hotspot",
+    summary="Hotspot Statistics",
     response_model=HotspotResponse,
     response_model_exclude_unset=True,
     responses={status.HTTP_404_NOT_FOUND: {"model": NotFoundError}},
@@ -153,6 +157,7 @@ async def get_hotspot(customer_id: str = Path(...)):
 # PMS ENDPOINT
 @sensor_router.get(
     "/customer/{customer_id}/pms",
+    summary="Eroom PMS Statistics",
     response_model=PmsResponse,
     response_model_exclude_unset=True,
     responses={status.HTTP_404_NOT_FOUND: {"model": NotFoundError}},
@@ -176,6 +181,7 @@ async def get_pms(customer_id: str = Path(...)):
 # PMS BOOKING HISTORY ENDPOINT
 @sensor_router.get(
     "/customer/{customer_id}/pms-booking-history",
+    summary="Eroom PMS Booking Historic",
     response_model=PmsHistory,
     response_model_exclude_unset=True,
     responses={status.HTTP_404_NOT_FOUND: {"model": NotFoundError}},

@@ -303,33 +303,45 @@ class Service(MongoQueries):
 
         if query_params.query == "":
 
-            cursor = self.find_all_customers_in_crud_view(
+            cursor = self.find_customers_in_crud_view(
                 query_params.skip,
                 query_params.limit,
                 query_params.column_sort.replace(" ", ""),
                 query_params.order,
                 special_query,
+                "",
             )
 
         else:
 
-            cursor = self.find_filter_customers_in_crud_view(
-                query_params.query,
+            cursor = self.find_customers_in_crud_view(
                 query_params.skip,
                 query_params.limit,
                 query_params.column_sort.replace(" ", ""),
                 query_params.order,
+                special_query,
+                query_params.query,
             )
 
-        for customer in await cursor.to_list(length=None):
+        customers = await cursor.to_list(length=None)
 
-            customers.append(customer)
+        # for customer in await cursor.to_list(length=None):
 
-        response = {
-            "customers": customers,
-            "total_items": total_customer,
-            "total_show": len(customers),
-        }
+        #     customers.append(customer)
+
+        if len(customers[0]["items"]) > 0:
+            response = {
+                "customers": customers[0]["items"],
+                "total_items": customers[0]["total_items"][0]["total"],
+                "total_show": len(customers[0]["items"]),
+            }
+        else:
+            response = {
+                "customers": [],
+                "total_items": 0,
+                "total_show": 0,
+            }
+
         return response
 
     async def update_customer(self, body) -> CustomerCRUDResponse:

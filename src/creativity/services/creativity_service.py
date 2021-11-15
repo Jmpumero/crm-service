@@ -1,13 +1,15 @@
 import uuid
+from bson import ObjectId
 
-from ..schemas import CreateCreativity
+from ..schemas import CreateCreativity, GetAllQueryParams
+from ..repositories import CreativityRepo
 
-
-creativities = {
+creativities_response = {
     "skip": 0,
     "limit": 10,
     "column_sort": None,
     "order_sort": None,
+    "total_items": 10,
     "query": "",
     "data": [
         {
@@ -23,15 +25,36 @@ creativities = {
 
 class CreativityService:
     def __init__(self):
-        pass
+        self.creativity_repo = CreativityRepo()
 
-    async def get_all(self):
+    async def get_all(self, query_params: GetAllQueryParams):
+        creativities = (
+            await self.creativity_repo.creativity.find()
+            .skip(query_params.skip)
+            .limit(query_params.limit)
+            .to_list(length=query_params.limit)
+        )
 
-        return creativities
+        creativities_response[
+            "total_items"
+        ] = await self.creativity_repo.creativity.count_documents({})
+        creativities_response["skip"] = query_params.skip
+        creativities_response["limit"] = query_params.limit
+        creativities_response["data"] = creativities
 
-    async def create_creativity(self, body):
+        return creativities_response
+
+    async def create_creativity(self, body: CreateCreativity):
         data = body.dict(by_alias=True)
-        data["_id"] = str(uuid.uuid4())
-        creativities["data"].append(data)
+        data["_id"] = str(ObjectId())
+
+        await self.creativity_repo.creativity.insert_one(data)
 
         return {"message": "creativity created successfully"}
+
+    async def get_one(self, creativity_id: str):
+        creativity = await self.creativity_repo.creativity.find_one(
+            {"_id": creativity_id}
+        )
+
+        return creativity or {}

@@ -30,6 +30,7 @@ class ConnectionMongo:
         self.cast_collection = self.db.cast
         self.hotspot_collection = self.db.hotspot
         self.butler_collection = self.db.butler
+        self.creativity = self.db.creativity
 
         self.products = self.db.product
         self.cross_selling = self.db.cross_selling

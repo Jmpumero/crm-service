@@ -6,6 +6,7 @@ from pydantic.fields import Field
 
 class CustomerProfileHeaderResponse(BaseModel):
     id_: Optional[str] = Field(None, alias="_id")
+    currency: Optional[str]
     customer_avatar: Optional[str]
     name: Optional[str]
     last_name: Optional[str]

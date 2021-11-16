@@ -109,7 +109,7 @@ class PmsStay(BaseModel):
     duration: Optional[int]
     room_type: Optional[str]
     upgrade: Optional[int]
-    upselling: Optional[int]
+    upsellings: Optional[int]
     amount: Optional[float]
 
 
@@ -124,7 +124,7 @@ class PmsBook(BaseModel):
     reseller: Optional[str]
     meal_plan: Optional[str]
     property: Optional[str]
-    taxes: Optional[str]
+    taxes: Optional[float]
 
 
 class Forecasts(BaseModel):
@@ -141,6 +141,7 @@ class LodgesPerYear(BaseModel):
 
 class PmsResponse(BaseModel):
     pms_response: Response
+    pms_currency: Optional[str]
     pms_first_stay: Optional[PmsStay]
     pms_last_stay: Optional[PmsStay]
     pms_avg_stay: Optional[int]
@@ -184,7 +185,6 @@ class PmsHistoryPrimaryGuest(BaseModel):
     country: Optional[str] = None
     city: Optional[str]
     booking: Optional[PmsBook]
-    # companion_data: Optional[List[PmsHistorySecondaryGuest]]
 
 
 class PmsHistory(BaseModel):
@@ -203,6 +203,7 @@ class SensorsTab(BaseModel):
 
 
 class PmsGeneral(BaseModel):
+    currency: Optional[str]
     first_checkin: Optional[Any]
     first_checkout: Optional[Any]
     last_checkin: Optional[Any]

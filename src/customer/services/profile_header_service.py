@@ -77,6 +77,7 @@ class ProfileHeaderService(MongoQueries):
                 if reservation["entity"] == "pms_booker":
                     stays_list.append(
                         PmsGeneral(
+                            currency=reservation["data"]["coreCurrency"]["iso"],
                             last_property=reservation["data"]["sproperty"]["name"],
                             last_checkout=datetime.strptime(
                                 reservation["data"]["bBooks"][-1]["checkout"],
@@ -87,6 +88,9 @@ class ProfileHeaderService(MongoQueries):
                 else:
                     stays_list.append(
                         PmsGeneral(
+                            currency=reservation["data"]["riRatePlan"]["coreCurrency"][
+                                "iso"
+                            ],
                             last_property=reservation["data"]["riRatePlan"][
                                 "sproperty"
                             ]["name"],
@@ -123,6 +127,7 @@ class ProfileHeaderService(MongoQueries):
 
             data = {
                 "_id": customer.get("_id", None),
+                "currency": stays_list[-1].currency,
                 "name": customer.get("name", None),
                 "customer_avatar": customer.get("customer_avatar", None),
                 "last_name": customer.get("last_name", None),
@@ -131,7 +136,7 @@ class ProfileHeaderService(MongoQueries):
                 "country": customer.get("country", None),
                 # "membership": "?",
                 "gender": customer.get("gender", None),
-                "age": customer.get("age", None),
+                "age": pms_lib.calculate_customer_age(customer.get("birthdate", None)),
                 # "next_hotel_stay": "random hotel",
                 # "next_stay_date": "25/10/2021",
                 "last_checkout_date": str(stays_list[-1].last_checkout.date()),
@@ -153,7 +158,9 @@ class ProfileHeaderService(MongoQueries):
                 ],
                 "average_expenditure_per_stay": lifetime_expenditure
                 / len(reservations_list),
-                "average_days_before_booking": int(statistics.mean(anticipation_list)),
+                "average_days_before_booking": abs(
+                    int(statistics.mean(anticipation_list))
+                ),
             }
 
             return CustomerProfileHeaderResponse(**data)
@@ -166,6 +173,6 @@ class ProfileHeaderService(MongoQueries):
                 "languages": [language.get("language", None) for language in languages],
                 "country": customer.get("country", None),
                 "gender": customer.get("gender", None),
-                "age": customer.get("age", None),
+                "age": pms_lib.calculate_customer_age(customer.get("birthdate", None)),
             }
             return CustomerProfileHeaderResponse(**data)

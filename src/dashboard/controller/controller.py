@@ -14,7 +14,7 @@ from src.dashboard.schemas.response.dashboard import (
     DashBoardDemographics,
 )
 
-from services import DashBoardService
+from ..services import DashBoardService
 
 from config.config import Settings
 

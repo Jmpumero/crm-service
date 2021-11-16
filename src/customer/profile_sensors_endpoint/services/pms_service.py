@@ -345,10 +345,12 @@ class PmsService(PmsQueries):
                     item["customer_id"], item["entity"], constrain, search, skip, limit
                 )
 
-            async for p_c_d in pms_customer_data:
-                customer_list.append(p_c_d)
+                async for p_c_d in pms_customer_data:
+                    customer_list.append(p_c_d)
 
-            for master in customer_list:
+            customer_list_clean = pms_lib.remove_duplicates(customer_list)
+
+            for master in customer_list_clean:
                 if master["entity"] == "pms_booker":
                     for book in master["data"]["bBooks"]:
                         pms_books_history_list.append(
@@ -504,17 +506,29 @@ class PmsService(PmsQueries):
                                 )
                             )
 
+            pms_guests_history_list_clean = pms_lib.remove_duplicates(
+                pms_guests_history_list
+            )
+
+            pms_companions_history_list_clean = pms_lib.remove_duplicates(
+                pms_guests_history_list
+            )
+
+            pms_books_history_list_clean = pms_lib.remove_duplicates(
+                pms_books_history_list
+            )
+
             response = {
                 "pms_history_response": {
                     "status_code": status.HTTP_200_OK,
                     "message": "Ok",
                 },
-                "total_items": len(pms_books_history_list),
+                "total_items": len(pms_books_history_list_clean),
                 "showing": limit,
                 "skip": skip,
-                "guest_data": pms_guests_history_list,
-                "companion_data": pms_companions_history_list,
-                "booking_data": pms_books_history_list,
+                "guest_data": pms_guests_history_list_clean,
+                "companion_data": pms_companions_history_list_clean,
+                "booking_data": pms_books_history_list_clean,
             }
 
             if len(pms_books_history_list) > 0:

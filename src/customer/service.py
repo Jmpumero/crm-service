@@ -275,9 +275,9 @@ class Service(MongoQueries):
             )
 
         elif query_params.sensor == "sensor_4":
-            items = []
+            response = self.response_history_sensor_building([], 0)
         elif query_params.sensor == "sensor_1":
-            items = []
+            response = self.response_history_sensor_building([], 0)
         else:
             response = self.response_history_sensor_building([], [])
 

@@ -10,7 +10,6 @@ from src.blacklist.repositories import BlacklistQueries
 
 from src.blacklist.schemas import (
     BlacklistResponse,
-    BlackListUpdate,
     BlacklistUpdateResponse,
 )
 

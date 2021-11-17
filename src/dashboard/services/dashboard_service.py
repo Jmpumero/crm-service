@@ -27,15 +27,119 @@ class DashBoardService(PmsQueries):
     def __init__(self):
         super().__init__()
 
-    def revenue_per_stay(self, date_from: str, date_to: str, property: str):
-        revenues_booker = self.get_revenues("pms_booker")
-        revenues_guest = self.get_revenues("pms_pri_guest")
+    async def __get_cancellations(self, date_from, date_to, property, segment):
+        """Cancellation Percentage"""
+
+        cancellations_booker = await self.get_cancellations(
+            "pms_booker", date_from, date_to, property, segment
+        ).to_list(None)
+
+        cancellations_guest = await self.get_cancellations(
+            "pms_pri_guest", date_from, date_to, property, segment
+        ).to_list(None)
+
+        total_cancellations = cancellations_booker + cancellations_guest
+
+        cancellled = [
+            i["count"] for i in total_cancellations if i["_id"] == "cancelled"
+        ]
+
+        non_cancelled = [
+            i["count"] for i in total_cancellations if i["_id"] != "cancelled"
+        ]
+
+        return {
+            "cancelled": reduce(lambda a, b: a + b, cancellled, 0),
+            "non_cancelled": reduce(lambda a, b: a + b, non_cancelled, 0),
+        }
+
+    async def __extras_over_revenue(self, date_from, date_to, property, segment):
+        """Graph for extras over revenue income percentage"""
+
+        revenues_booker = await self.get_revenues(
+            "pms_booker", date_from, date_to, property, segment
+        ).to_list(None)
+
+        revenues_guest = await self.get_revenues(
+            "pms_pri_guest", date_from, date_to, property, segment
+        ).to_list(None)
 
         joined_list = revenues_booker + revenues_guest
 
-        print(joined_list)
+        revenues_list = [
+            Forecasts(
+                concept=item["_id"],
+                count=item["count"],
+                net_amount=item["total_income"],
+                avg_income=item["average_income"],
+            )
+            for item in joined_list
+        ]
 
-    async def get_dashboard_graphs(self, customer_id, sensor):
+        revenue_list_reduced = [i.dict() for i in revenues_list]
+
+        upsellings = pms_lib.get_revenues(revenue_list_reduced, "UPSELLING")["total"]
+
+        total = (
+            pms_lib.get_revenues(revenue_list_reduced, "ACCOMMODATION")["total"]
+            + pms_lib.get_revenues(revenue_list_reduced, "FOOD AND BEVERAGES")["total"]
+            + pms_lib.get_revenues(revenue_list_reduced, "UPSELLING")["total"]
+        )
+
+        return {"total_revenue": total, "upselling_revenue": upsellings}
+
+    async def __age_range(
+        self, date_from: str, date_to: str, property: str, segment: str
+    ):
+        return {"param_1": "hola", "param_2": "mario"}
+
+    async def get_activity_graphs(
+        self, date_from: str, date_to: str, property: str, segment: str
+    ) -> DashBoardActivity:
+        response = {
+            "revenue_distribution": None,
+            "revenue_per_stay": None,
+            "cancellation_perc": await self.__get_cancellations(
+                date_from, date_to, property, segment
+            ),
+            "top_ten_upsellings": None,
+            "redeemed_promos": None,
+            "extras_over_revenue": await self.__extras_over_revenue(
+                date_from, date_to, property, segment
+            ),
+            "top_selling_products": None,
+            "customer_age_range": await self.__age_range(
+                date_from, date_to, property, segment
+            ),
+            "customer_gender_ratio": None,
+            "direct_reservations_perc": None,
+            "direct_reservation_expense_type": None,
+            "direct_reservation_up_over_total_exp_perc": None,
+            "direct_reservation_topt_ten_sold_up": None,
+        }
+
+        return response
+
+    async def get_demographics_graphs(
+        self, date_from: str, date_to: str, property: str, segment: str
+    ) -> DashBoardDemographics:
+        response = {
+            "funnel": None,
+            "funnel_plus_extras": None,
+            "extras_over_revenue": await self.__extras_over_revenue(
+                date_from, date_to, property, segment
+            ),
+            "customer_gender_ratio": None,
+            "typology_customer_volume": None,
+            "customer_moments": None,
+            "top_selling_products": None,
+            "customer_age_range": None,
+        }
+
+        return response
+
+    ################ LEGACY ##########################################
+    async def get(self, customer_id, sensor):
         masters_list = []
         books_list = []
         stay_time_list = []

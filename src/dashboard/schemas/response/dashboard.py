@@ -1,7 +1,7 @@
 from typing import List, Optional, Any
 from enum import Enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class PmsGeneral(BaseModel):
@@ -49,7 +49,8 @@ class RevenuePerStay(BaseModel):
 
 
 class CancellationPercentage(BaseModel):
-    pass
+    cancelled: float = Field(...)
+    non_cancelled: float = Field(...)
 
 
 class TopTenSoldUpsellings(BaseModel):
@@ -61,7 +62,8 @@ class RedeemedPromosPercentage(BaseModel):
 
 
 class UpsellingsOverRevenue(BaseModel):
-    pass
+    total_revenue: float = Field(...)
+    upselling_revenue: float = Field(...)
 
 
 class TopSellingProducts(BaseModel):
@@ -70,7 +72,8 @@ class TopSellingProducts(BaseModel):
 
 class CustomersAgeRange(BaseModel):
 
-    pass
+    param_1: str
+    param_2: str
 
 
 class CustomersGenderRatio(BaseModel):

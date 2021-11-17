@@ -1,5 +1,7 @@
+from typing import Optional
+from datetime import datetime
+
 from bson.son import SON
-from pydantic.types import constr
 
 from src.customer.repository import MongoQueries
 from config.config import Settings
@@ -12,16 +14,12 @@ class PmsQueries(MongoQueries):
     def __init__(self):
         super().__init__()
 
-    def count_customer_master_books(self, customer_id):
-        count = self.pms_collection.count_documents({"customer_id": customer_id})
+    def count_master_books(self):
+        count = self.pms_collection.count_documents({})
         return count
 
-    def get_all_customer_stays(self, customer_id):
-        match_stage = {
-            "$match": {
-                "customer_id": customer_id,
-            }
-        }
+    def get_all_stays(self):
+        match_stage = {"$match": {}}
         add_date_field_stage = {
             "$addFields": {
                 "checkin_date": {"$dateFromString": {"dateString": "$data.checkin"}}
@@ -84,8 +82,15 @@ class PmsQueries(MongoQueries):
 
         return pax_avg
 
-    def get_cancellations(self, customer_id, customer_type):
-        match_stage = {"$match": {"customer_id": customer_id}}
+    def get_cancellations(
+        self,
+        customer_type,
+        date_from: Optional[str] = None,
+        date_to: Optional[str] = None,
+        property: Optional[str] = None,
+        segment: Optional[str] = None,
+    ):
+        match_stage = {"$match": {}}
         if customer_type == "pms_booker":
             group_stage = {
                 "$group": {
@@ -275,8 +280,30 @@ class PmsQueries(MongoQueries):
 
         return result
 
-    def get_revenues(self, customer_type):
-        match_stage = {"$match": {}}
+    def get_revenues(
+        self,
+        customer_type,
+        date_from: Optional[str] = None,
+        date_to: Optional[str] = None,
+        property: Optional[str] = None,
+        segment: Optional[str] = None,
+    ):
+
+        add_date_field_stage = {
+            "$addFields": {
+                "checkin_date": {"$dateFromString": {"dateString": "$data.checkin"}}
+            }
+        }
+
+        if date_from and date_to:
+            date_from_ = datetime.strptime(date_from, "%Y-%m-%d")
+            date_to_ = datetime.strptime(date_to, "%Y-%m-%d")
+
+            match_stage = {
+                "$match": {"checkin_date": {"$gte": date_from_, "$lt": date_to_}}
+            }
+        else:
+            match_stage = {"$match": {}}
 
         if customer_type == "pms_booker":
             project_stage_1 = {
@@ -318,16 +345,10 @@ class PmsQueries(MongoQueries):
                 }
             }
 
-        # facet = {
-        #     "$facet": {
-        #         "concept": [match_stage, project_stage],
-        #         "total": [match_stage, {"$count": "total"}],
-        #     }
-        # }
-
         sort_stage = {"$sort": SON([("count", -1), ("_id", -1)])}
 
         pipeline = [
+            add_date_field_stage,
             match_stage,
             project_stage_1,
             unwind_stage_1,
@@ -337,32 +358,6 @@ class PmsQueries(MongoQueries):
             sort_stage,
         ]
 
-        # pipeline = [facet]
         upsellings_food_beverages = self.pms_collection.aggregate(pipeline)
 
         return upsellings_food_beverages
-
-    def get_food_beverages(self, customer_id, customer_type):
-        match_stage = {"$match": {"customer_id": customer_id}}
-
-        if customer_type == "pms_booker":
-            group_stage = {
-                "$group": {
-                    "_id": "$data.bBooks.bForecast.concept",
-                    "count": {"$sum": 1},
-                    "total_income": {"$sum": "$data.bBooks.bForecast.netAmt"},
-                }
-            }
-        elif customer_type == "pms_pri_guest":
-            group_stage = {
-                "$group": {
-                    "_id": "$data.bForecast.concept",
-                    "count": {"$sum": 1},
-                    "total_income": {"$sum": "$data.bForecast.netAmt"},
-                }
-            }
-        sort_stage = {"$sort": SON([("count", -1), ("_id", -1)])}
-        pipeline = [match_stage, group_stage, sort_stage]
-        food_beverages = self.pms_collection.aggregate(pipeline)
-
-        return food_beverages

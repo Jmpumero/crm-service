@@ -43,12 +43,14 @@ async def dashboard_activity(
     date_from: str = Query(default=None),
     date_to: str = Query(default=None),
     property: str = Query(default=None),
+    segment: str = Query(default=None),
 ):
     """
-    Get Customer Sensors list
+    Activity Dashboard
     """
 
-    pass
+    service = DashBoardService()
+    return await service.get_activity_graphs(date_from, date_to, property, segment)
 
 
 # Demographics endpoint
@@ -65,9 +67,11 @@ async def dashboard_demographics(
     date_from: str = Query(default=None),
     date_to: str = Query(default=None),
     property: str = Query(default=None),
+    segment: str = Query(default=None),
 ):
     """
-    Get Customer Sensors list
+    Demographics Dashboard
     """
 
-    pass
+    service = DashBoardService()
+    return await service.get_demographics_graphs(date_from, date_to, property, segment)

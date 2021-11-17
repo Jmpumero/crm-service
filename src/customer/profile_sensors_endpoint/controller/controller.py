@@ -190,8 +190,9 @@ async def get_pms(customer_id: str = Path(...)):
 @remove_422
 async def get_pms_history(
     customer_id: str = Path(...),
-    constrain: PmsHistoryListConstrains = Query(default="select_one"),
-    search: str = Query(default=None, min_length=1),
+    # constrain: Optional[PmsHistoryListConstrains] = Query(default="select_one"),
+    constrain: Optional[str] = Query(None),
+    search: Optional[str] = Query(default=None, min_length=1),
     skip: int = Query(default=0),
     limit: int = Query(default=10),
 ):

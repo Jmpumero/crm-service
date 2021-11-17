@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 
 class PmsHistoryListConstrains(Enum):
-    booking_select = "select_one"
+    booking_select = ""
     booking_code = "booking"
     booking_date = "date"
     booking_min_amt = "min_amount"

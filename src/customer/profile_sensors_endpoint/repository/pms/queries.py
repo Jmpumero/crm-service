@@ -202,13 +202,15 @@ class PmsQueries(MongoQueries):
             date_constrain = "data.checkin"
             amount_constrain = "data.netAmt"
 
-        if constrain.value == "select_one":
+        # if constrain.value == "select_one":
+        if constrain is None:
             match_stage = {
                 "$match": {
                     "customer_id": customer_id,
                 }
             }
-        elif constrain.value == "booking":
+        # elif constrain.value == "booking":
+        elif constrain == "booking":
             match_stage = {
                 "$match": {
                     "$and": [
@@ -223,7 +225,8 @@ class PmsQueries(MongoQueries):
                 }
             }
 
-        elif constrain.value == "date":
+        # elif constrain.value == "date":
+        elif constrain == "date":
             match_stage = {
                 "$match": {
                     "$and": [
@@ -232,7 +235,7 @@ class PmsQueries(MongoQueries):
                     ]
                 }
             }
-        elif constrain.value == "min_amount":
+        elif constrain == "min_amount":
             match_stage = {
                 "$match": {
                     "$and": [
@@ -241,7 +244,7 @@ class PmsQueries(MongoQueries):
                     ]
                 }
             }
-        elif constrain.value == "max_amount":
+        elif constrain == "max_amount":
             match_stage = {
                 "$match": {
                     "$and": [

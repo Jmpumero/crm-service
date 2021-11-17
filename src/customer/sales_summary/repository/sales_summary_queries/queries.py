@@ -8,7 +8,7 @@ from config.config import Settings
 global_settings = Settings()
 
 
-class PmsQueries(MongoQueries):
+class SalesSummaryQueries(MongoQueries):
     def __init__(self):
         super().__init__()
 
@@ -202,15 +202,13 @@ class PmsQueries(MongoQueries):
             date_constrain = "data.checkin"
             amount_constrain = "data.netAmt"
 
-        # if constrain.value == "select_one":
-        if constrain is None:
+        if constrain.value == "select_one":
             match_stage = {
                 "$match": {
                     "customer_id": customer_id,
                 }
             }
-        # elif constrain.value == "booking":
-        elif constrain == "booking":
+        elif constrain.value == "booking":
             match_stage = {
                 "$match": {
                     "$and": [
@@ -225,8 +223,7 @@ class PmsQueries(MongoQueries):
                 }
             }
 
-        # elif constrain.value == "date":
-        elif constrain == "date":
+        elif constrain.value == "date":
             match_stage = {
                 "$match": {
                     "$and": [
@@ -235,7 +232,7 @@ class PmsQueries(MongoQueries):
                     ]
                 }
             }
-        elif constrain == "min_amount":
+        elif constrain.value == "min_amount":
             match_stage = {
                 "$match": {
                     "$and": [
@@ -244,7 +241,7 @@ class PmsQueries(MongoQueries):
                     ]
                 }
             }
-        elif constrain == "max_amount":
+        elif constrain.value == "max_amount":
             match_stage = {
                 "$match": {
                     "$and": [

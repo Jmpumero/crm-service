@@ -328,133 +328,54 @@ class PmsService(PmsQueries):
             return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=response)
 
     async def get_pms_history(self, customer_id, constrain, search, skip, limit):
-        try:
-            master_books_list = []
-            customer_list = []
-            pms_books_history_list = []
-            pms_guests_history_list = []
-            pms_companions_history_list = []
+        # try:
+        master_books_list = []
+        customer_list = []
+        pms_books_history_list = []
+        pms_guests_history_list = []
+        pms_companions_history_list = []
 
-            pms_data = self.get_all_customer_stays(customer_id)
+        pms_data = self.get_all_customer_stays(customer_id)
 
-            async for data in pms_data:
-                master_books_list.append(data)
+        async for data in pms_data:
+            master_books_list.append(data)
 
-            for item in master_books_list:
-                pms_customer_data = self.get_bookings_agg_customer(
-                    item["customer_id"], item["entity"], constrain, search, skip, limit
-                )
+        for item in master_books_list:
+            pms_customer_data = self.get_bookings_agg_customer(
+                item["customer_id"], item["entity"], constrain, search, skip, limit
+            )
 
-                async for p_c_d in pms_customer_data:
-                    customer_list.append(p_c_d)
+            async for p_c_d in pms_customer_data:
+                customer_list.append(p_c_d)
 
-            customer_list_clean = pms_lib.remove_duplicates(customer_list)
+        customer_list_clean = pms_lib.remove_duplicates(customer_list)
 
-            for master in customer_list_clean:
-                if master["entity"] == "pms_booker":
-                    for book in master["data"]["bBooks"]:
-                        pms_books_history_list.append(
-                            PmsBook(
-                                code=book["code"],
-                                checkin=book["checkin"],
-                                checkout=book["checkout"],
-                                cost=book["netAmt"],
-                                room_type=book["riRoomType"]["name"],
-                                rate_plan=book["riRatePlan"]["name"],
-                                currency=book["riRatePlan"]["coreCurrency"]["iso"],
-                                reseller=master["data"]["preseller"]["name"],
-                                meal_plan=book["riMealPlan"]["name"],
-                                property=master["data"]["sproperty"]["name"],
-                                taxes=book["tax"],
-                            )
-                        )
-                        for guest in book["bBookPGuests"]:
-                            if guest["isMain"]:
-                                pms_guests_history_list.append(
-                                    PmsHistoryPrimaryGuest(
-                                        book_code=book["code"],
-                                        name=guest["pguest"]["name"],
-                                        last_name=guest["pguest"]["lastname"],
-                                        nationality=guest["pguest"]["coreCountry"][
-                                            "name"
-                                        ],
-                                        phone=guest["pguest"]["phone"],
-                                        # address=master["data"]["pms_customer"]["address"],
-                                        email=guest["pguest"]["email"],
-                                        documentId=[
-                                            {
-                                                "documentType": "DNI",
-                                                "documentNumber": guest["pguest"][
-                                                    "dni"
-                                                ],
-                                            },
-                                            {
-                                                "documentType": "Passport",
-                                                "documentNumber": guest["pguest"][
-                                                    "passport"
-                                                ],
-                                            },
-                                        ],
-                                        # civil_status=master["data"]["pms_customer"][
-                                        #     "civil_ststus"
-                                        # ],
-                                        age=pms_lib.calculate_customer_age(
-                                            guest["pguest"]["birthdate"]
-                                        ),
-                                        country=guest["pguest"]["coreCountry"]["name"],
-                                        # city=master["data"]["pms_customer"]["city"],
-                                    )
-                                )
-                            else:
-                                pms_companions_history_list.append(
-                                    PmsHistorySecondaryGuest(
-                                        book_code=book["code"],
-                                        name=guest["pguest"]["name"],
-                                        last_name=guest["pguest"]["lastname"],
-                                        documentId=[
-                                            {
-                                                "documentType": "DNI",
-                                                "documentNumber": guest["pguest"][
-                                                    "dni"
-                                                ],
-                                            },
-                                            {
-                                                "documentType": "Passport",
-                                                "documentNumber": guest["pguest"][
-                                                    "passport"
-                                                ],
-                                            },
-                                        ],
-                                        age=pms_lib.calculate_customer_age(
-                                            guest["pguest"]["birthdate"]
-                                        ),
-                                    )
-                                )
-                elif master["entity"] == "pms_pri_guest":
+        for master in customer_list_clean:
+            if master["entity"] == "pms_booker":
+                for book in master["data"]["bBooks"]:
                     pms_books_history_list.append(
                         PmsBook(
-                            code=master["data"]["code"],
-                            checkin=master["data"]["checkin"],
-                            checkout=master["data"]["checkout"],
-                            cost=master["data"]["netAmt"],
-                            room_type=master["data"]["riRoomType"]["name"],
-                            rate_plan=master["data"]["riRatePlan"]["name"],
-                            currency=master["data"]["riRatePlan"]["coreCurrency"][
-                                "iso"
-                            ],
-                            meal_plan=master["data"]["riMealPlan"]["name"],
-                            property=master["data"]["riRatePlan"]["sproperty"]["name"],
-                            taxes=float(master["data"]["tax"]),
+                            code=book["code"],
+                            checkin=book["checkin"],
+                            checkout=book["checkout"],
+                            cost=book["netAmt"],
+                            room_type=book["riRoomType"]["name"],
+                            rate_plan=book["riRatePlan"]["name"],
+                            currency=book["riRatePlan"]["coreCurrency"]["iso"],
+                            reseller=master["data"]["preseller"]["name"],
+                            meal_plan=book["riMealPlan"]["name"],
+                            property=master["data"]["sproperty"]["name"],
+                            taxes=book["tax"],
                         )
                     )
-                    for guest in master["data"]["bBookPGuests"]:
+                    for guest in book["bBookPGuests"]:
                         if guest["isMain"]:
                             pms_guests_history_list.append(
                                 PmsHistoryPrimaryGuest(
-                                    book_code=master["data"]["code"],
+                                    book_code=book["code"],
                                     name=guest["pguest"]["name"],
                                     last_name=guest["pguest"]["lastname"],
-                                    nationality="PENDIENTE",
+                                    nationality=guest["pguest"]["coreCountry"]["name"],
                                     phone=guest["pguest"]["phone"],
                                     # address=master["data"]["pms_customer"]["address"],
                                     email=guest["pguest"]["email"],
@@ -470,22 +391,20 @@ class PmsService(PmsQueries):
                                             ],
                                         },
                                     ],
-                                    # civil_status=guest["pms_customer"][
+                                    # civil_status=master["data"]["pms_customer"][
                                     #     "civil_ststus"
                                     # ],
                                     age=pms_lib.calculate_customer_age(
                                         guest["pguest"]["birthdate"]
                                     ),
-                                    language="PENDIENTE",
                                     country=guest["pguest"]["coreCountry"]["name"],
                                     # city=master["data"]["pms_customer"]["city"],
                                 )
                             )
-
                         else:
                             pms_companions_history_list.append(
                                 PmsHistorySecondaryGuest(
-                                    book_code=master["data"]["code"],
+                                    book_code=book["code"],
                                     name=guest["pguest"]["name"],
                                     last_name=guest["pguest"]["lastname"],
                                     documentId=[
@@ -505,45 +424,110 @@ class PmsService(PmsQueries):
                                     ),
                                 )
                             )
-
-            pms_guests_history_list_clean = pms_lib.remove_duplicates(
-                pms_guests_history_list
-            )
-
-            pms_companions_history_list_clean = pms_lib.remove_duplicates(
-                pms_guests_history_list
-            )
-
-            pms_books_history_list_clean = pms_lib.remove_duplicates(
-                pms_books_history_list
-            )
-
-            response = {
-                "pms_history_response": {
-                    "status_code": status.HTTP_200_OK,
-                    "message": "Ok",
-                },
-                "total_items": len(pms_books_history_list_clean),
-                "showing": limit,
-                "skip": skip,
-                "guest_data": pms_guests_history_list_clean,
-                "companion_data": pms_companions_history_list_clean,
-                "booking_data": pms_books_history_list_clean,
-            }
-
-            if len(pms_books_history_list) > 0:
-                return response
-            else:
-                response = {
-                    "code": status.HTTP_404_NOT_FOUND,
-                    "message": f"Not Found",
-                }
-                return JSONResponse(
-                    status_code=status.HTTP_404_NOT_FOUND, content=response
+            elif master["entity"] == "pms_pri_guest":
+                pms_books_history_list.append(
+                    PmsBook(
+                        code=master["data"]["code"],
+                        checkin=master["data"]["checkin"],
+                        checkout=master["data"]["checkout"],
+                        cost=master["data"]["netAmt"],
+                        room_type=master["data"]["riRoomType"]["name"],
+                        rate_plan=master["data"]["riRatePlan"]["name"],
+                        currency=master["data"]["riRatePlan"]["coreCurrency"]["iso"],
+                        meal_plan=master["data"]["riMealPlan"]["name"],
+                        property=master["data"]["riRatePlan"]["sproperty"]["name"],
+                        taxes=float(master["data"]["tax"]),
+                    )
                 )
-        except Exception as err:
+                for guest in master["data"]["bBookPGuests"]:
+                    if guest["isMain"]:
+                        pms_guests_history_list.append(
+                            PmsHistoryPrimaryGuest(
+                                book_code=master["data"]["code"],
+                                name=guest["pguest"]["name"],
+                                last_name=guest["pguest"]["lastname"],
+                                nationality="PENDIENTE",
+                                phone=guest["pguest"]["phone"],
+                                # address=master["data"]["pms_customer"]["address"],
+                                email=guest["pguest"]["email"],
+                                documentId=[
+                                    {
+                                        "documentType": "DNI",
+                                        "documentNumber": guest["pguest"]["dni"],
+                                    },
+                                    {
+                                        "documentType": "Passport",
+                                        "documentNumber": guest["pguest"]["passport"],
+                                    },
+                                ],
+                                # civil_status=guest["pms_customer"][
+                                #     "civil_ststus"
+                                # ],
+                                age=pms_lib.calculate_customer_age(
+                                    guest["pguest"]["birthdate"]
+                                ),
+                                language="PENDIENTE",
+                                country=guest["pguest"]["coreCountry"]["name"],
+                                # city=master["data"]["pms_customer"]["city"],
+                            )
+                        )
+
+                    else:
+                        pms_companions_history_list.append(
+                            PmsHistorySecondaryGuest(
+                                book_code=master["data"]["code"],
+                                name=guest["pguest"]["name"],
+                                last_name=guest["pguest"]["lastname"],
+                                documentId=[
+                                    {
+                                        "documentType": "DNI",
+                                        "documentNumber": guest["pguest"]["dni"],
+                                    },
+                                    {
+                                        "documentType": "Passport",
+                                        "documentNumber": guest["pguest"]["passport"],
+                                    },
+                                ],
+                                age=pms_lib.calculate_customer_age(
+                                    guest["pguest"]["birthdate"]
+                                ),
+                            )
+                        )
+
+        pms_guests_history_list_clean = pms_lib.remove_duplicates(
+            pms_guests_history_list
+        )
+
+        pms_companions_history_list_clean = pms_lib.remove_duplicates(
+            pms_guests_history_list
+        )
+
+        pms_books_history_list_clean = pms_lib.remove_duplicates(pms_books_history_list)
+
+        response = {
+            "pms_history_response": {
+                "status_code": status.HTTP_200_OK,
+                "message": "Ok",
+            },
+            "total_items": len(pms_books_history_list_clean),
+            "showing": limit,
+            "skip": skip,
+            "guest_data": pms_guests_history_list_clean,
+            "companion_data": pms_companions_history_list_clean,
+            "booking_data": pms_books_history_list_clean,
+        }
+
+        if len(pms_books_history_list) > 0:
+            return response
+        else:
             response = {
                 "code": status.HTTP_404_NOT_FOUND,
-                "message": f"Error: {err}",
+                "message": f"Not Found",
             }
             return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=response)
+        # except Exception as err:
+        #     response = {
+        #         "code": status.HTTP_404_NOT_FOUND,
+        #         "message": f"Error: {err}",
+        #     }
+        #     return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=response)

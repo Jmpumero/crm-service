@@ -51,13 +51,23 @@ def validate_most_used_room_type(room_list):
 
 
 def calculate_customer_age(birthdate):
-    if birthdate:
-        age = (
-            datetime.utcnow() - datetime.strptime(birthdate, "%Y-%m-%d")
-        ) / timedelta(days=365.2425)
-        return age
-    else:
-        return None
+    try:
+        if birthdate:
+            age = (
+                datetime.utcnow() - datetime.strptime(birthdate, "%Y-%m-%d")
+            ) / timedelta(days=365.2425)
+            return age
+        else:
+            return None
+    except ValueError:
+        if birthdate:
+            age = (
+                datetime.utcnow()
+                - datetime.strptime(birthdate, "%Y-%m-%dT%H:%M:%S.%fZ")
+            ) / timedelta(days=365.2425)
+            return age
+        else:
+            return None
 
 
 def timestamp(dt):

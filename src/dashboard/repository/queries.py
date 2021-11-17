@@ -275,8 +275,8 @@ class PmsQueries(MongoQueries):
 
         return result
 
-    def get_upsellings_food_beverages(self, customer_id, customer_type):
-        match_stage = {"$match": {"customer_id": customer_id}}
+    def get_revenues(self, customer_type):
+        match_stage = {"$match": {}}
 
         if customer_type == "pms_booker":
             project_stage_1 = {

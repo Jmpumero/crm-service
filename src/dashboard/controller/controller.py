@@ -40,7 +40,9 @@ dashboard_router = APIRouter(
 )
 @remove_422
 async def dashboard_activity(
-    date_from: str = Query(...), date_to: str = Query(...), property: str = Query(...)
+    date_from: str = Query(default=None),
+    date_to: str = Query(default=None),
+    property: str = Query(default=None),
 ):
     """
     Get Customer Sensors list
@@ -60,7 +62,9 @@ async def dashboard_activity(
 )
 @remove_422
 async def dashboard_demographics(
-    date_from: str = Query(...), date_to: str = Query(...), property: str = Query(...)
+    date_from: str = Query(default=None),
+    date_to: str = Query(default=None),
+    property: str = Query(default=None),
 ):
     """
     Get Customer Sensors list

@@ -14,7 +14,7 @@ from ..schemas.response.customers_sensors import (
     Forecasts,
 )
 from src.customer.profile_sensors_endpoint.repository.pms import PmsQueries
-from src.customer.profile_sensors_endpoint.libs import pms_lib
+from core.libs import pms_lib
 
 
 class PmsService(PmsQueries):

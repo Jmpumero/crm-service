@@ -13,8 +13,8 @@ from src.dashboard.schemas.response.dashboard import (
     Forecasts,
 )
 
-from src.customer.profile_sensors_endpoint.repository.pms import PmsQueries
-from src.customer.profile_sensors_endpoint.libs import pms_lib
+from src.dashboard.repository import PmsQueries
+from core.libs import pms_lib
 from http_exceptions import NotFoundException
 
 
@@ -26,6 +26,14 @@ class DashBoardService(PmsQueries):
 
     def __init__(self):
         super().__init__()
+
+    def revenue_per_stay(self, date_from: str, date_to: str, property: str):
+        revenues_booker = self.get_revenues("pms_booker")
+        revenues_guest = self.get_revenues("pms_pri_guest")
+
+        joined_list = revenues_booker + revenues_guest
+
+        print(joined_list)
 
     async def get_dashboard_graphs(self, customer_id, sensor):
         masters_list = []

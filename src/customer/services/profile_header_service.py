@@ -15,7 +15,7 @@ from src.customer.profile_sensors_endpoint.schemas.response.customers_sensors im
 )
 
 from src.customer.profile_sensors_endpoint.repository.pms import PmsQueries
-from src.customer.profile_sensors_endpoint.libs import pms_lib
+from core.libs import pms_lib
 
 
 class ProfileHeaderService(MongoQueries):

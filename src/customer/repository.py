@@ -455,7 +455,7 @@ class MongoQueries(ConnectionMongo):
                                         "email": {
                                             "$elemMatch": {
                                                 "email": {
-                                                    "$regex": f".*{item_search.lower()}.*",
+                                                    "$regex": f".*{item_search}.*",
                                                     "$options": "i",
                                                 },
                                                 "isMain": True,

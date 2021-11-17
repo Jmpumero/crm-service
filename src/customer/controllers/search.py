@@ -9,16 +9,16 @@ from src.customer.schemas.post.responses.customer_crud import CustomerCRUDRespon
 
 from core import keycloack_guard
 
-from services import SearchService
+from ..services import SearchService
 from utils.remove_422 import remove_422
 
 
 search_customers_router = APIRouter(
-    tags=["Main View Search Customers"], dependencies=[Depends(keycloack_guard)]
+    tags=["Search Customers"], dependencies=[Depends(keycloack_guard)]
 )
 
 
-@search_customers_router.get("/customers/")
+@search_customers_router.get("/search/customers/")
 @remove_422
 async def get_customers(
     skip: int = Query(0),

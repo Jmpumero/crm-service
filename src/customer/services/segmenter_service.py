@@ -40,25 +40,26 @@ class SegmenterService(MongoQueries):
         try:
             result = await self.repository.find_segments(query_params)
             result = await result.to_list(length=query_params.limit)
+
             author = await self.get_author_segments_list()
             if result != None and author != None:
                 segments["total_items"] = result[0]["total_items"][0]["total_items"]
                 segments["total_shows"] = result[0]["total_show"][0]["show_items"]
                 segments["items"] = result[0]["segments"]
                 segments["authors"] = author
-                segments["global_total_clients"] = await self.total_customer()
-                segments["total_enable_clients"] = (
-                    await self.total_customer()
-                ) - await self.total_customer_in_blacklist(True)
 
         except Exception as e:
-            # print(e)
+            print(e)
             segments["total_items"] = 0
             segments["total_shows"] = 0
             segments["items"] = []
             segments["authors"] = []
-            segments["global_total_clients"] = 0
-            segments["total_enable_clients"] = 0
+
             result = None
+
+        segments["global_total_clients"] = await self.total_customer()
+        segments["total_enable_clients"] = (
+            await self.total_customer()
+        ) - await self.total_customer_in_blacklist(True)
 
         return segments

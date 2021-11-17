@@ -85,24 +85,24 @@ class SearchQueries(ConnectionMongo):
             match = {
                 "$match": {
                     "$or": [
-                        # {
-                        #     "name": {
-                        #         "$regex": f".*{item}.*",
-                        #         "$options": "i",
-                        #     }
-                        # },
-                        # {
-                        #     "last_name": {
-                        #         "$regex": f".*{item}.*",
-                        #         "$options": "i",
-                        #     }
-                        # },
-                        # {
-                        #     "civil_status": {
-                        #         "$regex": f".*{item}.*",
-                        #         "$options": "i",
-                        #     }
-                        # },
+                        {
+                            "name": {
+                                "$regex": f".*{item}.*",
+                                "$options": "i",
+                            }
+                        },
+                        {
+                            "last_name": {
+                                "$regex": f".*{item}.*",
+                                "$options": "i",
+                            }
+                        },
+                        {
+                            "civil_status": {
+                                "$regex": f".*{item}.*",
+                                "$options": "i",
+                            }
+                        },
                         {
                             "email": {
                                 "$elemMatch": {

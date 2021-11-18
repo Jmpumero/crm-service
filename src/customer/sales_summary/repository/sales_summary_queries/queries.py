@@ -57,6 +57,38 @@ class SalesSummaryQueries(MongoQueries):
 
         return most_used
 
+    def group_by_most_used_app(self, customer_id):
+        pipeline = [
+            {"$match": {"customer_id": customer_id}},
+            {
+                "$group": {
+                    "_id": "$data.playback_pair.appName",
+                    "count": {"$sum": 1},
+                    "average": {
+                        "$avg": {
+                            "$subtract": [
+                                {
+                                    "$dateFromString": {
+                                        "dateString": "$data.playback_pair.endDate",
+                                    }
+                                },
+                                {
+                                    "$dateFromString": {
+                                        "dateString": "$data.playback_pair.startDate",
+                                    }
+                                },
+                            ]
+                        },
+                    },
+                }
+            },
+            {"$limit": 5},
+            {"$sort": SON([("count", -1), ("_id", -1)])},
+        ]
+        most_used = self.cast_collection.aggregate(pipeline)
+
+        return most_used
+
     def get_avg_pax(self, customer_id):
         match_stage = {"$match": {"customer_id": customer_id}}
 

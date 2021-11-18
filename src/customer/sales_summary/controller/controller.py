@@ -25,7 +25,7 @@ sales_summary_router = APIRouter(
     },
 )
 
-# SENSORS TAB ENDPOINT
+# Sales Summary Tab ENDPOINT
 @sales_summary_router.get(
     "/customer/{customer_id}/sales_summary",
     summary="Sales Summary Tab in Customer Profile",
@@ -35,7 +35,7 @@ sales_summary_router = APIRouter(
     status_code=status.HTTP_200_OK,
 )
 @remove_422
-async def get_sensors_tab(customer_id: str = Path(...)):
+async def get_get_sales_summary(customer_id: str = Path(...)):
     """
     Get Customer Sensors list
     """

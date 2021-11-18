@@ -63,7 +63,7 @@ customers_router = APIRouter(
 )
 
 
-@customers_router.get("/customers/")
+@customers_router.get("/customers/", deprecated=True)
 @remove_422
 async def get_customers(
     query_params: SearchCustomersQueryParams = Depends(SearchCustomersQueryParams),

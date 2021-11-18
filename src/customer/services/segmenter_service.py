@@ -28,7 +28,8 @@ class SegmenterService(MongoQueries):
             list_authors = self.simple_delete_duplicate_list(list_authors)
             # print(list_authors)
         except Exception as e:
-            print(e)
+            ...
+            # print(e)
         return list_authors
 
     async def get_segmenters(

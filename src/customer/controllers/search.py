@@ -1,24 +1,29 @@
 from __future__ import annotations
 from aioredis.client import Redis
-from typing import Any, List
 
-from fastapi import APIRouter, Depends
+# from typing import Any, List
+
+from fastapi import APIRouter, Depends, status
 from fastapi.param_functions import Query
 
-from src.customer.schemas.post.responses.customer_crud import CustomerCRUDResponse
-
 from core import keycloack_guard
-
 from ..services import SearchService
 from utils.remove_422 import remove_422
+from http_exceptions import NotFoundError
 
+from ..schemas.get import ResponseSearch
 
 search_customers_router = APIRouter(
     tags=["Search Customers"], dependencies=[Depends(keycloack_guard)]
 )
 
 
-@search_customers_router.get("/search/customers/")
+@search_customers_router.get(
+    "/search/customers/",
+    response_model=ResponseSearch,
+    # response_model_exclude_unset=True,
+    # status_code=status.HTTP_200_OK,
+)
 @remove_422
 async def get_customers(
     skip: int = Query(0),

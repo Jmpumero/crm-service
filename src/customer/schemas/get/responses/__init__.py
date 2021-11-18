@@ -13,7 +13,12 @@ from .customer_crud import (
     SearchUpdateResponse,
     SearchMerge,
     SearchMergeResponse,
+    Addresses,
+    Languages,
+    Emails,
+    Phones,
 )
 from .cross_selling import Product, CrossSellingAndProductsResponse, CrossSelling
 
 from .segmenter import Segmenter, SegmenterResponse
+from .search import ResponseSearch

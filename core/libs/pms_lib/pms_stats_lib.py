@@ -26,6 +26,7 @@ def get_revenues(forecasts, concept):
     )
 
     result = {
+        "concept": concept,
         "count": forecast_count,
         "total": forecast_income,
         "avg": forecast_avg,

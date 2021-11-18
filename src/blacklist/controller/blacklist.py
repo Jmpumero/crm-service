@@ -28,7 +28,7 @@ blacklist_router = APIRouter(
 @blacklist_router.get(
     "/blacklist/",
     response_model=BlacklistResponse,
-    response_model_exclude_none=True,
+    # response_model_exclude_none=True,
 )
 @remove_422
 async def get_customers_(

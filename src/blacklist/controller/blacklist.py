@@ -48,17 +48,17 @@ async def get_customers_(
 
 
 @blacklist_router.get(
-    "/blacklist/{id_customer}",
+    "/blacklist/{customer_id}",
     # response_model=BlacklistResponse,
     response_model_exclude_none=True,
 )
 @remove_422
 async def get_customers_(
-    id_customer: str = Path(..., title="The ID of the customer to get"),
+    customer_id: str = Path(..., title="The ID of the customer to get"),
 ):
     service = BlacklistService()
 
-    return await service.get_customers_blacklist(id_customer)
+    return await service.get_one_customer_bl(customer_id)
 
 
 @blacklist_router.put(

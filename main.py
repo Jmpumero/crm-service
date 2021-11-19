@@ -24,12 +24,15 @@ from src import (
     customers_profile_router,
     segments_details_router,
     creativity_router,
+    search_customers_router,
 )
 from src.customer.controller import customers_router
 from src.customer.profile_sensors_endpoint.controller import sensor_router
 from src.customer.sales_summary.controller import sales_summary_router
 from src.dashboard import dashboard_router
 from src.blacklist import blacklist_router
+
+# from src.
 
 global_settings: Settings = Settings()
 
@@ -56,8 +59,9 @@ app.include_router(customers_profile_router)
 # app.include_router(segmenter_details_router)
 app.include_router(blacklist_router)
 app.include_router(segments_details_router)
-app.include_router(get_openapi_router(app))
 app.include_router(creativity_router)
+app.include_router(search_customers_router)
+app.include_router(get_openapi_router(app))
 
 app.add_exception_handler(RequestValidationError, validation_handler)
 app.add_exception_handler(BadGatewayException, base_handler)

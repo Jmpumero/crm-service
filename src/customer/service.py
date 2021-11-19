@@ -62,7 +62,9 @@ class Service(MongoQueries):
         cursor = None
         total_customer = await self.total_customer()
         customer = None
-
+        # print(query_params.column_name)
+        # print(query_params.order)
+        # print(query_params.column_order)
         if query_params.query == "":
             if query_params.column_name:  # ultima validacion especial
                 cursor = self.find_all_customers(
@@ -275,9 +277,9 @@ class Service(MongoQueries):
             )
 
         elif query_params.sensor == "sensor_4":
-            items = []
+            response = self.response_history_sensor_building([], 0)
         elif query_params.sensor == "sensor_1":
-            items = []
+            response = self.response_history_sensor_building([], 0)
         else:
             response = self.response_history_sensor_building([], [])
 

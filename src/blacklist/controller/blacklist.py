@@ -50,7 +50,7 @@ async def get_customers_(
 @blacklist_router.get(
     "/blacklist/{customer_id}",
     # response_model=BlacklistResponse,
-    response_model_exclude_none=True,
+    # response_model_exclude_none=True,
 )
 @remove_422
 async def get_customers_(

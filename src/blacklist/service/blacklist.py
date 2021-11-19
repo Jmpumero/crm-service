@@ -49,8 +49,21 @@ class BlacklistService(MongoQueries):
 
         return self.build_blacklist_response(items)
 
-    async def get_one_customer_bl(self, id_customer):
-        ...
+    async def get_one_customer_bl(self, customer_id):
+        # cursor=self.
+        r = await self.repository.get_customer_details(customer_id)
+        if r != None:
+            customer = r
+
+        # para que luis no llore.Lo mas optimo seria no enviar los campos
+        if not ("address_main" in r):
+            r["address_main"] = None
+        elif not ("phone_main" in r):
+            r["phone_main"] = None
+        elif not ("email_main" in r):
+            r["email_main"] = None
+        #
+        return customer
 
     async def update_(self, body) -> BlacklistUpdateResponse:
         resp = await self.repository.update_customer(body)

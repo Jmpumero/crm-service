@@ -49,6 +49,9 @@ class BlacklistService(MongoQueries):
 
         return self.build_blacklist_response(items)
 
+    async def get_one_customer_bl(self, id_customer):
+        ...
+
     async def update_(self, body) -> BlacklistUpdateResponse:
         resp = await self.repository.update_customer(body)
 

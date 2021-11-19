@@ -20,8 +20,10 @@ class SearchService:
                 _time = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%f")
 
             except Exception as e:
-                # print(e)
-                _time = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ")
+                try:
+                    _time = datetime.strptime(date, "%Y-%m-%d")
+                except Exception as e:
+                    _time = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ")
 
             age = today - _time
 

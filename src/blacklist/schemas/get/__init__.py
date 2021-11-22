@@ -3,6 +3,7 @@ from .query_params import (
 )
 from .responses import (
     BlacklistResponse,
-    CustomerBlacklist,
+    TableCustomerBlacklist,
     StatusInBlacklist,
+    CustomerResponseBL,
 )

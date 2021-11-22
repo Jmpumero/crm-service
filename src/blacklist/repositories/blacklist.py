@@ -7,22 +7,22 @@ from src.customer.repository import MongoQueries
 blacklist_projections = {
     "name": 1,
     "last_name": 1,
-    "age": 1,
     "email": 1,
     "phone": 1,
     "address": 1,
     "documentId": 1,
     "nationality": 1,
-    "civil_status": 1,
-    "customer_avatar": 1,
-    "languages": 1,
-    "birthdate": 1,
-    "associated_sensors": 1,
     "blacklist_status": 1,
     "blacklist_last_enabled_motive": 1,
     "blacklist_last_disabled_motive": 1,
-    "customer_status": 1,
-    "blacklist_log": 1,
+    "age": 1,
+    "birthdate": 1,
+    # "languages": 1,
+    # "civil_status": 1,
+    # "customer_avatar": 1,
+    # "associated_sensors": 1,
+    # "customer_status": 1,
+    # "blacklist_log": 1,
     "email_main": {
         "$arrayElemAt": [
             "$email",
@@ -48,6 +48,44 @@ class BlacklistQueries(MongoQueries):
     def __init__(self):
         super().__init__()
 
+        self.details_customer = {
+            "name": 1,
+            "last_name": 1,
+            "email": 1,
+            "phone": 1,
+            "address": 1,
+            "documentId": 1,
+            "nationality": 1,
+            "civil_status": 1,
+            "customer_avatar": 1,
+            "languages": 1,
+            "birthdate": 1,
+            "associated_sensors": 1,
+            "blacklist_status": 1,
+            "blacklist_last_enabled_motive": 1,
+            "blacklist_last_disabled_motive": 1,
+            "customer_status": 1,
+            "blacklist_log": 1,
+            "email_main": {
+                "$arrayElemAt": [
+                    "$email",
+                    {"$indexOfArray": ["$email.isMain", True]},
+                ]
+            },
+            "phone_main": {
+                "$arrayElemAt": [
+                    "$phone",
+                    {"$indexOfArray": ["$phone.isMain", True]},
+                ]
+            },
+            "address_main": {
+                "$arrayElemAt": [
+                    "$address",
+                    {"$indexOfArray": ["$address.isMain", True]},
+                ]
+            },
+        }
+
     def build_search_match(self, item) -> dict:
 
         match = {"$match": {}}
@@ -62,21 +100,36 @@ class BlacklistQueries(MongoQueries):
                             }
                         },
                         {
-                            "email_main.email": {
-                                "$regex": f".*{item}.*",
-                                "$options": "i",
+                            "email_main": {
+                                "$elemMatch": {
+                                    "email": {
+                                        "$regex": f".*{item}.*",
+                                        "$options": "i",
+                                    },
+                                    "isMain": True,
+                                }
                             }
                         },
                         {
-                            "address_main.main": {
-                                "$regex": f".*{item}.*",
-                                "$options": "i",
+                            "address_main": {
+                                "$elemMatch": {
+                                    "address": {
+                                        "$regex": f".*{item}.*",
+                                        "$options": "i",
+                                    },
+                                    "isMain": True,
+                                }
                             }
                         },
                         {
-                            "phone_main.intl_format": {
-                                "$regex": f".*{item}.*",
-                                "$options": "i",
+                            "phone_main": {
+                                "$elemMatch": {
+                                    "intl_format": {
+                                        "$regex": f".*{item}.*",
+                                        "$options": "i",
+                                    },
+                                    "isMain": True,
+                                }
                             }
                         },
                     ]
@@ -230,3 +283,7 @@ class BlacklistQueries(MongoQueries):
             )
 
         return result
+
+    async def get_customer_details(self, customer_id):
+
+        return await self.customer.find_one({"_id": customer_id}, self.details_customer)

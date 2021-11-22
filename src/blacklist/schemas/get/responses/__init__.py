@@ -1,5 +1,6 @@
 from .blacklist import (
-    CustomerBlacklist,
+    TableCustomerBlacklist,
     BlacklistResponse,
     StatusInBlacklist,
+    CustomerResponseBL,
 )

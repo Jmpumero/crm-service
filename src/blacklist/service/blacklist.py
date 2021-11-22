@@ -53,15 +53,15 @@ class BlacklistService(MongoQueries):
         # cursor=self.
         r = await self.repository.get_customer_details(customer_id)
         if r != None:
+            # para que front no llore.Lo mas optimo seria no enviar los campos vacios
             customer = r
+            if not ("address_main" in r):
+                r["address_main"] = None
+            elif not ("phone_main" in r):
+                r["phone_main"] = None
+            elif not ("email_main" in r):
+                r["email_main"] = None
 
-        # para que luis no llore.Lo mas optimo seria no enviar los campos
-        if not ("address_main" in r):
-            r["address_main"] = None
-        elif not ("phone_main" in r):
-            r["phone_main"] = None
-        elif not ("email_main" in r):
-            r["email_main"] = None
         #
         return customer
 

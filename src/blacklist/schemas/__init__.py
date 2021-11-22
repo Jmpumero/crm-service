@@ -1,8 +1,9 @@
 from .get import (
     BlacklistQueryParams,
     BlacklistResponse,
-    CustomerBlacklist,
+    TableCustomerBlacklist,
     StatusInBlacklist,
+    CustomerResponseBL,
 )
 
 from .post import (

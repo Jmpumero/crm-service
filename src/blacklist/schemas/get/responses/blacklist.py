@@ -46,29 +46,29 @@ class BlacklistLog(BaseModel):
     type: str
 
 
-class CustomerBlacklist(BaseModel):
+class TableCustomerBlacklist(BaseModel):
     id: str = Field(..., alias="_id")
     name: Optional[str]
     last_name: Optional[str]
-    age: Optional[int]
-    email: Optional[List[Emails]] = ""
-    phone: Optional[List[Phones]] = ""
+    email: Optional[List[Emails]]
+    phone: Optional[List[Phones]]
     address: Optional[List[Addresses]]
     documentId: Optional[List[DocumentID]]
     nationality: Optional[List[str]]
-    civil_status: Optional[str]
-    languages: Optional[List[Languages]]
-    birthdate: Optional[str]
-    associated_sensors: Optional[List[str]]
     blacklist_status: bool
     blacklist_last_enabled_motive: List[str]
     blacklist_last_disabled_motive: List[str]
-    stenant: Optional[Any]
     email_main: Optional[Emails]
     phone_main: Optional[Phones]
     address_main: Optional[Addresses]
-    blacklist_log: Optional[List[BlacklistLog]]
-    customer_avatar: Optional[str]
+    # civil_status: Optional[str]
+    # birthdate: Optional[str]
+    # associated_sensors: Optional[List[str]]
+    # languages: Optional[List[Languages]]
+    # stenant: Optional[Any]
+    # age: Optional[int]
+    # blacklist_log: Optional[List[BlacklistLog]]
+    # customer_avatar: Optional[str]
 
     class Config:
         allow_population_by_field_name = True
@@ -76,7 +76,18 @@ class CustomerBlacklist(BaseModel):
         json_encoders = {ObjectId: str}
 
 
+class CustomerResponseBL(TableCustomerBlacklist):
+    civil_status: Optional[str]
+    birthdate: Optional[str]
+    associated_sensors: Optional[List[str]]
+    languages: Optional[List[Languages]]
+    stenant: Optional[Any]
+    age: Optional[int]
+    blacklist_log: Optional[List[BlacklistLog]]
+    customer_avatar: Optional[str]
+
+
 class BlacklistResponse(BaseModel):
     total_items: int
     total_show: int
-    items: List[CustomerBlacklist]
+    items: List[TableCustomerBlacklist]

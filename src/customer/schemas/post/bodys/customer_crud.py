@@ -1,7 +1,7 @@
 from typing import List, Optional, Any
 from fastapi.openapi.models import Link
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from bson import ObjectId
 
 
@@ -72,7 +72,7 @@ class CreateCustomerBody(BaseModel):
     postal_address: str
     email: List[Emails]
     documentId: List[DocumentID]
-    civil_status: str = ""
+    civil_status: str
     age: int
     birthdate: str = ""  # format '%Y-%m-%d
     languages: List[Languages]
@@ -87,7 +87,7 @@ class CreateCustomerBody(BaseModel):
     postalCode: Optional[str]
     blacklist_last_enabled_motive: Optional[List[str]] = []
     blacklist_last_disabled_motive: Optional[List[str]] = []
-    create_at: str = ""  # format '%Y-%m-%dT%H:%M:%S', 2021-12-31T23:59:59
+    create_at: str  # format '%Y-%m-%dT%H:%M:%S', 2021-12-31T23:59:59
     update_at: str = ""  # format '%Y-%m-%dT%H:%M:%S'
     delete_at: Optional[str] = ""  # format '%Y-%m-%dT%H:%M:%S'
     general_score: Optional[int]
@@ -97,6 +97,24 @@ class CreateCustomerBody(BaseModel):
     total_childrens: Optional[int] = 0
     blacklist_log: Optional[List[BlacklistLog]]
     # class Config:  # valida si falta un campo/campo desconocido
+
+    @validator("address")
+    def address_must_contain_object(cls, a):
+        if len(a) == 0:
+            raise ValueError("must contain a object address")
+        return a
+
+    @validator("phone")
+    def phone_must_contain_object(cls, a):
+        if len(a) == 0:
+            raise ValueError("must contain a object phone")
+        return a
+
+    @validator("email")
+    def email_must_contain_object(cls, a):
+        if len(a) == 0:
+            raise ValueError("must contain a object phone")
+        return a
 
     class Config:
         allow_population_by_field_name = True

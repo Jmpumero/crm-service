@@ -36,8 +36,10 @@ class SalesSummaryService(SalesSummaryQueries):
             customer_id, "pms_pri_guest"
         ).to_list(None)
 
+        # print(rooms_booker)
+        # print(rooms_guest)
         rooms_types = rooms_booker + rooms_guest
-
+        # print(rooms_types)
         room_type_list = [
             FrequentRooms(room_name=app["_id"][0], count=app["count"])
             if app["_id"]

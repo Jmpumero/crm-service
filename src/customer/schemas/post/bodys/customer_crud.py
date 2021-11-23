@@ -77,7 +77,7 @@ class CreateCustomerBody(BaseModel):
     birthdate: str = ""  # format '%Y-%m-%d
     languages: List[Languages]
     signature: Optional[str]
-    social_media: Optional[List[SocialMedia]] = []
+    social_media: Optional[List[SocialMedia]]
     customer_avatar: Optional[str]
     customer_status: bool = True
     blacklist_status: bool = False
@@ -96,7 +96,6 @@ class CreateCustomerBody(BaseModel):
     profession: Optional[str] = ""
     total_childrens: Optional[int] = 0
     blacklist_log: Optional[List[BlacklistLog]]
-    # class Config:  # valida si falta un campo/campo desconocido
 
     @validator("address")
     def address_must_contain_object(cls, a):

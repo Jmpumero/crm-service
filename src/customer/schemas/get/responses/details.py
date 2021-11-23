@@ -10,11 +10,12 @@ class CustomerTermAccepted(BaseModel):
 
 
 class CustomerProfileDetailResponse(BaseModel):
-    most_visited_hotel: Optional[str]
-    recency: Optional[int]
-    email: Optional[List[str]]
-    phone: Optional[List[str]]
-    social_networks: Optional[List[Any]]
-    accepted_terms: Optional[List[CustomerTermAccepted]]
-    interests: Optional[List[str]]
-    communication_methods: Optional[Any]
+    ...
+    # most_visited_hotel: Optional[str]
+    # recency: Optional[int]
+    # email: Optional[List[str]]
+    # phone: Optional[List[str]]
+    # social_networks: Optional[List[Any]]
+    # accepted_terms: Optional[List[CustomerTermAccepted]]
+    # interests: Optional[List[str]]
+    # communication_methods: Optional[Any]

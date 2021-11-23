@@ -26,7 +26,7 @@ class SearchService:
                     _time = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.%fZ")
 
             age = today - _time
-
+            # print(age)
             age = int(age.total_seconds() * 1000)
 
         return age

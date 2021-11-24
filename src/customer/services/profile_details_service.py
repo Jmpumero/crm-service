@@ -23,11 +23,16 @@ class ProfileDetailService(MongoQueries):
 
         return a_interest
 
+    def build_tab_profile_res(self, contact, interest, d_hotel):
+        return {"contact": contact, "interest": interest, "data_hotel": d_hotel}
+
     async def get_profile_details(self, customer_id: str) -> Any:
 
         c_contact = await self.profile_detail.get_contact(customer_id)
+        contact = await c_contact.to_list(length=None)
         interest = await self.get_interest_cast(customer_id)
+        data_hotel = await self.profile_detail.get_data_tab_profile(customer_id)
 
-        a = await self.profile_detail.get_most_visited_hotel(customer_id)
+        response = self.build_tab_profile_res(contact, interest, data_hotel)
 
-        return a
+        return response

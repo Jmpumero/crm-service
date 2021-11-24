@@ -47,14 +47,14 @@ async def get_customer_profile_detail(customer_id: str):
     return await service.get_profile_details(customer_id)
 
 
-@customers_profile_router.get(
-    "/customers/{customer_id}/details/modal-info",
-)
-@remove_422
-async def get_contact_modal_info(customer_id: str):
-    service = ProfileDetailService()
+# @customers_profile_router.get(
+#     "/customers/{customer_id}/details/modal-info",
+# )
+# @remove_422
+# async def get_contact_modal_info(customer_id: str):
+#     service = ProfileDetailService()
 
-    return await service.get_contact_modal_info(customer_id)
+#     return await service.get_contact_modal_info(customer_id)
 
 
 @customers_profile_router.get(

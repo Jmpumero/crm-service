@@ -1,5 +1,6 @@
 from fastapi.encoders import jsonable_encoder
 import pymongo
+from datetime import datetime
 from core.connection.connection import ConnectionMongo
 
 
@@ -37,8 +38,9 @@ class PDQueries(ConnectionMongo):
                 {"$limit": 5},
             ]
         most_used_guest = self.pms_collection.aggregate(pipeline)
-
-        return await most_used_guest.to_list(length=None)
+        if most_used_guest != None:
+            return await most_used_guest.to_list(length=None)
+        return None
 
     def clear_group_array(self, k):
 
@@ -62,11 +64,48 @@ class PDQueries(ConnectionMongo):
 
         return array[gt_i]
 
+    async def get_last_checkout_h(self, customer_id, m_hotel):
+        # print(m_hotel)
+        time_ck = None
+        pipeline = [
+            {"$match": {"customer_id": customer_id}},
+            {
+                "$match": {
+                    "$or": [
+                        {"data.riRatePlan.sproperty.name": m_hotel},
+                        {"data.sproperty.name": m_hotel},
+                    ]
+                }
+            },
+            {
+                "$project": {
+                    "data.checkout": {
+                        "$dateFromString": {"dateString": "$data.checkout"}
+                    }
+                }
+            },
+            {"$sort": {"data.checkout": -1}},
+        ]
+
+        last_checkout = self.pms_collection.aggregate(pipeline)
+        if last_checkout != None:
+            r_last_ck = await last_checkout.to_list(length=None)
+            time_ck = r_last_ck[0]["data"]["checkout"]
+
+        return time_ck
+
     async def get_most_visited_hotel(self, customer_id):
+
+        r_last_ck = None
+        today = datetime.utcnow()
 
         r = await self.most_visited_h(customer_id, "guest")
         t = await self.most_visited_h(customer_id, "")
         k = self.clear_group_array(r + t)
-        # print(self.get_most_coincidence_hotel(k))
+        hotel = self.get_most_coincidence_hotel(k)
+        date_last_ck = await self.get_last_checkout_h(customer_id, hotel["_id"])
 
-        return self.get_most_coincidence_hotel(k)
+        delta = today - date_last_ck
+        print(int(delta.total_seconds() * 1000))
+
+        return delta

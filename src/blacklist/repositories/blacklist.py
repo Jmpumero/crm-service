@@ -100,7 +100,7 @@ class BlacklistQueries(MongoQueries):
                             }
                         },
                         {
-                            "email_main": {
+                            "email": {
                                 "$elemMatch": {
                                     "email": {
                                         "$regex": f".*{item}.*",
@@ -111,7 +111,7 @@ class BlacklistQueries(MongoQueries):
                             }
                         },
                         {
-                            "address_main": {
+                            "address": {
                                 "$elemMatch": {
                                     "address": {
                                         "$regex": f".*{item}.*",
@@ -122,7 +122,7 @@ class BlacklistQueries(MongoQueries):
                             }
                         },
                         {
-                            "phone_main": {
+                            "phone": {
                                 "$elemMatch": {
                                     "intl_format": {
                                         "$regex": f".*{item}.*",

@@ -109,7 +109,7 @@ class PDQueries(ConnectionMongo):
         date_last_ck = None
         hotel = None
         today = datetime.utcnow()
-        response = None
+        response = {}
 
         r = await self.most_visited_h(customer_id, "guest")
         t = await self.most_visited_h(customer_id, "")
@@ -118,7 +118,8 @@ class PDQueries(ConnectionMongo):
         if hotel != None:
             date_last_ck = await self.get_last_checkout_h(customer_id, hotel["_id"])
             response["most_v_hotel"] = hotel["_id"]
-
+        else:
+            response = None
         if date_last_ck != None:
 
             delta = today - date_last_ck

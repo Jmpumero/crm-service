@@ -22,3 +22,4 @@ from .cross_selling import Product, CrossSellingAndProductsResponse, CrossSellin
 
 from .segmenter import Segmenter, SegmenterResponse
 from .search import ResponseSearch
+from .profile_details import PDResponse

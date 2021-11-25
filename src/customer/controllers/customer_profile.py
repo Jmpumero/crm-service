@@ -6,6 +6,7 @@ from ..schemas import (
     CustomerProfileDetailResponse,
     CustomerLogBook,
     CustomerMarketingSubscriptions,
+    PDResponse,
 )
 from ..services import (
     ProfileHeaderService,
@@ -37,7 +38,7 @@ async def get_customer_profile_header(customer_id: str):
 
 @customers_profile_router.get(
     "/customers/{customer_id}/details",
-    # response_model=CustomerProfileDetailResponse,
+    response_model=PDResponse,
     response_model_exclude_none=True,
 )
 @remove_422

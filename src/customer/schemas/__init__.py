@@ -28,6 +28,7 @@ from .get import (
     SegmenterResponse,
     SegmenterQueryParams,
     ResponseSearch,
+    PDResponse,
 )
 
 from .post import (

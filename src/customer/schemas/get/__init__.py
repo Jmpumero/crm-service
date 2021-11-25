@@ -29,4 +29,5 @@ from .responses import (
     SegmenterResponse,
     Segmenter,
     ResponseSearch,
+    PDResponse,
 )

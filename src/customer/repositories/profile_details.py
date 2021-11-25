@@ -109,7 +109,7 @@ class PDQueries(ConnectionMongo):
         date_last_ck = None
         hotel = None
         today = datetime.utcnow()
-        response = {"most_v_hotel": None, "recency": None}
+        response = None
 
         r = await self.most_visited_h(customer_id, "guest")
         t = await self.most_visited_h(customer_id, "")

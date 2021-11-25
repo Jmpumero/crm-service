@@ -24,6 +24,8 @@ class ProfileDetailService(MongoQueries):
         return a_interest
 
     def build_tab_profile_res(self, contact, interest, d_hotel):
+
+        response = {}
         return {"contact": contact, "interest": interest, "data_hotel": d_hotel}
 
     async def get_profile_details(self, customer_id: str) -> Any:
